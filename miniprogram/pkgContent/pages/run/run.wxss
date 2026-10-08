@@ -1,0 +1,209 @@
+.run {
+  padding-bottom: 40rpx;
+}
+
+.head {
+  background: #fff;
+  border-bottom: 1rpx solid #e5e7eb;
+  padding: 20rpx 24rpx 0 24rpx;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.head-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.head-line .muted {
+  font-size: 22rpx;
+}
+
+.head-title {
+  font-size: 27rpx;
+  font-weight: 600;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.head-sep {
+  font-size: 24rpx;
+  color: #6b7280;
+  margin-left: 16rpx;
+  flex-shrink: 0;
+}
+
+.head-finish {
+  display: inline-block;
+  width: auto;
+  margin-left: auto;
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.head-bar {
+  margin: 8rpx -24rpx 0 -24rpx;
+  border-radius: 0;
+  height: 8rpx;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.tags .badge {
+  margin-right: 12rpx;
+  margin-bottom: 8rpx;
+}
+
+.id-text {
+  margin-left: auto;
+}
+
+.stem-row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.stem-no {
+  width: 48rpx;
+  height: 48rpx;
+  line-height: 48rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-size: 24rpx;
+  margin-right: 18rpx;
+  flex-shrink: 0;
+}
+
+.options {
+  margin-top: 24rpx;
+}
+
+.option {
+  border: 1rpx solid #e5e7eb;
+  border-radius: 16rpx;
+  padding: 22rpx 24rpx;
+  margin-bottom: 16rpx;
+  background: #fff;
+}
+
+.option-active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.option-text {
+  font-size: 28rpx;
+  color: #1f2937;
+}
+
+.blanks {
+  margin-top: 24rpx;
+}
+
+.blank-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.blank-no {
+  width: 70rpx;
+  flex-shrink: 0;
+  color: #6b7280;
+  font-size: 26rpx;
+}
+
+.blank-input {
+  flex: 1;
+}
+
+.long {
+  margin-top: 24rpx;
+}
+
+.part-input {
+  flex: 1;
+  min-height: 90rpx;
+}
+
+.photo-btns {
+  display: flex;
+}
+
+.photo-btns .btn {
+  width: auto;
+  margin-right: 16rpx;
+}
+
+.thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 20rpx;
+}
+
+.thumb-box {
+  position: relative;
+  margin-right: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.thumb {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 14rpx;
+  border: 1rpx solid #e5e7eb;
+}
+
+.thumb-del {
+  position: absolute;
+  top: -12rpx;
+  right: -12rpx;
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: #374151;
+  color: #fff;
+  font-size: 28rpx;
+}
+
+.submit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.submit-tip {
+  flex: 1;
+  margin-right: 16rpx;
+  line-height: 1.5;
+  font-size: 22rpx;
+}
+
+.submit-btn {
+  width: auto;
+  min-width: 220rpx;
+  flex-shrink: 0;
+}
+
+.tip {
+  margin-top: 8rpx;
+}
+
+.nav-tip {
+  margin-top: 12rpx;
+  line-height: 1.6;
+}

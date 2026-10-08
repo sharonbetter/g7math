@@ -1,0 +1,57 @@
+<view class="wrap">
+  <view wx:if="{{!found}}" class="card">
+    <view class="card-title">未找到该章节</view>
+    <view class="muted intro">请返回课程中心重新选择。</view>
+  </view>
+
+  <block wx:else>
+    <view class="card">
+      <view class="muted">{{chapter.no}}</view>
+      <view class="chap-title">{{chapter.no}} {{chapter.title}}</view>
+
+      <view class="tags">
+        <view class="badge">共 {{total}} 个知识点</view>
+        <view class="badge badge-blue">已学 {{done}} 个</view>
+        <view wx:if="{{mastered}}" class="badge badge-green">已掌握</view>
+        <view wx:elif="{{loopLabel}}" class="badge badge-amber">{{loopLabel}}</view>
+        <view wx:if="{{!hasLesson}}" class="badge">课件待生成</view>
+      </view>
+
+      <view class="muted prog-line">课件进度 {{done}} / {{total}}</view>
+      <view class="bar"><view class="bar-inner" style="width:{{pct}}%"></view></view>
+    </view>
+
+    <view wx:for="{{sections}}" wx:key="id" wx:for-item="sec" class="card sec">
+      <view class="sec-head">{{sec.no}} {{sec.title}}</view>
+
+      <view
+        wx:for="{{sec.points}}"
+        wx:key="id"
+        wx:for-item="p"
+        class="pt"
+        data-id="{{p.id}}"
+        bindtap="goLesson"
+      >
+        <view class="pt-head">
+          <text class="pt-name">{{p.name}}</text>
+          <view wx:if="{{p.studied}}" class="badge badge-green">已学</view>
+          <view wx:elif="{{!hasLesson}}" class="badge">待生成</view>
+        </view>
+        <view class="pt-sum">{{p.summary}}</view>
+        <view class="pt-meta">
+          <text class="muted">约 {{p.estimatedMinutes}} 分钟</text>
+          <text wx:if="{{p.refText}}" class="muted ref">拓展：{{p.refText}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">章节考评</view>
+      <view class="muted intro">
+        {{hasExam ? '选择、填空、计算、应用四类题型由易到难，逐题计时并自动批改。' : '本章考评卷正在生成中，可以先看课件。'}}
+      </view>
+      <view class="gap"></view>
+      <button class="btn btn-primary" disabled="{{!hasExam}}" bindtap="goExam">开始章节考评</button>
+    </view>
+  </block>
+</view>

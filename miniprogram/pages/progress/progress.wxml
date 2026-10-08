@@ -1,0 +1,102 @@
+<view class="wrap">
+  <view class="card">
+    <view class="row">
+      <view class="card-title">学习报告</view>
+      <view class="badge badge-violet">{{userLabel}}</view>
+    </view>
+    <view class="muted intro">
+      汇总全部考评与专项练习数据，记录自适应学习循环的完成情况。学习数据保存在本机，可导出备份，也可清空重来。
+    </view>
+  </view>
+
+  <view class="stats">
+    <view class="stat">
+      <view class="muted">知识点总数</view>
+      <view class="stat-num">{{totalPoints}}</view>
+    </view>
+    <view class="stat">
+      <view class="muted">已学课件</view>
+      <view class="stat-num blue">{{studiedCount}}</view>
+    </view>
+    <view class="stat">
+      <view class="muted">考评轮次</view>
+      <view class="stat-num">{{roundCount}}</view>
+    </view>
+    <view class="stat">
+      <view class="muted">已掌握章节</view>
+      <view class="stat-num green">{{masteredCount}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">学习进度</view>
+    <view class="prog">
+      <view class="row muted">
+        <text>课件学习</text>
+        <text>{{studiedCount}} / {{totalPoints}}</text>
+      </view>
+      <view class="bar"><view class="bar-inner" style="width:{{studiedPct}}%"></view></view>
+      <view class="gap"></view>
+      <view class="row muted">
+        <text>章节掌握</text>
+        <text>{{masteredCount}} / {{chapterCount}}</text>
+      </view>
+      <view class="bar"><view class="bar-inner bar-inner-green" style="width:{{masteredPct}}%"></view></view>
+    </view>
+  </view>
+
+  <view class="stats">
+    <view class="stat">
+      <view class="muted">累计作答</view>
+      <view class="stat-num">{{totalAnswered}}</view>
+    </view>
+    <view class="stat">
+      <view class="muted">累计错题</view>
+      <view class="stat-num red">{{totalWrong}}</view>
+    </view>
+    <view class="stat">
+      <view class="muted">累计耗时标记</view>
+      <view class="stat-num amber">{{totalSlow}}</view>
+    </view>
+    <view class="stat">
+      <view class="muted">累计作答用时</view>
+      <view class="stat-num small">{{totalTimeText}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="row">
+      <view class="card-title">最近考评</view>
+      <view class="muted">共 {{roundCount}} 轮</view>
+    </view>
+
+    <view wx:if="{{rounds.length === 0}}" class="muted empty-tip">
+      还没有考评记录，去「章节考评」做一套吧。
+    </view>
+
+    <view wx:for="{{rounds}}" wx:key="id" class="list-item" data-id="{{item.id}}" bindtap="openReport">
+      <view class="list-main">
+        <view class="list-title">{{item.title}}</view>
+        <view class="muted list-sub">
+          {{item.timeText}} · 正确 {{item.correct}}/{{item.total}} · 错 {{item.wrong}} · 超时 {{item.slow}} · 用时 {{item.durationText}}
+        </view>
+      </view>
+      <view class="badge {{item.mastered ? 'badge-green' : 'badge-amber'}}">{{item.mastered ? '已掌握' : '待提升'}}</view>
+    </view>
+
+    <view wx:if="{{roundCount > rounds.length}}" class="muted more-tip">只显示最近 {{rounds.length}} 轮，完整记录请查看学习报告。</view>
+    <view class="gap"></view>
+    <button class="btn" bindtap="goExams">去做章节考评</button>
+  </view>
+
+  <view class="card">
+    <view class="card-title">数据管理</view>
+    <view class="muted intro">
+      导出：把全部学习数据转成 JSON 文本并复制到剪贴板，可粘贴保存，用于备份或换设备时迁移。清空：删除当前用户的全部本机学习数据，不可撤销。
+    </view>
+    <view class="gap"></view>
+    <button class="btn btn-primary" bindtap="onExport">导出学习数据</button>
+    <view class="gap"></view>
+    <button class="btn btn-danger" bindtap="onReset">清空当前用户数据</button>
+  </view>
+</view>

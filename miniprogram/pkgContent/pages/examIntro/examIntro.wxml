@@ -1,0 +1,70 @@
+<view class="wrap">
+  <view wx:if="{{!found}}" class="card center">
+    <view class="card-title">未找到该章节</view>
+    <view class="muted intro">请返回考评列表重新选择章节。</view>
+    <view class="gap"></view>
+    <button class="btn btn-primary" bindtap="goExams">返回考评列表</button>
+  </view>
+
+  <view wx:elif="{{!hasExam}}" class="card">
+    <view class="card-title">{{chapterNo}} {{chapterTitle}}</view>
+    <view class="muted intro">该章考评卷正在生成中，暂时不能开始考评。可以先去学习本章课件。</view>
+    <view class="gap"></view>
+    <button class="btn btn-primary" bindtap="goChapter">先去学习本章课件</button>
+    <view class="gap"></view>
+    <button class="btn" bindtap="goExams">返回考评列表</button>
+  </view>
+
+  <block wx:else>
+    <view class="card">
+      <view class="muted">{{chapterNo}} {{chapterTitle}} · 考评说明</view>
+      <view class="exam-title">{{examTitle}}</view>
+      <view class="muted intro">
+        本卷共 {{questionCount}} 题，预计用时 {{totalTimeText}}，覆盖 {{pointCount}} 个知识点。建议在安静环境下一次完成。
+      </view>
+      <view wx:if="{{loopTip}}" class="badge badge-amber loop-tip">{{loopTip}}</view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">试卷结构</view>
+      <view class="table">
+        <view class="tr th">
+          <text class="td">题型</text>
+          <text class="td right">题量</text>
+          <text class="td right">预计耗时</text>
+        </view>
+        <view wx:for="{{counts}}" wx:key="type" class="tr">
+          <text class="td">{{item.label}}</text>
+          <text class="td right">{{item.n}} 题</text>
+          <text class="td right muted">{{item.timeText}}</text>
+        </view>
+        <view class="tr total">
+          <text class="td">合计</text>
+          <text class="td right">{{questionCount}} 题</text>
+          <text class="td right">{{totalTimeText}}</text>
+        </view>
+      </view>
+
+      <view class="divider"></view>
+      <view class="card-title">难度分布</view>
+      <view class="ch-tags">
+        <text wx:for="{{difficulty}}" wx:key="d" class="badge badge-blue">{{item.label}} {{item.n}} 题</text>
+        <text wx:if="{{bookCount > 0}}" class="badge badge-violet">选自《探究应用新思维》{{bookCount}} 题</text>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">作答规则</view>
+      <view class="rule">逐题计时：每题的起点是上一题的提交时刻，第一题从点击「开始考评」算起；提交本题后自动进入下一题，计时连续衔接。</view>
+      <view class="rule">选择题点击选项后提交本题；填空题填写答案后点「提交答案并上传」。</view>
+      <view class="rule">计算题与应用题需填写最终答案，并写出必要的解答过程，可以拍照上传手写过程。</view>
+      <view class="rule">交卷后自动批改：实际耗时比预计耗时多用超过 1 分钟的题目会被标记为耗时异常，错题会定位到知识点并生成专项练习。</view>
+    </view>
+
+    <view class="card">
+      <button class="btn btn-primary" loading="{{busy}}" disabled="{{busy}}" bindtap="onStart">开始考评</button>
+      <view class="gap"></view>
+      <button class="btn" bindtap="goRemedial">查看专项提升</button>
+    </view>
+  </block>
+</view>

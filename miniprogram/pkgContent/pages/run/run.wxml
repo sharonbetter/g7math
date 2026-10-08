@@ -1,0 +1,123 @@
+<view class="run" wx:if="{{ready}}">
+  <!-- 顶部信息 -->
+  <view class="head">
+    <view class="head-line">
+      <text class="head-title">{{title}}</text>
+      <text class="head-sep">第 {{idx + 1}} / {{total}} 题</text>
+    </view>
+    <view class="head-line">
+      <text class="muted">本卷已用 {{elapsedText}} / 预计 {{totalEstimatedText}}</text>
+      <text class="muted">本题 {{currentElapsedText}} / 预计 {{currentEstimatedText}}</text>
+    </view>
+    <view class="head-line">
+      <view wx:if="{{flash}}" class="badge badge-green">已提交 ✓</view>
+      <button class="btn btn-sm head-finish" bindtap="onFinish">{{finishLabel}}</button>
+    </view>
+    <view class="bar head-bar"><view class="bar-inner" style="width:{{progressPct}}%"></view></view>
+  </view>
+
+  <view class="wrap">
+    <!-- 题型标签 -->
+    <view class="tags">
+      <view class="badge badge-blue">{{typeLabel}}</view>
+      <view class="badge">难度 {{difficultyLabel}}</view>
+      <view class="badge">预计 {{currentEstimatedText}}</view>
+      <view wx:if="{{fromBook}}" class="badge badge-violet">选自《探究应用新思维》{{bookRefText}}</view>
+      <text class="muted id-text">{{currentId}}</text>
+    </view>
+
+    <!-- 题干 -->
+    <view class="card">
+      <view class="stem-row">
+        <view class="stem-no">{{idx + 1}}</view>
+        <text class="stem">{{stem}}</text>
+      </view>
+
+      <!-- 选择题 -->
+      <view wx:if="{{isChoice}}" class="options">
+        <view
+          wx:for="{{optionsView}}"
+          wx:key="letter"
+          class="option {{item.active ? 'option-active' : ''}}"
+          data-letter="{{item.letter}}"
+          bindtap="onSelectOption"
+        >
+          <text class="option-text">{{item.text}}</text>
+        </view>
+      </view>
+
+      <!-- 填空题 -->
+      <view wx:if="{{isFill}}" class="blanks">
+        <view wx:for="{{blanks}}" wx:key="i" class="blank-row">
+          <text wx:if="{{blanks.length > 1}}" class="blank-no">({{item.i + 1}})</text>
+          <input
+            class="input blank-input"
+            placeholder="在此填写答案"
+            value="{{item.v}}"
+            data-i="{{item.i}}"
+            bindinput="onBlankInput"
+          />
+        </view>
+        <view class="muted tip">多个空按顺序填写；分数可直接写 1/2，也可写 0.5。</view>
+      </view>
+
+      <!-- 计算题 / 应用题 -->
+      <view wx:if="{{isLong}}" class="long">
+        <view class="label">{{partCount >= 2 ? '各小问的最终答案（分开填写）' : '最终答案（用于自动判分，例如 x = 3）'}}</view>
+        <block wx:if="{{partCount >= 2}}">
+          <view wx:for="{{partDrafts}}" wx:key="i" class="blank-row">
+            <text class="blank-no">({{item.i + 1}})</text>
+            <textarea
+              class="textarea part-input"
+              placeholder="第 {{item.i + 1}} 问的答案"
+              value="{{item.v}}"
+              data-i="{{item.i}}"
+              bindinput="onPartInput"
+              auto-height
+            />
+          </view>
+        </block>
+        <input wx:else class="input" placeholder="填写最终答案" value="{{draft}}" bindinput="onDraftInput" />
+
+        <view class="gap"></view>
+        <view class="label">解答过程（{{isCalc ? '写出计算步骤' : '写出设元、列式、求解与作答'}}）</view>
+        <textarea class="textarea" placeholder="在此写出完整过程…" value="{{work}}" bindinput="onWorkInput" auto-height />
+
+        <view class="gap"></view>
+        <view class="label">手写过程拍照上传（可选，最多 3 张）</view>
+        <view class="photo-btns">
+          <button class="btn btn-primary btn-sm" bindtap="onTakePhoto">拍照上传</button>
+          <button class="btn btn-sm" bindtap="onPickPhoto">从相册选择</button>
+        </view>
+        <view wx:if="{{images.length}}" class="thumbs">
+          <view wx:for="{{images}}" wx:key="i" class="thumb-box">
+            <image class="thumb" src="{{item.src}}" mode="aspectFill" data-i="{{item.i}}" bindtap="onPreviewImage" />
+            <view class="thumb-del" data-i="{{item.i}}" catchtap="onRemoveImage">×</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="divider"></view>
+      <view class="submit-row">
+        <text class="muted submit-tip">{{submitTip}}</text>
+        <button class="btn btn-primary submit-btn" disabled="{{!canSubmit || grading}}" bindtap="onSubmit">{{submitLabel}}</button>
+      </view>
+    </view>
+
+    <!-- 题号导航 -->
+    <view class="grid-num">
+      <view
+        wx:for="{{nums}}"
+        wx:key="i"
+        class="num {{item.cls}}"
+        data-i="{{item.i}}"
+        bindtap="onGoTo"
+      >{{item.label}}</view>
+    </view>
+    <view class="muted nav-tip">点击题号可跳到任意一题查看或修改。离开题目时本题计时暂停，返回后继续。</view>
+  </view>
+</view>
+
+<view wx:else class="wrap">
+  <view class="card muted">正在恢复答题进度…</view>
+</view>

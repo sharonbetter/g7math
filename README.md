@@ -9,6 +9,8 @@
 
 ## 快速开始
 
+PC / 网页端：
+
 ```bash
 cd app
 node scripts/sync-data.mjs      # 把 ../data 的内容同步到 app/public/data
@@ -21,6 +23,15 @@ npm run dev                     # 打开 http://127.0.0.1:5273
 ```bash
 cd app && npm run build && npm run preview
 ```
+
+微信小程序端：
+
+```bash
+node tools/sync-miniprogram-data.mjs    # 生成小程序可直接 require 的内容数据
+```
+
+然后用微信开发者工具导入 `miniprogram/` 目录，无需 npm install 与构建。
+详见 [`miniprogram/README.md`](miniprogram/README.md)。
 
 ---
 
@@ -75,17 +86,36 @@ cd app && npm run build && npm run preview
 │  ├─ exams/<chapterId>.json   # 每章的考评卷（含解析、错因、变式）
 │  ├─ ocr/book/                # 277 页 OCR 文本
 │  └─ book/                    # index.json + units/（讲次文本）+ pages_jpg/（原页图像）
-├─ app/                        # Vite + React + TypeScript + Tailwind 前端
+├─ app/                        # Vite + React + TypeScript + Tailwind 前端（PC / 网页）
+├─ miniprogram/                # 微信小程序端（原生，含内容分包）
 ├─ tools/
 │  ├─ ocr.swift / ocr          # macOS Vision 逐页 OCR
 │  ├─ render.swift / render    # PDF 逐页渲染为 PNG
 │  ├─ compress_pages.py        # PNG → 网页可用 JPEG
 │  ├─ build_book.py            # 按书中目录切分讲次
-│  └─ validate_content.py      # 内容规范校验
+│  ├─ validate_content.py      # 内容规范校验
+│  ├─ sync-miniprogram-data.mjs# data/ → 小程序内容模块
+│  └─ test-miniprogram-*.js    # 小程序端逻辑与流程测试
 └─ docs/
    ├─ DESIGN.md                # 系统设计文档
    └─ CONTENT_SCHEMA.md        # 课件 / 题库数据规范
 ```
+
+---
+
+## 双端说明
+
+PC / 网页端与微信小程序端共用同一份 `data/` 内容，判分、计时、耗时标记与
+自适应循环的规则完全一致（小程序端的 `miniprogram/lib/` 是同一套逻辑的移植，
+有测试保证行为对齐）。
+
+| 能力 | PC / 网页端 | 微信小程序端 |
+| --- | --- | --- |
+| 课件、考评、专项循环 | ✅ | ✅ |
+| 用户区分 | 手机号登录 | 微信 openid（未接服务器时为本机 id） |
+| 学习数据存储 | 浏览器 localStorage | 小程序本地存储，按用户分键 |
+| 非客观题模型批改 | 本地 `/api/grade` 中间件 | 需 HTTPS 域名（`miniprogram/config.js`） |
+| 教辅原页图像 | 同步到静态目录 | 需 HTTPS 域名（`miniprogram/config.js`） |
 
 ---
 

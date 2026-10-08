@@ -1,0 +1,44 @@
+<view class="wrap">
+  <view class="card">
+    <view class="row">
+      <view class="card-title">课程中心</view>
+      <button class="btn btn-sm" bindtap="openBook">探究新思维</button>
+    </view>
+    <view class="muted intro">
+      依据人教版（2024）七年级数学上、下册教学大纲整理，共 {{totalChapters}} 章、{{totalPoints}} 个知识点。
+      每个知识点配套课件讲解，并融合《探究应用新思维·七年级数学》的探究方法。
+    </view>
+    <view class="gap"></view>
+    <view class="row">
+      <text class="muted">已学课件 {{studiedCount}} / {{totalPoints}}</text>
+      <text class="muted">已掌握章节 {{masteredCount}} / {{totalChapters}}</text>
+    </view>
+  </view>
+
+  <view wx:for="{{volumes}}" wx:key="id" wx:for-item="vol" class="vol">
+    <view class="vol-name">{{vol.name}}</view>
+
+    <view wx:for="{{vol.chapters}}" wx:key="id" wx:for-item="ch" class="card chap">
+      <view class="row">
+        <view class="chap-title">{{ch.no}} {{ch.title}}</view>
+        <view wx:if="{{ch.mastered}}" class="badge badge-green">已掌握</view>
+        <view wx:elif="{{ch.loopLabel}}" class="badge badge-amber">{{ch.loopLabel}}</view>
+      </view>
+
+      <view class="tags">
+        <view class="badge">{{ch.pointCount}} 个知识点</view>
+        <view class="badge {{ch.hasLesson ? 'badge-blue' : ''}}">{{ch.hasLesson ? '有课件' : '课件待生成'}}</view>
+        <view class="badge {{ch.hasExam ? 'badge-violet' : ''}}">{{ch.hasExam ? '有考评' : '考评待生成'}}</view>
+      </view>
+
+      <view class="muted prog-line">课件进度 {{ch.done}} / {{ch.pointCount}}</view>
+      <view class="bar"><view class="bar-inner" style="width:{{ch.pct}}%"></view></view>
+
+      <view class="gap"></view>
+      <view class="actions">
+        <button class="btn btn-sm btn-primary" data-id="{{ch.id}}" bindtap="openChapter">查看知识点</button>
+        <button class="btn btn-sm" data-id="{{ch.id}}" bindtap="openExam">章节考评</button>
+      </view>
+    </view>
+  </view>
+</view>

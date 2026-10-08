@@ -1,0 +1,42 @@
+.intro {
+  line-height: 1.7;
+  margin-top: 12rpx;
+}
+
+.ch-card {
+  padding: 24rpx 28rpx;
+}
+
+.ch-head {
+  flex: 1;
+  min-width: 0;
+  margin-right: 16rpx;
+}
+
+.ch-title {
+  font-size: 29rpx;
+  font-weight: 600;
+  color: #111827;
+  margin-top: 6rpx;
+}
+
+.ch-tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 16rpx;
+}
+
+.ch-tags .badge {
+  margin: 0 12rpx 8rpx 0;
+}
+
+.ch-foot {
+  margin-top: 8rpx;
+  border-top: 1rpx solid #f3f4f6;
+  padding-top: 16rpx;
+}
+
+.ch-foot .muted {
+  flex: 1;
+  margin-right: 16rpx;
+}

@@ -1,0 +1,68 @@
+<view class="wrap" wx:if="{{ready}}">
+  <view class="head">
+    <view class="muted">{{round.title}} / 专项讲解课件</view>
+    <view class="head-title">{{round.chapterTitle}} · 专项讲解课件</view>
+    <view class="head-desc">
+      本课件根据你在「{{round.title}}」中的表现自动生成：针对 {{analyses.length}} 道问题题目
+      （错题 {{wrongCount}} 道、耗时标记题 {{slowCount}} 道）与 {{weak.length}} 个薄弱知识点，
+      逐一剖析错因、重建思路，并给出变式跟进。
+    </view>
+    <view class="gap"></view>
+    <button class="btn btn-primary" disabled="{{busy}}" bindtap="startPractice">{{busy ? '正在生成…' : '学完课件，进入专项练习'}}</button>
+    <view class="gap"></view>
+    <button class="btn" bindtap="backReport">返回报告</button>
+  </view>
+
+  <view wx:if="{{analyses.length === 0}}" class="card pass">
+    本轮没有错题也没有耗时超标的题目，无需专项讲解。
+  </view>
+
+  <!-- 薄弱知识点与对应课件 -->
+  <view wx:for="{{groups}}" wx:key="pointId" class="card">
+    <view class="row">
+      <view class="point-name">{{item.name}}</view>
+      <view class="badge badge-violet" data-point="{{item.pointId}}" bindtap="openLesson">看完整课件</view>
+    </view>
+    <view class="muted point-meta">共 {{item.questionCount}} 道问题题目 · 错 {{item.wrongCount}} · 超时 {{item.slowCount}}</view>
+
+    <view wx:for="{{item.slides}}" wx:for-item="s" wx:key="title" class="slide">
+      <view class="slide-kind">{{s.kindLabel}}</view>
+      <view class="slide-title">{{s.title}}</view>
+      <text wx:if="{{s.body}}" class="solution">{{s.body}}</text>
+      <block wx:if="{{s.problem}}">
+        <view class="muted slide-sub">题目</view>
+        <text class="stem">{{s.problem}}</text>
+        <view class="muted slide-sub">解答</view>
+        <text class="solution">{{s.solution}}</text>
+      </block>
+    </view>
+  </view>
+
+  <!-- 逐题错因 -->
+  <view class="card">
+    <view class="card-title">逐题错因剖析</view>
+    <view wx:for="{{analyses}}" wx:key="qid" class="ana">
+      <view class="row">
+        <view class="ana-id">{{item.qid}}</view>
+        <view>
+          <view wx:if="{{item.slow}}" class="badge badge-amber">耗时 {{item.gapText}}</view>
+          <view wx:if="{{!item.correct}}" class="badge badge-red">错误</view>
+        </view>
+      </view>
+      <text class="stem ana-stem">{{item.stem}}</text>
+      <view class="ana-box">
+        <view class="muted">你的答案：{{item.valueText}}</view>
+        <view class="muted">正确答案：{{item.answer}}</view>
+        <view wx:if="{{item.errorReason}}" class="ana-reason">{{item.errorReason}}</view>
+      </view>
+      <view class="ana-solution">
+        <view class="muted">解析</view>
+        <text class="solution">{{item.solution}}</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<view wx:else class="wrap">
+  <view class="card muted">正在生成专项课件…</view>
+</view>

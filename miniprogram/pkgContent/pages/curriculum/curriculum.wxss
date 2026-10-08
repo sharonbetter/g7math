@@ -1,0 +1,49 @@
+.intro {
+  margin-top: 12rpx;
+  line-height: 1.7;
+}
+
+.vol {
+  margin-bottom: 8rpx;
+}
+
+.vol-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #374151;
+  padding: 8rpx 4rpx;
+}
+
+.chap {
+  padding: 24rpx;
+}
+
+.chap-title {
+  font-size: 29rpx;
+  font-weight: 600;
+  color: #111827;
+  flex: 1;
+  margin-right: 12rpx;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 14rpx;
+}
+
+.prog-line {
+  margin: 14rpx 0 8rpx;
+}
+
+.actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.actions .btn-sm {
+  flex: 1;
+  display: block;
+  width: auto;
+}

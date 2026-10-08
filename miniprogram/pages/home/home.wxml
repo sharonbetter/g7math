@@ -1,0 +1,109 @@
+<view class="wrap">
+  <view class="hero">
+    <view class="hero-title">七年级数学学习工具</view>
+    <view class="hero-desc">
+      依据人教版（2024）七上、七下教学大纲设计知识点课件，融合《探究应用新思维·七年级数学》的探究方法，
+      提供分层考评、逐题计时、自动批改、错因分析与专项讲解—专项练习的自适应循环。
+    </view>
+  </view>
+
+  <view class="stats">
+    <view class="stat">
+      <view class="muted">知识点总数</view>
+      <view class="stat-num">{{totalPoints}}</view>
+    </view>
+    <view class="stat">
+      <view class="muted">已学课件</view>
+      <view class="stat-num blue">{{studiedCount}}</view>
+    </view>
+    <view class="stat">
+      <view class="muted">考评轮次</view>
+      <view class="stat-num">{{roundCount}}</view>
+    </view>
+    <view class="stat">
+      <view class="muted">已掌握章节</view>
+      <view class="stat-num green">{{mastered}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="row">
+      <view class="card-title">四步学习闭环</view>
+      <view class="badge badge-violet">自适应</view>
+    </view>
+    <view class="steps">
+      <view class="step">
+        <view class="step-no">1</view>
+        <view class="step-text"><text class="strong">知识点讲解</text>：按大纲章节看课件，含概念、例题、易错与方法提炼，并附《探究应用新思维》拓展。</view>
+      </view>
+      <view class="step">
+        <view class="step-no">2</view>
+        <view class="step-text"><text class="strong">章节考评</text>：选择、填空、计算、应用四类题型，由易到难；逐题计时并自动批改。</view>
+      </view>
+      <view class="step">
+        <view class="step-no">3</view>
+        <view class="step-text"><text class="strong">耗时与错因分析</text>：实际用时比预计多用 1 分钟以上即标记；错题定位到知识点。</view>
+      </view>
+      <view class="step">
+        <view class="step-no">4</view>
+        <view class="step-text"><text class="strong">专项讲解 + 专项练习</text>：针对错题与超时题生成变式练习，循环到无错题、无超时。</view>
+      </view>
+    </view>
+    <view class="gap"></view>
+    <button class="btn btn-primary" bindtap="goCurriculum">开始学习课件</button>
+    <view class="gap"></view>
+    <button class="btn" bindtap="goExams">进入章节考评</button>
+    <view class="gap"></view>
+    <button class="btn" bindtap="goRemedial">专项提升</button>
+  </view>
+
+  <view class="card">
+    <view class="card-title">学习进度</view>
+    <view class="prog">
+      <view class="row muted">
+        <text>课件学习</text>
+        <text>{{studiedCount}} / {{totalPoints}}</text>
+      </view>
+      <view class="bar"><view class="bar-inner" style="width:{{studiedPct}}%"></view></view>
+      <view class="gap"></view>
+      <view class="row muted">
+        <text>章节掌握</text>
+        <text>{{mastered}} / {{chapterCount}}</text>
+      </view>
+      <view class="bar"><view class="bar-inner bar-inner-green" style="width:{{masteredPct}}%"></view></view>
+    </view>
+
+    <view class="divider"></view>
+    <view class="card-title">最近的考评</view>
+    <view wx:if="{{rounds.length === 0}}" class="muted empty-tip">还没有考评记录，去「章节考评」做一套吧。</view>
+    <view wx:for="{{rounds}}" wx:key="id" class="list-item" data-id="{{item.id}}" bindtap="openReport">
+      <view class="list-title">{{item.title}}</view>
+      <view class="list-right">
+        <text class="muted">{{item.correct}}/{{item.total}} 正确</text>
+        <view class="badge {{item.mastered ? 'badge-green' : 'badge-amber'}}">{{item.mastered ? '已掌握' : '待提升'}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">教材章节一览</view>
+    <view wx:for="{{volumes}}" wx:key="id" wx:for-item="vol" class="vol">
+      <view class="vol-name">{{vol.name}}</view>
+      <view wx:for="{{vol.chapters}}" wx:key="id" wx:for-item="ch" class="list-item" data-id="{{ch.id}}" bindtap="openChapter">
+        <view class="list-title">{{ch.no}} {{ch.title}}</view>
+        <view class="list-right">
+          <text class="muted">{{ch.pointCount}} 个知识点</text>
+          <view wx:if="{{ch.mastered}}" class="badge badge-green">已掌握</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="row">
+      <view class="card-title">当前用户</view>
+      <button class="btn btn-sm" bindtap="onLogout">退出</button>
+    </view>
+    <view class="muted user-line">{{userLabel}}</view>
+  </view>
+</view>

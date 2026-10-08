@@ -1,0 +1,177 @@
+<view class="wrap" wx:if="{{ready}}">
+  <!-- 概要 -->
+  <view class="card">
+    <view class="muted">{{kindLabel}} · 第 {{round.round}} 轮</view>
+    <view class="report-title">{{round.title}}</view>
+    <view class="muted">交卷时间 {{finishedText}}</view>
+    <view class="gap"></view>
+    <view class="btns">
+      <button class="btn btn-primary btn-sm" bindtap="goRemedial">生成专项讲解课件</button>
+      <button class="btn btn-sm" disabled="{{busy}}" bindtap="startPractice">{{busy ? '正在生成…' : '生成专项练习'}}</button>
+    </view>
+  </view>
+
+  <!-- 统计 -->
+  <view class="stat-grid">
+    <view class="stat">
+      <view class="muted">正确率</view>
+      <view class="stat-num {{accuracy >= 80 ? 'green' : 'amber'}}">{{accuracy}}%</view>
+      <view class="muted">{{correctCount}} / {{answered}} 题</view>
+    </view>
+    <view class="stat">
+      <view class="muted">得分率</view>
+      <view class="stat-num">{{scorePct}}%</view>
+      <view class="muted">含步骤分</view>
+    </view>
+    <view class="stat">
+      <view class="muted">错题</view>
+      <view class="stat-num {{wrongCount ? 'red' : 'green'}}">{{wrongCount}}</view>
+    </view>
+    <view class="stat">
+      <view class="muted">耗时标记</view>
+      <view class="stat-num {{slowCount ? 'amber' : 'green'}}">{{slowCount}}</view>
+      <view class="muted">超出预计 1 分钟以上</view>
+    </view>
+    <view class="stat">
+      <view class="muted">总用时 / 预计</view>
+      <view class="stat-num {{overTime ? 'amber' : 'green'}}">{{actualTotalText}}</view>
+      <view class="muted">预计 {{estimatedTotalText}}</view>
+    </view>
+  </view>
+
+  <!-- 通过 / 待提升 -->
+  <view wx:if="{{passed}}" class="card pass-card">
+    <view class="pass-title">🎉 本轮全部通过：没有错题，也没有耗时超标的题目。</view>
+    <view class="muted">自适应循环已完成，本章标记为「已掌握」。</view>
+  </view>
+  <view wx:else class="card warn-card">
+    <view class="warn-title">待提升：{{analyses.length}} 道题</view>
+    <view class="muted">
+      其中错题 {{wrongCount}} 道、耗时标记题 {{slowCount}} 道，涉及 {{weak.length}} 个知识点。
+      先看「专项讲解课件」，再做「专项练习」，直到没有问题题目为止。
+    </view>
+    <view wx:if="{{weak.length}}" class="weak-tags">
+      <view wx:for="{{weak}}" wx:key="id" class="badge badge-violet" data-point="{{item.id}}" bindtap="openLesson">{{item.name}}</view>
+    </view>
+  </view>
+
+  <!-- 逐题耗时 -->
+  <view class="card">
+    <view class="card-title">逐题耗时对比</view>
+    <view class="muted">实际耗时 − 预计耗时 &gt; 1 分钟的题目标黄；选择题另给出首次选择用时。</view>
+    <view class="timing-head">
+      <text class="c-no">题号</text>
+      <text class="c-type">题型</text>
+      <text class="c-num">预计</text>
+      <text class="c-num">实际</text>
+      <text class="c-num">差值</text>
+    </view>
+    <view wx:for="{{timings}}" wx:key="index" class="timing-row {{item.slow ? 'timing-slow' : ''}}">
+      <text class="c-no">{{item.index}}</text>
+      <text class="c-type">{{item.typeLabel}}</text>
+      <text class="c-num">{{item.estimatedText}}</text>
+      <text class="c-num">{{item.actualText}}</text>
+      <text class="c-num {{item.over ? 'over' : ''}}">{{item.gapText}}</text>
+    </view>
+  </view>
+
+  <!-- 逐题详情 -->
+  <view class="card">
+    <view class="card-title">逐题解析</view>
+    <view wx:for="{{items}}" wx:key="qid" class="q-item">
+      <view class="q-head" data-i="{{index}}" bindtap="toggleItem">
+        <view class="q-no {{item.cls}}">{{item.index}}</view>
+        <view class="q-brief">
+          <view class="q-stem-brief">{{item.stemBrief}}</view>
+          <view class="muted">{{item.typeLabel}} · {{item.diffLabel}} · 用时 {{item.actualText}} / 预计 {{item.estimatedText}}</view>
+        </view>
+        <view class="q-badges">
+          <view wx:if="{{item.pending}}" class="badge badge-blue">手写待确认</view>
+          <view wx:elif="{{item.correct}}" class="badge badge-green">正确</view>
+          <view wx:else class="badge badge-red">错误</view>
+          <view wx:if="{{item.slow}}" class="badge badge-amber">耗时</view>
+        </view>
+      </view>
+
+      <view wx:if="{{item.open}}" class="q-body">
+        <view class="box">
+          <text class="stem">{{item.stem}}</text>
+          <view wx:if="{{item.options.length}}">
+            <view wx:for="{{item.options}}" wx:for-item="opt" wx:key="*this" class="muted opt">{{opt}}</view>
+          </view>
+        </view>
+
+        <view class="two-col">
+          <view class="box">
+            <view class="muted">你的答案</view>
+            <text class="solution">{{item.valueText}}</text>
+            <block wx:if="{{item.work}}">
+              <view class="muted work-label">你的过程</view>
+              <text class="solution">{{item.work}}</text>
+            </block>
+            <block wx:if="{{item.images.length}}">
+              <view class="muted work-label">手写照片（批改以此为准）</view>
+              <view class="thumbs">
+                <image
+                  wx:for="{{item.images}}"
+                  wx:for-item="src"
+                  wx:key="*this"
+                  class="thumb"
+                  src="{{src}}"
+                  mode="aspectFill"
+                  data-qid="{{item.qid}}"
+                  data-src="{{src}}"
+                  bindtap="previewPhoto"
+                />
+              </view>
+              <view wx:if="{{item.pending}}" class="btns">
+                <button class="btn btn-primary btn-sm" data-qid="{{item.qid}}" data-ok="1" bindtap="confirmPhoto">手写答案正确</button>
+                <button class="btn btn-sm" data-qid="{{item.qid}}" data-ok="0" bindtap="confirmPhoto">手写答案有误</button>
+              </view>
+            </block>
+          </view>
+
+          <view class="box box-green">
+            <view class="answer-label">正确答案</view>
+            <text class="solution">{{item.answer}}</text>
+          </view>
+        </view>
+
+        <view class="box box-blue">
+          <view class="answer-label">完整解析</view>
+          <text class="solution">{{item.solution}}</text>
+        </view>
+
+        <view wx:if="{{!item.correct && !item.pending}}" class="box box-red">
+          <view class="answer-label">错因分析</view>
+          <text class="solution">{{item.errorReason}}</text>
+        </view>
+
+        <view wx:if="{{item.slow}}" class="box box-amber">
+          <text class="solution">本题用时 {{item.actualText}}，比预计多用 {{item.gapText}}，已超过 1 分钟阈值，说明该知识点的方法还不熟练，建议重点练习。</text>
+        </view>
+
+        <view wx:if="{{item.rubric.length}}" class="box">
+          <view class="muted">步骤要点自查（勾选你确实做到的要点，用于计算过程分）</view>
+          <view wx:for="{{item.rubric}}" wx:for-item="r" wx:for-index="ri" wx:key="ri" class="rubric-row">
+            <checkbox-group data-qid="{{item.qid}}" data-ri="{{ri}}" bindchange="onRubric">
+              <label class="rubric-label">
+                <checkbox value="1" checked="{{item.rubricChecked[ri]}}" />
+                <text class="solution">{{r}}</text>
+              </label>
+            </checkbox-group>
+          </view>
+          <view class="muted">当前得分 {{item.scorePct}}%</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <button class="btn" bindtap="goExams">← 返回考评列表</button>
+  </view>
+</view>
+
+<view wx:else class="wrap">
+  <view class="card muted">正在生成报告…</view>
+</view>

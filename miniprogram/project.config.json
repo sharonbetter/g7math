@@ -1,0 +1,27 @@
+{
+  "description": "七年级数学学习工具 · 微信小程序",
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true,
+    "bigPackageSizeSupport": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.5.0",
+  "appid": "touristappid",
+  "projectname": "g7math",
+  "miniprogramRoot": "./",
+  "condition": {}
+}

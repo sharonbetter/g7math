@@ -1,0 +1,28 @@
+<view class="wrap login-wrap">
+  <view class="card">
+    <view class="brand">
+      <view class="brand-icon">七</view>
+      <view class="brand-name">七年级数学学习工具</view>
+    </view>
+
+    <view class="muted login-tip">
+      用微信身份登录。每个用户的学习记录（考评、掌握进度、错题）单独保存，互不影响。
+    </view>
+
+    <view wx:if="{{config.allowDisplayName}}" class="login-field">
+      <view class="label">昵称（可选）</view>
+      <input class="input" placeholder="不填则显示为微信用户" value="{{name}}" bindinput="onName" />
+    </view>
+
+    <view wx:if="{{error}}" class="login-error">{{error}}</view>
+
+    <button class="btn btn-primary login-btn" loading="{{busy}}" disabled="{{busy}}" bindtap="onLogin">
+      微信登录
+    </button>
+
+    <view class="muted login-note">
+      <block wx:if="{{hasServer}}">已接入服务器，将使用微信 openid 作为唯一用户标识。</block>
+      <block wx:else>当前未接入服务器，先使用本机用户标识；接入服务器后自动切换为微信 openid。</block>
+    </view>
+  </view>
+</view>

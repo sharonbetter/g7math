@@ -1,0 +1,53 @@
+<view class="wrap">
+  <view class="card">
+    <view class="card-title">《{{book}}》知识索引</view>
+    <view class="muted intro">
+      原书共 {{pdfPages}} 页扫描件，已按目录切分为 {{units.length}} 个讲次。
+      点下面任一讲查看 OCR 正文{{hasPages ? '与原页图像' : ''}}。
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">讲次目录</view>
+    <view class="chips">
+      <view
+        wx:for="{{units}}"
+        wx:key="id"
+        wx:for-item="u"
+        class="chip {{u.id === currentId ? 'chip-on' : ''}}"
+        data-id="{{u.id}}"
+        bindtap="tapUnit"
+      >{{u.noText}}{{u.title}}</view>
+    </view>
+  </view>
+
+  <block wx:if="{{hasCurrent}}">
+    <view class="card">
+      <view class="muted">{{current.category}}</view>
+      <view class="unit-title">{{current.noText}}{{current.title}}</view>
+      <view class="tags">
+        <view class="badge badge-violet">{{current.kindLabel}}</view>
+        <view class="badge">书内第 {{current.printedStart}}–{{current.printedEnd}} 页</view>
+        <view class="badge">PDF 第 {{current.pdfStart}}–{{current.pdfEnd}} 页</view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">原页图像</view>
+      <view wx:if="{{!hasPages}}" class="muted hint">未配置页图服务器，仅显示文字</view>
+      <block wx:else>
+        <view wx:if="{{pageImages.length === 0}}" class="muted hint">本讲没有对应的页图。</view>
+        <view wx:for="{{pageImages}}" wx:key="page" wx:for-item="img" class="page-box">
+          <image class="page-img" src="{{img.url}}" mode="widthFix" lazy-load="{{true}}"></image>
+          <view class="muted page-cap">书内第 {{img.printed}} 页 · PDF 第 {{img.page}} 页</view>
+        </view>
+      </block>
+    </view>
+
+    <view class="card">
+      <view class="card-title">OCR 正文</view>
+      <view class="muted hint">OCR 对数学公式识别有误差，仅作检索线索，准确内容请对照原书。</view>
+      <view class="page-text">{{text}}</view>
+    </view>
+  </block>
+</view>

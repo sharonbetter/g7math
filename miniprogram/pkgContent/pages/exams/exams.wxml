@@ -1,0 +1,39 @@
+<view class="wrap">
+  <view class="card">
+    <view class="row">
+      <view class="card-title">章节考评</view>
+      <view class="badge badge-blue">{{readyCount}} / {{chapterCount}} 章可考</view>
+    </view>
+    <view class="muted intro">
+      每章一套考评卷，含选择题、填空题、计算题、应用题，由易到难。答题时逐题计时，交卷后自动批改，并生成耗时对比与错因分析。
+    </view>
+    <view class="gap"></view>
+    <button class="btn" bindtap="goRemedial">进入专项提升</button>
+  </view>
+
+  <view wx:if="{{chapterCount === 0}}" class="card muted center">暂无章节数据。</view>
+
+  <view wx:for="{{chapters}}" wx:key="id" class="card ch-card" data-id="{{item.id}}" bindtap="openIntro">
+    <view class="row">
+      <view class="ch-head">
+        <view class="muted">{{item.volumeName}}</view>
+        <view class="ch-title">{{item.no}} {{item.title}}</view>
+      </view>
+      <view class="badge {{item.loopClass}}">{{item.loopText}}</view>
+    </view>
+
+    <view class="ch-tags">
+      <block wx:if="{{item.hasExam}}">
+        <text class="badge badge-blue">{{item.questionCount}} 题</text>
+        <text class="badge badge-blue">预计 {{item.minutes}} 分钟</text>
+      </block>
+      <text wx:else class="badge badge-amber">考评卷生成中</text>
+      <text class="badge">{{item.pointCount}} 个知识点</text>
+    </view>
+
+    <view class="row ch-foot">
+      <text class="muted">{{item.hasExam ? '点本行查看考评说明' : '该章考评卷暂未生成'}}</text>
+      <button class="btn btn-sm" catchtap="goRemedial" data-id="{{item.id}}">专项提升</button>
+    </view>
+  </view>
+</view>

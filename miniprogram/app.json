@@ -1,0 +1,40 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/home/home",
+    "pages/progress/progress"
+  ],
+  "subPackages": [
+    {
+      "root": "pkgContent",
+      "name": "content",
+      "pages": [
+        "pages/curriculum/curriculum",
+        "pages/chapter/chapter",
+        "pages/lesson/lesson",
+        "pages/exams/exams",
+        "pages/examIntro/examIntro",
+        "pages/run/run",
+        "pages/report/report",
+        "pages/remedial/remedial",
+        "pages/book/book"
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/home/home": {
+      "network": "all",
+      "packages": ["content"]
+    }
+  },
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "七年级数学学习工具",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f7f8fa"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

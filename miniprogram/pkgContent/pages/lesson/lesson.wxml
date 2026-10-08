@@ -1,0 +1,130 @@
+<view class="wrap">
+  <view wx:if="{{!found}}" class="card">
+    <view class="card-title">未找到该知识点</view>
+    <view class="muted intro">请返回课程中心重新选择。</view>
+  </view>
+
+  <block wx:else>
+    <view class="card">
+      <view class="muted crumb" bindtap="goChapter">{{chapter.no}} {{chapter.title}} ›</view>
+      <view class="ls-title">{{lesson ? lesson.title : point.name}}</view>
+      <view class="tags">
+        <view wx:if="{{lesson}}" class="badge badge-blue">约 {{lesson.durationMinutes}} 分钟</view>
+        <view wx:else class="badge badge-blue">约 {{point.estimatedMinutes}} 分钟</view>
+        <view class="badge">难度 {{star}}</view>
+        <view wx:if="{{studied}}" class="badge badge-green">已学完</view>
+      </view>
+      <view class="gap"></view>
+      <button class="btn" bindtap="goExam">去做本章考评</button>
+    </view>
+
+    <view wx:if="{{missing}}" class="card">
+      <view class="card-title">{{missing}}</view>
+      <view class="muted intro">可以先看下面的知识要点，或返回课程中心选择其它章节。</view>
+      <view class="divider"></view>
+      <view class="pt-name">{{point.name}}</view>
+      <view class="body-text">{{point.summary}}</view>
+      <view wx:if="{{point.keyPoints.length}}" class="kp">
+        <view wx:for="{{point.keyPoints}}" wx:key="*this" wx:for-item="k" class="kp-item">· {{k}}</view>
+      </view>
+    </view>
+
+    <block wx:else>
+      <view class="card">
+        <view class="card-title">学习目标</view>
+        <view wx:for="{{objectives}}" wx:key="*this" wx:for-item="o" class="obj">· {{o}}</view>
+        <view class="divider"></view>
+        <view class="label">知识要点</view>
+        <view class="body-text">{{point.summary}}</view>
+      </view>
+
+      <view wx:if="{{slideTotal > 0}}" class="prog-row">
+        <text class="muted">课件进度 {{slideIdx + 1}} / {{slideTotal}}</text>
+        <view class="bar prog-bar">
+          <view class="bar-inner" style="width:{{(slideIdx + 1) * 100 / slideTotal}}%"></view>
+        </view>
+      </view>
+
+      <view wx:if="{{slideTotal === 0}}" class="card">
+        <view class="muted">本知识点暂无讲解幻灯片。</view>
+      </view>
+
+      <view
+        wx:for="{{slides}}"
+        wx:key="id"
+        wx:for-item="s"
+        wx:for-index="si"
+        wx:if="{{s.visible}}"
+        class="card slide"
+      >
+        <view class="slide-head">
+          <view class="badge {{s.tone}}">{{s.label}}</view>
+          <text class="slide-title">{{s.title}}</text>
+        </view>
+
+        <view wx:if="{{s.bookRef}}" class="muted ref">《{{s.bookRef}}》</view>
+        <view wx:if="{{s.body}}" class="body-text">{{s.body}}</view>
+
+        <view wx:if="{{s.problem}}" class="problem">
+          <view class="label">题目</view>
+          <view class="stem">{{s.problem}}</view>
+        </view>
+
+        <block wx:if="{{s.solution}}">
+          <button
+            wx:if="{{!s.showSolution}}"
+            class="btn btn-sm"
+            data-index="{{si}}"
+            bindtap="showSolution"
+          >显示解答</button>
+          <view wx:else class="solution-box">
+            <view class="label green">解答</view>
+            <view class="solution">{{s.solution}}</view>
+            <view wx:if="{{s.notes}}" class="notes">点评：{{s.notes}}</view>
+            <view class="gap"></view>
+            <button class="btn btn-sm" data-index="{{si}}" bindtap="hideSolution">收起解答</button>
+          </view>
+        </block>
+      </view>
+
+      <view wx:if="{{slideTotal > 0}}" class="card">
+        <button wx:if="{{!slidesDone}}" class="btn btn-primary" bindtap="nextSlide">
+          下一页（{{slideIdx + 2}} / {{slideTotal}}）
+        </button>
+        <block wx:else>
+          <button class="btn" bindtap="restartSlides">回顾课件</button>
+          <view class="gap"></view>
+          <view class="badge badge-green">本知识点已标记为学完</view>
+        </block>
+      </view>
+
+      <view wx:if="{{lesson.summary}}" class="card">
+        <view class="card-title">小结</view>
+        <view class="body-text">{{lesson.summary}}</view>
+      </view>
+
+      <view wx:if="{{checkQuestions.length > 0}}" class="card">
+        <view class="card-title">随堂检测</view>
+        <view wx:for="{{checkQuestions}}" wx:key="id" wx:for-item="q" wx:for-index="qi" class="cq">
+          <view class="cq-head">
+            <text class="cq-no">{{qi + 1}}</text>
+            <text class="cq-q">{{q.question}}</text>
+          </view>
+          <view wx:if="{{q.shown}}" class="cq-a">{{q.answer}}</view>
+          <view class="gap"></view>
+          <button class="btn btn-sm" data-index="{{qi}}" bindtap="toggleAnswer">{{q.shown ? '收起答案' : '查看答案'}}</button>
+        </view>
+      </view>
+    </block>
+
+    <view class="card">
+      <view class="nav-row">
+        <button wx:if="{{prev}}" class="btn btn-sm nav-btn" data-id="{{prev.id}}" bindtap="goPoint">← 上一课</button>
+        <button class="btn btn-sm nav-btn" bindtap="goChapter">返回章节</button>
+        <button wx:if="{{next}}" class="btn btn-sm nav-btn btn-primary" data-id="{{next.id}}" bindtap="goPoint">下一课 →</button>
+      </view>
+      <view wx:if="{{prev}}" class="muted nav-tip">上一课：{{prev.name}}</view>
+      <view wx:if="{{next}}" class="muted nav-tip">下一课：{{next.name}}</view>
+    </view>
+  </block>
+</view>
