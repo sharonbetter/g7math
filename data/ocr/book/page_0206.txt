@@ -1,0 +1,49 @@
+空自与圖形
+例5 如图①，已知正方形ABCD 的面积为1,M为AB 的中点.求图中阴影
+部分的面积.
+（湖北省武汉市竞赛题）
+窗
+解法一 如图 ①，SLAMD= SLAMC
+4，SLAMG 为公共部分，所以 SLAGD=
+充分利用正方形的
+SAMCC，因为DAMG 与DAMD 的高相等（以A为顶点作高），AMCG 与AMCD
+特征、中点，探寻知识的
+的高相等（以C为顶点作高），
+关联，从特殊到一般，从
+面积比到代数化，生成
+SLAMG
+SAMCG。
+MG
+-SLMCC
+S
+AMCG
+所以
+S LAMD
+SLMCD
+MD，即
+例 5的不同解法.
+4
+解得
+SAMCG=
+，S與影=2X
+3
+图①
+图②
+图③
+解法二 如图②，连接GB，由正方形的对称性得 SLABG =SLAGD，
+又 Scute=NS200e -S2cn，
+解法三
+如图③，连接 BD,BG，设BD，AC 交于点0,SAA = ，
+因为 SAAMD=SLAOD =
+SABCD，
+所以 SLGOD =SAAOD -S LAGD = SLAMD -SLACD = S LAMG =z.
+又SLBOG LGOD ，SLBMC SLAMG= ，
+因为 S LAOB =SAACM + SAGOB +SABMG，
+所以 Sa。 -SLco +SLmes=2（S 2AmP SLawe）=g
+皮克公式
+奥地利数学家皮克于1899年发现了一个点阵中计算多边形面积公式，也称皮
+克定理，是最重要的100个数学定理之一.
+例6 用水平线和竖直线将平面分成若干个边长为1的小正方形格子，小正方
+形的顶点叫格点，以格点为顶点的多边形叫格点多边形.设格点多边形的面积为
+199
+关注微信公众号“初高教辅站”获取更 多初高中教辅资料

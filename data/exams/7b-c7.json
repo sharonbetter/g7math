@@ -1,0 +1,747 @@
+{
+  "id": "7b-c7-exam",
+  "chapterId": "7b-c7",
+  "chapterTitle": "第七章 相交线与平行线",
+  "title": "第七章 相交线与平行线 · 章节考评",
+  "totalEstimatedSeconds": 3440,
+  "sections": [
+    {
+      "id": "A",
+      "title": "一、选择题（每题只有一个正确选项）",
+      "type": "choice",
+      "questionIds": ["7b-c7-e01", "7b-c7-e02", "7b-c7-e03", "7b-c7-e04", "7b-c7-e05", "7b-c7-e06", "7b-c7-e07", "7b-c7-e08"]
+    },
+    {
+      "id": "B",
+      "title": "二、填空题",
+      "type": "fill",
+      "questionIds": ["7b-c7-e09", "7b-c7-e10", "7b-c7-e11", "7b-c7-e12", "7b-c7-e13"]
+    },
+    {
+      "id": "C",
+      "title": "三、计算题（写出必要的计算过程）",
+      "type": "calc",
+      "questionIds": ["7b-c7-e14", "7b-c7-e15", "7b-c7-e16", "7b-c7-e17", "7b-c7-e18"]
+    },
+    {
+      "id": "D",
+      "title": "四、应用题（写出必要的解答过程）",
+      "type": "applied",
+      "questionIds": ["7b-c7-e19", "7b-c7-e20", "7b-c7-e21", "7b-c7-e22"]
+    }
+  ],
+  "questions": [
+    {
+      "id": "7b-c7-e01",
+      "type": "choice",
+      "difficulty": 1,
+      "estimatedSeconds": 50,
+      "pointIds": ["7b-7-01"],
+      "stem": "直线 AB 与直线 CD 相交于点 O。下列说法正确的是（  ）",
+      "options": [
+        "A. ∠AOC 与 ∠BOD 是邻补角",
+        "B. ∠AOC 与 ∠AOD 是对顶角",
+        "C. ∠AOC 与 ∠BOD 是对顶角",
+        "D. 两条直线相交只形成 1 对邻补角"
+      ],
+      "answer": "C",
+      "solution": "两条直线相交于 O，四条射线 OA、OB 互为反向延长线，OC、OD 互为反向延长线。∠AOC 与 ∠BOD 有公共顶点 O，两边分别互为反向延长线，所以是对顶角，C 正确。∠AOC 与 ∠AOD 有公共边 OA，是邻补角，不是对顶角，A、B 都错。两条直线相交得到 4 对邻补角、2 对对顶角，D 错。故选 C。",
+      "errorTags": ["概念不清", "图形识别错误"],
+      "commonWrong": [
+        { "answer": "B", "reason": "把有公共边的邻补角误认成对顶角" },
+        { "answer": "A", "reason": "把对顶角和邻补角的位置关系记反了" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "直线 MN 与直线 PQ 相交于点 O。下列说法正确的是（  ）",
+          "options": [
+            "A. ∠MOP 与 ∠NOQ 是邻补角",
+            "B. ∠MOP 与 ∠MOQ 是对顶角",
+            "C. 图中有 2 对对顶角",
+            "D. 图中有 2 对邻补角"
+          ],
+          "answer": "C",
+          "solution": "两条直线相交得到 4 个角，其中对顶角有 2 对，邻补角有 4 对。∠MOP 与 ∠NOQ 是对顶角，不是邻补角；∠MOP 与 ∠MOQ 有公共边，是邻补角。故选 C。",
+          "estimatedSeconds": 50
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e02",
+      "type": "choice",
+      "difficulty": 2,
+      "estimatedSeconds": 60,
+      "pointIds": ["7b-7-03"],
+      "stem": "下列说法正确的是（  ）",
+      "options": [
+        "A. 两条直线相交，就一定互相垂直",
+        "B. 过直线外一点可以作两条直线与已知直线垂直",
+        "C. 如果两条直线相交成的四个角中有一个是 90°，那么这两条直线互相垂直",
+        "D. 垂线是一条线段"
+      ],
+      "answer": "C",
+      "solution": "垂直是相交的特殊情形：四个角中有一个是直角，就说两条直线互相垂直，C 正确。相交不一定垂直，A 错。在同一平面内，过一点有且只有一条直线与已知直线垂直，B 错。垂线是直线，垂线段才是线段，D 错。故选 C。",
+      "errorTags": ["概念不清", "审题不清"],
+      "commonWrong": [
+        { "answer": "A", "reason": "把“相交”和“垂直”当成同一件事" },
+        { "answer": "D", "reason": "把垂线和垂线段混为一谈" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "下列说法正确的是（  ）",
+          "options": [
+            "A. 互相垂直的两条直线一定相交",
+            "B. 相交的两条直线一定互相垂直",
+            "C. 点到直线的距离是一条垂线段",
+            "D. 过直线上一点可以作无数条垂线"
+          ],
+          "answer": "A",
+          "solution": "互相垂直的定义建立在相交之上，所以垂直的两条直线一定相交，A 正确。相交不一定成直角，B 错。点到直线的距离是垂线段的长度，是一个数值，不是线段本身，C 错。过一点有且只有一条直线与已知直线垂直，D 错。故选 A。",
+          "estimatedSeconds": 55
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e03",
+      "type": "choice",
+      "difficulty": 2,
+      "estimatedSeconds": 70,
+      "pointIds": ["7b-7-06"],
+      "stem": "下列说法正确的是（  ）",
+      "options": [
+        "A. 不相交的两条直线一定平行",
+        "B. 在同一平面内，不相交的两条直线叫做平行线",
+        "C. 过直线上一点可以作一条直线与这条直线平行",
+        "D. 若 a∥b，b∥c，则 a 与 c 一定相交"
+      ],
+      "answer": "B",
+      "solution": "平行线的定义要求“同一平面内”且“不相交”，B 正确。不在同一平面内的两条直线可以既不相交也不平行，A 错。平行线的基本事实是：过直线外一点，有且只有一条直线与已知直线平行，直线上的点不满足“直线外”，C 错。平行具有传递性：a∥b 且 b∥c 时 a∥c，D 错。故选 B。",
+      "errorTags": ["概念不清", "审题不清"],
+      "commonWrong": [
+        { "answer": "A", "reason": "漏掉了“同一平面内”这个前提" },
+        { "answer": "D", "reason": "把平行的传递性记成了相交" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "下列说法正确的是（  ）",
+          "options": [
+            "A. 在同一平面内，两条直线的位置关系只有相交和平行两种",
+            "B. 平行线可以相交于无穷远处的一点",
+            "C. 过直线外一点可以作两条直线与已知直线平行",
+            "D. a∥b，b∥c 时，a 与 c 不一定平行"
+          ],
+          "answer": "A",
+          "solution": "同一平面内两条直线要么相交，要么平行，没有第三种位置关系，A 正确。平行线是不相交的，B 错。过直线外一点有且只有一条直线与已知直线平行，C 错。由传递性，a∥c，D 错。故选 A。",
+          "estimatedSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e04",
+      "type": "choice",
+      "difficulty": 2,
+      "estimatedSeconds": 75,
+      "pointIds": ["7b-7-05"],
+      "stem": "直线 AB、CD 被直线 EF 所截，E 在 AB 上，F 在 CD 上，射线顺序为 A—E—B、C—F—D，截线方向为 E 到 F。∠AEF 与 ∠EFD 的位置关系是（  ）",
+      "options": [
+        "A. 同位角",
+        "B. 内错角",
+        "C. 同旁内角",
+        "D. 对顶角"
+      ],
+      "answer": "B",
+      "solution": "截线是 EF。∠AEF 在截线 EF 的 A 一侧，且在被截直线 AB、CD 之间；∠EFD 在截线的另一侧（D 一侧），也在两条被截直线之间。两角在截线两侧、又都在被截两直线之间，是内错角（“Z”型）。它们不是同位角，也不是同旁内角，更没有公共顶点，不是对顶角。故选 B。",
+      "errorTags": ["图形识别错误", "概念不清"],
+      "commonWrong": [
+        { "answer": "C", "reason": "没有分清两角是在截线的同旁还是两侧" },
+        { "answer": "A", "reason": "把“Z”型内错角看成了“F”型同位角" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "直线 AB、CD 被直线 EF 所截，E 在 AB 上，F 在 CD 上，射线顺序为 A—E—B、C—F—D。∠BEF 与 ∠DFE 的位置关系是（  ）",
+          "options": [
+            "A. 内错角",
+            "B. 对顶角",
+            "C. 同旁内角",
+            "D. 邻补角"
+          ],
+          "answer": "C",
+          "solution": "∠BEF 与 ∠DFE 都在截线 EF 的同一侧（B、D 所在的一侧），并且都位于被截直线 AB、CD 之间，所以是同旁内角。故选 C。",
+          "estimatedSeconds": 70
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e05",
+      "type": "choice",
+      "difficulty": 3,
+      "estimatedSeconds": 80,
+      "pointIds": ["7b-7-07"],
+      "stem": "直线 a、b 被直线 c 所截，形成一对同位角 ∠1 与 ∠2。能判定 a∥b 的条件是（  ）",
+      "options": [
+        "A. ∠1 + ∠2 = 180°",
+        "B. ∠1 = ∠2",
+        "C. ∠1 = 2∠2",
+        "D. ∠1 与 ∠2 是同位角"
+      ],
+      "answer": "B",
+      "solution": "平行线的判定是“由角得线”：两条直线被第三条直线所截，同位角相等，才能判定这两条直线平行。题目已经说明 ∠1、∠2 是同位角，所以需要的条件是 ∠1 = ∠2，选 B。同位角互补不能直接判定平行，A 错；只知道它们是同位角，没有数量关系，也不能判定平行，D 错。",
+      "errorTags": ["公式记错", "概念不清"],
+      "commonWrong": [
+        { "answer": "A", "reason": "把“同旁内角互补”的判定误用到了同位角上" },
+        { "answer": "D", "reason": "只记住了角的名称，没有用上“相等”这个数量条件" }
+      ],
+      "source": { "kind": "book", "ref": "几何-22-相交线与平行线", "pdfPage": 168 },
+      "variants": [
+        {
+          "stem": "直线 a、b 被直线 c 所截，∠1 与 ∠2 是一对同旁内角。能判定 a∥b 的条件是（  ）",
+          "options": [
+            "A. ∠1 = ∠2",
+            "B. ∠1 + ∠2 = 90°",
+            "C. ∠1 + ∠2 = 180°",
+            "D. ∠1 = 2∠2"
+          ],
+          "answer": "C",
+          "solution": "同旁内角互补，两直线平行。所以应选 ∠1 + ∠2 = 180°。同旁内角仅仅相等不能判定平行。故选 C。",
+          "estimatedSeconds": 70
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e06",
+      "type": "choice",
+      "difficulty": 3,
+      "estimatedSeconds": 85,
+      "pointIds": ["7b-7-09"],
+      "stem": "已知 a∥b，直线 c 截 a、b，其中一对同旁内角为 ∠1 与 ∠2。下列结论正确的是（  ）",
+      "options": [
+        "A. ∠1 = ∠2",
+        "B. ∠1 + ∠2 = 90°",
+        "C. ∠1 + ∠2 = 180°",
+        "D. 由此可以判定 a∥b"
+      ],
+      "answer": "C",
+      "solution": "题目已经给出 a∥b，用的是平行线的性质（由线得角）：两直线平行，同旁内角互补，所以 ∠1 + ∠2 = 180°。同旁内角不是相等，A 错。平行已经是已知条件，不是待判定的结论，D 把判定和性质的因果写反了。故选 C。",
+      "errorTags": ["概念不清", "公式记错"],
+      "commonWrong": [
+        { "answer": "A", "reason": "把“同位角相等”误用成了同旁内角相等" },
+        { "answer": "D", "reason": "已知的是线平行，却反过来当成要判定平行" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "已知 m∥n，直线 l 截 m、n，∠3 与 ∠4 是其中一对内错角。下列结论正确的是（  ）",
+          "options": [
+            "A. ∠3 + ∠4 = 180°",
+            "B. ∠3 = ∠4",
+            "C. ∠3 + ∠4 = 90°",
+            "D. 由此判定 m∥n"
+          ],
+          "answer": "B",
+          "solution": "两直线平行，内错角相等，所以 ∠3 = ∠4。内错角互补是错的。平行已是条件，不能再说“由此判定平行”。故选 B。",
+          "estimatedSeconds": 70
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e07",
+      "type": "choice",
+      "difficulty": 3,
+      "estimatedSeconds": 80,
+      "pointIds": ["7b-7-11"],
+      "stem": "下列语句中，是假命题的是（  ）",
+      "options": [
+        "A. 如果两个角是对顶角，那么这两个角相等",
+        "B. 如果 a∥b，b∥c，那么 a∥c",
+        "C. 如果两个角相等，那么这两个角是对顶角",
+        "D. 在同一平面内，如果两条直线都垂直于同一条直线，那么这两条直线平行"
+      ],
+      "answer": "C",
+      "solution": "命题“如果两个角相等，那么这两个角是对顶角”是假命题：相等的角不一定是对顶角，例如一个 30° 的角和它的同位角（两直线平行时）相等，但不是对顶角。A 是对顶角相等，真；B 是平行的传递性，真；D 是“垂直于同一条直线的两条直线平行”，在同一平面内为真。故选 C。",
+      "errorTags": ["概念不清", "推理不严谨"],
+      "commonWrong": [
+        { "answer": "A", "reason": "把真命题“对顶角相等”误判成假命题" },
+        { "answer": "D", "reason": "不记得“同垂直于一条直线则两直线平行”是真命题" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "下列语句中，是真命题的是（  ）",
+          "options": [
+            "A. 如果两个角互补，那么这两个角是邻补角",
+            "B. 如果两个角是邻补角，那么这两个角互补",
+            "C. 画一条线段 AB",
+            "D. 这两条直线平行吗"
+          ],
+          "answer": "B",
+          "solution": "邻补角一定互补，B 是真命题。互补的两个角不一定相邻，A 是假命题。C 是作图语句，D 是疑问句，都不是命题。故选 B。",
+          "estimatedSeconds": 70
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e08",
+      "type": "choice",
+      "difficulty": 4,
+      "estimatedSeconds": 90,
+      "pointIds": ["7b-7-10"],
+      "stem": "已知 AB∥DE。过 AB 与 DE 之间的点 C 作射线 CF，使 CF∥AB（从而 CF∥DE）。∠ABC 与 ∠BCF 是内错角，且 ∠ABC = 70°；∠CDE 与 ∠DCF 是同旁内角，且 ∠CDE = 140°。射线 CD 在 ∠BCF 的内部。则 ∠BCD 的度数是（  ）",
+      "options": [
+        "A. 20°",
+        "B. 30°",
+        "C. 40°",
+        "D. 70°"
+      ],
+      "answer": "B",
+      "solution": "因为 CF∥AB，∠ABC 与 ∠BCF 是内错角，所以 ∠BCF = ∠ABC = 70°（两直线平行，内错角相等）。\n因为 CF∥DE，∠CDE 与 ∠DCF 是同旁内角，所以 ∠DCF = 180° - 140° = 40°（两直线平行，同旁内角互补）。\n射线 CD 在 ∠BCF 内部，所以 ∠BCD = ∠BCF - ∠DCF = 70° - 40° = 30°。故选 B。",
+      "errorTags": ["方法选择不当", "计算失误", "图形识别错误"],
+      "commonWrong": [
+        { "answer": "D", "reason": "把两个同旁内角直接相减，得到 140° - 70° = 70°，没有对照折线的弯折方向" },
+        { "answer": "C", "reason": "只算出了 180° - 140° = 40°，把它当成了 ∠BCD" }
+      ],
+      "source": { "kind": "book", "ref": "几何-22-相交线与平行线", "pdfPage": 171 },
+      "variants": [
+        {
+          "stem": "已知 AB∥DE。过点 C 作 CF∥AB。∠ABC 与 ∠BCF 是内错角，∠ABC = 80°；∠CDE 与 ∠DCF 是同旁内角，∠CDE = 150°。射线 CD 在 ∠BCF 内部。则 ∠BCD 的度数是（  ）",
+          "options": [
+            "A. 20°",
+            "B. 30°",
+            "C. 50°",
+            "D. 80°"
+          ],
+          "answer": "C",
+          "solution": "CF∥AB∥DE。内错角 ∠BCF = 80°。同旁内角 ∠DCF = 180° - 150° = 30°。射线 CD 在 ∠BCF 内部，所以 ∠BCD = 80° - 30° = 50°。故选 C。",
+          "estimatedSeconds": 90
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e09",
+      "type": "fill",
+      "difficulty": 2,
+      "estimatedSeconds": 90,
+      "pointIds": ["7b-7-02"],
+      "stem": "直线 AB、CD 相交于点 O，∠AOC = 50°。则它的对顶角 ∠BOD = ______°，邻补角 ∠AOD = ______°。",
+      "answer": "50；130",
+      "acceptedAnswers": ["50；130", "50;130", "50°；130°"],
+      "solution": "对顶角相等，∠BOD = ∠AOC = 50°。邻补角互补，∠AOD = 180° - 50° = 130°。",
+      "errorTags": ["公式记错", "计算失误"],
+      "commonWrong": [
+        { "answer": "130；50", "reason": "把对顶角和邻补角的数量关系记反了" },
+        { "answer": "50；50", "reason": "以为相交所得的四个角都相等" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "直线 MN、PQ 相交于点 O，∠MON = 65°。则对顶角 ∠POQ = ______°，邻补角 ∠MOP = ______°。",
+          "answer": "65；115",
+          "acceptedAnswers": ["65；115", "65;115"],
+          "solution": "对顶角相等，∠POQ = 65°。邻补角互补，∠MOP = 180° - 65° = 115°。",
+          "estimatedSeconds": 80
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e10",
+      "type": "fill",
+      "difficulty": 2,
+      "estimatedSeconds": 100,
+      "pointIds": ["7b-7-04"],
+      "stem": "点 P 在直线 l 外，PH⊥l 于点 H，PH = 4 cm。Q 是直线 l 上不同于 H 的一点，PQ = 5 cm。则点 P 到直线 l 的距离是 ______ cm；线段 PQ 与垂线段 PH 比较，较短的是 ______（填 PH 或 PQ）。",
+      "answer": "4；PH",
+      "acceptedAnswers": ["4；PH", "4;PH", "4 cm；PH"],
+      "solution": "点到直线的距离是垂线段的长度，所以距离是 PH = 4 cm。垂线段最短，PH < PQ，较短的是 PH。",
+      "errorTags": ["概念不清", "单位或作答遗漏"],
+      "commonWrong": [
+        { "answer": "5；PQ", "reason": "把斜线段 PQ 当成了点到直线的距离" },
+        { "answer": "PH；PH", "reason": "第一空应填长度这个数值，而不是线段名称" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "点 A 到直线 m 的垂足是 B，AB = 6 cm，C 是直线 m 上另一点，AC = 10 cm。点 A 到直线 m 的距离是 ______ cm。",
+          "answer": "6",
+          "acceptedAnswers": ["6", "6 cm", "6cm"],
+          "solution": "点到直线的距离是垂线段 AB 的长度，等于 6 cm。AC 是斜线段，不是距离。",
+          "estimatedSeconds": 70
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e11",
+      "type": "fill",
+      "difficulty": 3,
+      "estimatedSeconds": 120,
+      "pointIds": ["7b-7-09", "7b-7-07"],
+      "stem": "直线 a∥b，直线 c 截 a、b。一组同位角中的一个角是 48°，则它的同位角是 ______°；与这个 48° 的角构成同旁内角的那个角是 ______°。",
+      "answer": "48；132",
+      "acceptedAnswers": ["48；132", "48;132"],
+      "solution": "两直线平行，同位角相等，所以同位角是 48°。两直线平行，同旁内角互补，所以同旁内角是 180° - 48° = 132°。这里用的是性质：已知线平行，求角。",
+      "errorTags": ["公式记错", "计算失误"],
+      "commonWrong": [
+        { "answer": "132；48", "reason": "把同位角互补、同旁内角相等记反了" },
+        { "answer": "48；48", "reason": "以为平行线截出的角全部相等" }
+      ],
+      "source": { "kind": "book", "ref": "几何-22-相交线与平行线", "pdfPage": 168 },
+      "variants": [
+        {
+          "stem": "直线 m∥n，被直线 l 所截。一组内错角中的一个角是 73°，则它的内错角是 ______°；与这个 73° 的角构成同旁内角的角是 ______°。",
+          "answer": "73；107",
+          "acceptedAnswers": ["73；107", "73;107"],
+          "solution": "两直线平行，内错角相等，内错角是 73°。同旁内角互补，180° - 73° = 107°。",
+          "estimatedSeconds": 100
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e12",
+      "type": "fill",
+      "difficulty": 3,
+      "estimatedSeconds": 130,
+      "pointIds": ["7b-7-12", "7b-7-11"],
+      "stem": "命题“如果两个角是对顶角，那么这两个角相等”的题设是 ______，结论是 ______。（用“如果……那么……”中的两句话填写，中间用分号隔开）",
+      "answer": "两个角是对顶角；这两个角相等",
+      "acceptedAnswers": [
+        "两个角是对顶角；这两个角相等",
+        "两个角是对顶角；这两个角相等。"
+      ],
+      "solution": "“如果……那么……”中，“如果”后面是题设，“那么”后面是结论。题设：两个角是对顶角；结论：这两个角相等。这个命题经过推理可以证实，是定理“对顶角相等”的内容。",
+      "errorTags": ["概念不清", "审题不清"],
+      "commonWrong": [
+        { "answer": "这两个角相等；两个角是对顶角", "reason": "把题设和结论写反了" },
+        { "answer": "对顶角相等；对顶角相等", "reason": "没有把命题拆成条件和结论两部分" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "命题“如果两条直线平行，那么同位角相等”的题设是 ______。",
+          "answer": "两条直线平行",
+          "acceptedAnswers": ["两条直线平行", "两条直线平行。"],
+          "solution": "“如果”后面的部分是题设，即“两条直线平行”。",
+          "estimatedSeconds": 80
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e13",
+      "type": "fill",
+      "difficulty": 4,
+      "estimatedSeconds": 150,
+      "pointIds": ["7b-7-13"],
+      "stem": "把线段 AB 沿水平向右的方向平移 5 cm，得到线段 A'B'。若 AB = 8 cm，则 A'B' = ______ cm；线段 AA' 的长是 ______ cm。",
+      "answer": "8；5",
+      "acceptedAnswers": ["8；5", "8;5"],
+      "solution": "平移不改变图形的形状和大小，对应线段相等，所以 A'B' = AB = 8 cm。平移的距离是 5 cm，对应点的连线相等，所以 AA' = BB' = 5 cm。",
+      "errorTags": ["概念不清", "审题不清"],
+      "commonWrong": [
+        { "answer": "5；8", "reason": "把平移距离和线段本身的长度对调了" },
+        { "answer": "13；5", "reason": "把原长和移动距离加在一起当成了对应线段的长" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "把线段 MN 竖直向上平移 4 cm，得到线段 M'N'。若 MN = 6 cm，则 M'N' = ______ cm，MM' = ______ cm。",
+          "answer": "6；4",
+          "acceptedAnswers": ["6；4", "6;4"],
+          "solution": "平移不改变长度，M'N' = 6 cm。对应点连线等于平移距离，MM' = 4 cm。",
+          "estimatedSeconds": 100
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e14",
+      "type": "calc",
+      "difficulty": 2,
+      "estimatedSeconds": 180,
+      "pointIds": ["7b-7-02"],
+      "stem": "直线 AB、CD 相交于点 O，∠AOC = 35°。求 ∠BOD 和 ∠BOC 的度数。",
+      "answer": "∠BOD = 35°，∠BOC = 145°",
+      "acceptedAnswers": ["∠BOD = 35°，∠BOC = 145°", "35°；145°", "∠BOD=35°，∠BOC=145°"],
+      "solution": "因为 AB、CD 相交于 O，∠AOC 与 ∠BOD 是对顶角，所以 ∠BOD = ∠AOC = 35°。\n∠AOC 与 ∠BOC 是邻补角，所以 ∠BOC = 180° - ∠AOC = 180° - 35° = 145°。",
+      "rubric": [
+        "指出 ∠AOC 与 ∠BOD 是对顶角",
+        "由对顶角相等得 ∠BOD = 35°",
+        "由邻补角互补得 ∠BOC = 145°"
+      ],
+      "errorTags": ["公式记错", "计算失误", "步骤不规范"],
+      "commonWrong": [
+        { "answer": "∠BOD = 145°，∠BOC = 35°", "reason": "把对顶角和邻补角的关系用反了" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "直线 EF、GH 相交于点 O，∠EOG = 62°。求 ∠FOH 和 ∠FOG 的度数。",
+          "answer": "∠FOH = 62°，∠FOG = 118°",
+          "acceptedAnswers": ["∠FOH = 62°，∠FOG = 118°", "62°；118°"],
+          "solution": "∠EOG 与 ∠FOH 是对顶角，所以 ∠FOH = 62°。∠EOG 与 ∠FOG 是邻补角，所以 ∠FOG = 180° - 62° = 118°。",
+          "estimatedSeconds": 150
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e15",
+      "type": "calc",
+      "difficulty": 3,
+      "estimatedSeconds": 200,
+      "pointIds": ["7b-7-08"],
+      "stem": "直线 a、b 被直线 c 所截。一对同位角 ∠1 = 70°，∠2 = 70°。请判断 a 与 b 是否平行，并写出推理过程。",
+      "answer": "a∥b",
+      "acceptedAnswers": ["a∥b", "a 与 b 平行", "平行"],
+      "solution": "因为 ∠1 与 ∠2 是直线 a、b 被直线 c 所截得到的同位角，且 ∠1 = ∠2 = 70°，所以 a∥b（同位角相等，两直线平行）。\n这里是由角的相等推出线平行，用的是判定，不是性质。",
+      "rubric": [
+        "确认 ∠1、∠2 是同位角",
+        "写出 ∠1 = ∠2",
+        "用“同位角相等，两直线平行”得出 a∥b"
+      ],
+      "errorTags": ["推理不严谨", "步骤不规范", "概念不清"],
+      "commonWrong": [
+        { "answer": "不能判定", "reason": "已经有同位角相等，却不敢下平行的结论" }
+      ],
+      "source": { "kind": "book", "ref": "几何-22-相交线与平行线", "pdfPage": 169 },
+      "variants": [
+        {
+          "stem": "直线 m、n 被直线 l 所截。一对内错角 ∠3 = 55°，∠4 = 55°。判断 m 与 n 是否平行，并写出理由。",
+          "answer": "m∥n",
+          "acceptedAnswers": ["m∥n", "m 与 n 平行", "平行"],
+          "solution": "因为 ∠3 与 ∠4 是内错角，且 ∠3 = ∠4，所以 m∥n（内错角相等，两直线平行）。",
+          "estimatedSeconds": 160
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e16",
+      "type": "calc",
+      "difficulty": 3,
+      "estimatedSeconds": 220,
+      "pointIds": ["7b-7-09"],
+      "stem": "已知 a∥b，直线 c 截 a、b。同位角 ∠1 = 58°。求与 ∠1 构成内错角的那个角 ∠3，以及与 ∠1 构成同旁内角的那个角 ∠4。",
+      "answer": "∠3 = 58°，∠4 = 122°",
+      "acceptedAnswers": ["∠3 = 58°，∠4 = 122°", "58°；122°", "∠3=58°，∠4=122°"],
+      "solution": "因为 a∥b，∠1 与 ∠3 是内错角，所以 ∠3 = ∠1 = 58°（两直线平行，内错角相等）。\n因为 a∥b，∠1 与 ∠4 是同旁内角，所以 ∠4 = 180° - ∠1 = 180° - 58° = 122°（两直线平行，同旁内角互补）。",
+      "rubric": [
+        "由 a∥b 和内错角相等得 ∠3 = 58°",
+        "由 a∥b 和同旁内角互补列式 180° - 58°",
+        "算出 ∠4 = 122°"
+      ],
+      "errorTags": ["公式记错", "计算失误", "推理不严谨"],
+      "commonWrong": [
+        { "answer": "∠3 = 122°，∠4 = 58°", "reason": "把内错角互补、同旁内角相等用反了" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "已知 m∥n，被直线 l 所截。同位角 ∠1 = 47°。求它的内错角 ∠3 和同旁内角 ∠4。",
+          "answer": "∠3 = 47°，∠4 = 133°",
+          "acceptedAnswers": ["∠3 = 47°，∠4 = 133°", "47°；133°"],
+          "solution": "两直线平行，内错角相等，∠3 = 47°。两直线平行，同旁内角互补，∠4 = 180° - 47° = 133°。",
+          "estimatedSeconds": 180
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e17",
+      "type": "calc",
+      "difficulty": 4,
+      "estimatedSeconds": 240,
+      "pointIds": ["7b-7-10"],
+      "stem": "已知 AB∥CD。折线 A—E—C 的拐点为 E，且 E 在 AB、CD 之间。∠BAE = 40°，∠DCE = 30°，这两个角分别是折线在 A、C 处朝向同一侧的角。过 E 作 EF∥AB，交折线所夹区域，且 EF 在 ∠AEC 内部。求 ∠AEC 的度数。",
+      "answer": "∠AEC = 70°",
+      "acceptedAnswers": ["∠AEC = 70°", "70°", "70"],
+      "solution": "因为 EF∥AB，且 AB∥CD，所以 EF∥CD。\n∠BAE 与 ∠AEF 是 AB、EF 被 AE 所截的内错角，所以 ∠AEF = ∠BAE = 40°。\n∠DCE 与 ∠CEF 是 CD、EF 被 CE 所截的内错角，所以 ∠CEF = ∠DCE = 30°。\n因为 EF 在 ∠AEC 内部，所以 ∠AEC = ∠AEF + ∠CEF = 40° + 30° = 70°。",
+      "rubric": [
+        "过拐点 E 作 EF∥AB，并得到 EF∥CD",
+        "由内错角相等得 ∠AEF = 40°",
+        "由内错角相等得 ∠CEF = 30°",
+        "两角相加得 ∠AEC = 70°"
+      ],
+      "errorTags": ["方法选择不当", "计算失误", "推理不严谨"],
+      "commonWrong": [
+        { "answer": "10°", "reason": "把两个角相减，没有看清辅助线在角的内部" },
+        { "answer": "110°", "reason": "误用同旁内角，把 180° - 40° - 30° 当成了结果" }
+      ],
+      "source": { "kind": "book", "ref": "几何-22-相交线与平行线", "pdfPage": 170 },
+      "variants": [
+        {
+          "stem": "已知 AB∥CD，折线拐点 E 在两平行线之间。∠BAE = 35°，∠DCE = 25°，过 E 作 EF∥AB 且 EF 在 ∠AEC 内部，∠BAE、∠DCE 都转化为 EF 两侧的内错角。求 ∠AEC。",
+          "answer": "∠AEC = 60°",
+          "acceptedAnswers": ["∠AEC = 60°", "60°", "60"],
+          "solution": "EF∥AB∥CD。内错角 ∠AEF = 35°，内错角 ∠CEF = 25°。EF 在 ∠AEC 内部，所以 ∠AEC = 35° + 25° = 60°。",
+          "estimatedSeconds": 200
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e18",
+      "type": "calc",
+      "difficulty": 4,
+      "estimatedSeconds": 260,
+      "pointIds": ["7b-7-14"],
+      "stem": "把△ABC 沿水平向右的方向平移 6 cm，得到△A'B'C'。已知 AB = 5 cm，BC = 7 cm，CA = 8 cm。求 A'B'、B'C'、C'A' 的长度，并求对应点连线 AA' 的长度。",
+      "answer": "A'B' = 5 cm，B'C' = 7 cm，C'A' = 8 cm，AA' = 6 cm",
+      "acceptedAnswers": [
+        "A'B' = 5 cm，B'C' = 7 cm，C'A' = 8 cm，AA' = 6 cm",
+        "5 cm；7 cm；8 cm；6 cm"
+      ],
+      "solution": "平移不改变图形的形状和大小，对应线段相等，所以 A'B' = AB = 5 cm，B'C' = BC = 7 cm，C'A' = CA = 8 cm。\n平移的方向是水平向右，距离是 6 cm，对应点所连线段相等且都等于平移距离，所以 AA' = BB' = CC' = 6 cm。",
+      "rubric": [
+        "写出平移不改变形状和大小",
+        "对应边分别等于 5 cm、7 cm、8 cm",
+        "对应点连线等于平移距离 6 cm"
+      ],
+      "errorTags": ["概念不清", "单位或作答遗漏", "审题不清"],
+      "commonWrong": [
+        { "answer": "A'B' = 11 cm", "reason": "把原边长与平移距离相加" }
+      ],
+      "source": { "kind": "original" },
+      "variants": [
+        {
+          "stem": "把△DEF 竖直向上平移 3 cm，得到△D'E'F'。DE = 4 cm，EF = 9 cm，FD = 6 cm。求 D'E' 和 DD'。",
+          "answer": "D'E' = 4 cm，DD' = 3 cm",
+          "acceptedAnswers": ["D'E' = 4 cm，DD' = 3 cm", "4 cm；3 cm"],
+          "solution": "对应线段相等，D'E' = DE = 4 cm。对应点连线等于平移距离，DD' = 3 cm。",
+          "estimatedSeconds": 180
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e19",
+      "type": "applied",
+      "difficulty": 3,
+      "estimatedSeconds": 240,
+      "pointIds": ["7b-7-04", "7b-7-03"],
+      "stem": "一条笔直的公路可以看成直线 l。村庄 P 在公路外。从 P 向公路作垂线，垂足为 H，量得 PH = 300 m。公路上另有一处车站 Q，PQ = 500 m。\n(1) 村庄到公路的距离是多少米？\n(2) 说明为什么从村庄到公路修一条最短的小路应选择 PH，而不是 PQ。",
+      "answer": "距离是 300 m；最短小路是垂线段 PH",
+      "acceptedAnswers": [
+        "300 m；PH",
+        "距离是 300 m；最短小路是垂线段 PH",
+        "300；PH"
+      ],
+      "solution": "(1) 点到直线的距离是从这点向直线所作垂线段的长度。PH⊥l，所以村庄到公路的距离是 PH = 300 m。\n(2) 连接直线外一点与直线上各点的所有线段中，垂线段最短。Q 在直线 l 上且 Q 不是 H，所以 PH < PQ。因此最短小路是垂线段 PH，PQ = 500 m 不是最短路径。",
+      "rubric": [
+        "指出距离是垂线段的长度",
+        "答出距离为 300 m",
+        "用“垂线段最短”说明 PH 比 PQ 短",
+        "明确 PQ 不是到公路的距离"
+      ],
+      "errorTags": ["概念不清", "推理不严谨", "单位或作答遗漏"],
+      "commonWrong": [
+        { "answer": "500 m", "reason": "把斜线段 PQ 当成点到直线的距离" }
+      ],
+      "source": { "kind": "book", "ref": "几何-22-相交线与平行线", "pdfPage": 171 },
+      "variants": [
+        {
+          "stem": "点 A 在直线道路 m 外，AB⊥m 于 B，AB = 80 m。C 是道路上另一点，AC = 170 m。求点 A 到道路的距离，并比较 AB 与 AC 的长短。",
+          "answer": "距离是 80 m；AB < AC",
+          "acceptedAnswers": ["距离是 80 m；AB < AC", "80 m；AB"],
+          "solution": "点到直线的距离是垂线段 AB 的长度，等于 80 m。垂线段最短，所以 AB < AC。",
+          "estimatedSeconds": 200
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e20",
+      "type": "applied",
+      "difficulty": 3,
+      "estimatedSeconds": 260,
+      "pointIds": ["7b-7-08", "7b-7-02"],
+      "stem": "直线 AB、CD 被直线 EF 所截，E 在 AB 上，F 在 CD 上。已知 ∠AEF = 65°。∠CFE 与 ∠AEF 是内错角，且 ∠CFE = 65°。\n(1) 判断 AB 与 CD 是否平行，写出因为……所以……；\n(2) 若再知直线 GH 过点 F 且 GH⊥CD，判断 GH 与 CD 的位置关系。",
+      "answer": "AB∥CD；GH⊥CD",
+      "acceptedAnswers": ["AB∥CD；GH⊥CD", "平行；垂直"],
+      "solution": "(1) 因为 ∠AEF 与 ∠CFE 是内错角，且 ∠AEF = ∠CFE = 65°，所以 AB∥CD（内错角相等，两直线平行）。\n(2) 因为 GH⊥CD，所以 GH 与 CD 互相垂直。垂直是相交成 90° 的特殊情形，不能由此说 GH∥CD。",
+      "rubric": [
+        "确认两个 65° 的角是内错角",
+        "用内错角相等推出 AB∥CD，并写出因为所以",
+        "由垂直的定义说明 GH⊥CD",
+        "不把垂直误写成平行"
+      ],
+      "errorTags": ["推理不严谨", "步骤不规范", "概念不清"],
+      "commonWrong": [
+        { "answer": "不能判断平行", "reason": "内错角已经相等，却没有使用判定定理" }
+      ],
+      "source": { "kind": "book", "ref": "几何-22-相交线与平行线", "pdfPage": 169 },
+      "variants": [
+        {
+          "stem": "直线 a、b 被直线 c 所截，一对同旁内角 ∠1 = 110°，∠2 = 70°。判断 a 与 b 是否平行，并写出推理。",
+          "answer": "a∥b",
+          "acceptedAnswers": ["a∥b", "平行"],
+          "solution": "因为 ∠1 与 ∠2 是同旁内角，且 ∠1 + ∠2 = 110° + 70° = 180°，所以 a∥b（同旁内角互补，两直线平行）。",
+          "estimatedSeconds": 220
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e21",
+      "type": "applied",
+      "difficulty": 4,
+      "estimatedSeconds": 300,
+      "pointIds": ["7b-7-10", "7b-7-09"],
+      "stem": "已知 AB∥CD。点 E 在两平行线之间，∠BAE = 50°，∠DCE = 60°。过 E 作 EF∥AB，且 EF 落在 ∠AEC 的内部，∠BAE 与 ∠AEF 是内错角，∠DCE 与 ∠CEF 是内错角。求 ∠AEC 的度数，并说明用的是性质还是判定。",
+      "answer": "∠AEC = 110°；先用判定（传递）得到 EF∥CD，再用性质得到两个内错角",
+      "acceptedAnswers": [
+        "∠AEC = 110°",
+        "110°",
+        "110"
+      ],
+      "solution": "因为 EF∥AB，又 AB∥CD，所以 EF∥CD（如果两条直线都与第三条直线平行，那么这两条直线平行）。这一步是由线得线，用的是平行的传递性。\n因为 EF∥AB，∠BAE 与 ∠AEF 是内错角，所以 ∠AEF = ∠BAE = 50°（两直线平行，内错角相等）。这是性质：由线得角。\n因为 EF∥CD，∠DCE 与 ∠CEF 是内错角，所以 ∠CEF = ∠DCE = 60°。\n因为 EF 在 ∠AEC 内部，所以 ∠AEC = ∠AEF + ∠CEF = 50° + 60° = 110°。",
+      "rubric": [
+        "由 EF∥AB 且 AB∥CD 得到 EF∥CD",
+        "由平行性质得 ∠AEF = 50°",
+        "由平行性质得 ∠CEF = 60°",
+        "相加得 ∠AEC = 110°",
+        "说清判定（或传递）与性质各自用在哪一步"
+      ],
+      "errorTags": ["方法选择不当", "推理不严谨", "计算失误"],
+      "commonWrong": [
+        { "answer": "10°", "reason": "把 60° 与 50° 相减" },
+        { "answer": "70°", "reason": "用 180° - 50° - 60°，把内错角当成了同旁内角" }
+      ],
+      "source": { "kind": "book", "ref": "几何-22-相交线与平行线", "pdfPage": 173 },
+      "variants": [
+        {
+          "stem": "已知 AB∥CD，E 在两线之间。∠BAE = 28°，∠DCE = 37°。过 E 作 EF∥AB，EF 在 ∠AEC 内部，两个已知角都成为 EF 两侧的内错角。求 ∠AEC。",
+          "answer": "∠AEC = 65°",
+          "acceptedAnswers": ["∠AEC = 65°", "65°", "65"],
+          "solution": "EF∥AB∥CD。内错角 ∠AEF = 28°，内错角 ∠CEF = 37°，所以 ∠AEC = 28° + 37° = 65°。",
+          "estimatedSeconds": 240
+        }
+      ]
+    },
+    {
+      "id": "7b-c7-e22",
+      "type": "applied",
+      "difficulty": 5,
+      "estimatedSeconds": 360,
+      "pointIds": ["7b-7-14", "7b-7-13"],
+      "stem": "一条笔直的河的两岸平行，河宽 40 m（两岸之间的垂直距离）。村庄 A 在河的一侧，到本岸的距离是 30 m；村庄 B 在河的另一侧，到对岸的距离是 50 m。A、B 沿河岸方向相距 120 m（即两岸垂足沿河岸方向的距离是 120 m）。要在两岸各修一座桥头，桥垂直于河岸。把 A 先沿垂直于河岸、指向对岸的方向平移 40 m（河宽），得到点 A1。\n(1) 说明平移后，从 A1 到 B 的直线距离与“A 到本岸桥头 + 桥长 + 对岸桥头到 B”中除去桥长以后的两段之和有什么关系；\n(2) 求两段陆路之和的最小值。",
+      "answer": "40√13 m",
+      "acceptedAnswers": ["40√13 m", "40√13", "√20800 m"],
+      "solution": "(1) 桥垂直于河岸，桥长始终等于河宽 40 m，不随桥的位置改变。把 A 沿垂直于河岸、指向对岸的方向平移 40 m 得到 A1，平移距离正好是河宽。由平移性质，A 到本岸桥头的线段与 A1 到对岸桥头的线段平行且相等。所以两段陆路之和等于 A1B 的长度。陆路之和最小，就是 A1B 最短。\n(2) 平移后 A1 与 B 在河的同一侧。A1 到 B 这一侧河岸的垂直距离是 30 + 50 = 80 (m)，沿河岸方向的距离仍是 120 m。两点之间线段最短，由勾股定理得 A1B = √(120² + 80²) = √(14400 + 6400) = √20800。因为 20800 = 1600 × 13，所以 A1B = 40√13 (m)。因此两段陆路之和的最小值是 40√13 m。",
+      "rubric": [
+        "说明桥长固定为 40 m，平移距离等于河宽",
+        "说明两段陆路之和等于平移后的 A1B",
+        "算出同侧垂直距离 30 + 50 = 80 m",
+        "用勾股定理列式 √(120² + 80²)",
+        "化简得 40√13 m"
+      ],
+      "errorTags": ["方法选择不当", "计算失误", "分类讨论不全"],
+      "commonWrong": [
+        { "answer": "130 m", "reason": "把平移后的垂直距离算成 50 - 30 = 20，或把 50 与 120 直接做勾股，没有把河两岸放到同一侧" },
+        { "answer": "170 m", "reason": "把 30 + 40 + 50 + 50 一类长度直接相加，没有利用平移找最短路径" }
+      ],
+      "source": { "kind": "book", "ref": "几何-探究-实验与操作", "pdfPage": 221 },
+      "variants": [
+        {
+          "stem": "河岸平行，河宽 30 m。A 到本岸 40 m，B 在对岸一侧到对岸 20 m，两岸垂足沿河岸方向相距 80 m。桥垂直河岸。把 A 垂直河岸向对岸平移 30 m 后，求两段陆路之和的最小值。",
+          "answer": "100 m",
+          "acceptedAnswers": ["100 m", "100"],
+          "solution": "平移河宽后，A1 与 B 的垂直距离是 40 + 20 = 60 m，沿河岸距离 80 m。陆路之和的最小值是 √(80² + 60²) = √(6400 + 3600) = √10000 = 100 m。",
+          "estimatedSeconds": 300
+        }
+      ]
+    }
+  ]
+}

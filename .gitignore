@@ -1,0 +1,29 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+.build/
+
+# 密钥（务必不要提交）
+.env
+.env.*
+!.env.example
+
+# 缓存与临时文件
+.cache/
+.npm-cache/
+.tmp/
+.tmp_crops/
+tmp_*.png
+
+# 由 app/scripts/sync-data.mjs 生成的静态数据
+app/public/data/
+
+# 扫描页图与原 PDF（体积大；文字内容已提交，页面图可本地放回）
+data/book/pages/
+data/book/pages_jpg/
+refs/*.pdf
+
+# 系统文件
+.DS_Store
