@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { logout, maskPhone, useSession } from '../lib/auth'
+import { computeIncentives } from '../lib/incentives'
+import { useAppData } from '../lib/store'
 
 export function Card({
   children,
@@ -104,6 +106,9 @@ const NAV = [
 export function Layout({ children }: { children: ReactNode }) {
   const loc = useLocation()
   const session = useSession()
+  const data = useAppData()
+  const game = computeIncentives(data)
+  const earnedBadges = game.badges.filter((b) => b.earned)
   const isRunner = loc.pathname.startsWith('/run/')
   return (
     <div className="min-h-full">
@@ -134,10 +139,33 @@ export function Layout({ children }: { children: ReactNode }) {
             </nav>
             <div className="ml-auto flex items-center gap-3 text-xs text-gray-500">
               {session && (
-                <span>
-                  {session.name}
-                  <span className="ml-1 text-gray-400">{maskPhone(session.phone)}</span>
-                </span>
+                <Link
+                  to="/progress"
+                  title="查看完整等级与徽章"
+                  className="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-1.5 hover:border-blue-300 hover:bg-blue-50/40"
+                >
+                  <span className="flex h-6 min-w-6 items-center justify-center rounded-md bg-blue-600 px-1 text-[10px] font-semibold text-white">
+                    Lv.{game.level}
+                  </span>
+                  <span className="flex flex-col leading-tight">
+                    <span className="text-gray-800">{session.name}</span>
+                    <span className="text-[10px] text-gray-400">
+                      {maskPhone(session.phone)} · {game.levelName} · 徽章 {game.earnedCount}/{game.badges.length}
+                    </span>
+                  </span>
+                  {earnedBadges.length > 0 && (
+                    <span className="ml-1 flex items-center gap-0.5 text-sm">
+                      {earnedBadges.slice(0, 6).map((b) => (
+                        <span key={b.id} title={`${b.name}：${b.desc}`}>
+                          {b.icon}
+                        </span>
+                      ))}
+                      {earnedBadges.length > 6 && (
+                        <span className="text-[10px] text-gray-400">+{earnedBadges.length - 6}</span>
+                      )}
+                    </span>
+                  )}
+                </Link>
               )}
               <button type="button" className="btn !py-1 !text-xs" onClick={logout}>
                 退出

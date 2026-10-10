@@ -188,6 +188,16 @@
       <view class="card-title">当前用户</view>
       <button class="btn btn-sm" bindtap="onLogout">退出</button>
     </view>
-    <view class="muted user-line">{{userLabel}}</view>
+    <view class="user-box">
+      <view class="user-lv">Lv.{{level}}</view>
+      <view class="user-main">
+        <view class="user-name">{{userLabel}}</view>
+        <view class="muted">{{levelName}} · 已获得 {{earnedCount}}/{{badgeTotal}} 枚徽章{{streak > 0 ? ' · 连续 ' + streak + ' 天' : ''}}</view>
+      </view>
+    </view>
+    <view class="user-badges">
+      <view wx:for="{{earnedBadges}}" wx:key="id" class="user-badge">{{item.icon}} {{item.name}}</view>
+      <view wx:if="{{earnedCount === 0}}" class="muted">还没有徽章，学完一课就能拿到「第一课」。</view>
+    </view>
   </view>
 </view>
