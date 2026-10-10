@@ -120,35 +120,70 @@
   color: #374151;
 }
 
-/* 等级 */
+/* 等级面板：渐变底，突出当前等级 */
+.lv-panel {
+  border-radius: 24rpx;
+  overflow: hidden;
+  margin-bottom: 20rpx;
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  box-shadow: 0 8rpx 24rpx rgba(37, 99, 235, 0.25);
+}
+
+.lv-panel-top {
+  padding: 30rpx 32rpx;
+}
+
+.lv-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lv-panel-title {
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.lv-panel-cap {
+  color: #dbeafe;
+  font-size: 22rpx;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999rpx;
+  padding: 4rpx 18rpx;
+}
+
 .lv-row {
   display: flex;
   align-items: center;
-  margin-top: 20rpx;
+  margin-top: 24rpx;
 }
 
 .lv-medal {
-  width: 130rpx;
-  height: 130rpx;
-  border-radius: 28rpx;
-  background: #2563eb;
-  color: #fff;
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 36rpx;
+  background: rgba(255, 255, 255, 0.16);
+  border: 2rpx solid rgba(255, 255, 255, 0.32);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-right: 24rpx;
+  margin-right: 28rpx;
   flex-shrink: 0;
 }
 
 .lv-medal-cap {
-  font-size: 20rpx;
-  opacity: 0.8;
+  font-size: 22rpx;
+  color: #dbeafe;
+  letter-spacing: 4rpx;
+  line-height: 1;
 }
 
 .lv-medal-num {
-  font-size: 52rpx;
-  font-weight: 600;
+  font-size: 84rpx;
+  font-weight: 700;
+  color: #fff;
   line-height: 1.1;
 }
 
@@ -158,28 +193,53 @@
 }
 
 .lv-name {
-  font-size: 32rpx;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.lv-xp {
+  font-size: 24rpx;
+  color: #dbeafe;
+  margin-top: 6rpx;
+}
+
+.lv-bar {
+  height: 18rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+  margin-top: 16rpx;
+}
+
+.lv-bar-inner {
+  height: 100%;
+  border-radius: 999rpx;
+  background: #fff;
+}
+
+.lv-bar-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  color: #dbeafe;
+}
+
+.lv-bar-hint {
+  color: #fff;
   font-weight: 600;
 }
 
-.lv-nums {
-  margin: 8rpx 0;
-}
-
-.lv-nums .muted {
-  font-size: 22rpx;
-}
-
-.lv-next {
-  margin-top: 8rpx;
-  font-size: 22rpx;
-}
-
 /* 等级节点轨 */
+.lv-rail-wrap {
+  background: rgba(0, 0, 0, 0.16);
+  padding: 24rpx 32rpx;
+}
+
 .lv-rail {
   display: flex;
   align-items: flex-start;
-  margin-top: 28rpx;
 }
 
 .lv-node {
@@ -190,51 +250,56 @@
 }
 
 .lv-dot {
-  width: 40rpx;
-  height: 40rpx;
-  line-height: 40rpx;
+  width: 44rpx;
+  height: 44rpx;
+  line-height: 44rpx;
   text-align: center;
   border-radius: 50%;
-  background: #f3f4f6;
-  color: #9ca3af;
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(219, 234, 254, 0.7);
   font-size: 22rpx;
+  font-weight: 600;
 }
 
 .lv-dot-reached {
-  background: #dbeafe;
+  background: rgba(255, 255, 255, 0.82);
   color: #1d4ed8;
 }
 
 .lv-dot-current {
-  background: #2563eb;
-  color: #fff;
+  background: #fff;
+  color: #1d4ed8;
+  box-shadow: 0 0 0 6rpx rgba(255, 255, 255, 0.25);
 }
 
 .lv-node-name {
-  margin-top: 6rpx;
+  margin-top: 10rpx;
   font-size: 18rpx;
-  color: #9ca3af;
+  color: rgba(219, 234, 254, 0.65);
   text-align: center;
   line-height: 1.2;
 }
 
 .lv-node-cur-name {
-  color: #1d4ed8;
+  color: #fff;
   font-weight: 600;
 }
 
-/* 连续与今日目标 */
+.lv-bottom {
+  background: #fff;
+  padding: 26rpx 32rpx 30rpx 32rpx;
+}
+
 .lv-stats {
   display: flex;
-  margin-top: 28rpx;
 }
 
 .lv-stat {
   flex: 1;
   border: 1rpx solid #eef0f3;
-  border-radius: 16rpx;
-  padding: 18rpx;
-  margin-right: 16rpx;
+  border-radius: 18rpx;
+  padding: 20rpx;
+  margin-right: 18rpx;
 }
 
 .lv-stat:last-child {
@@ -242,9 +307,9 @@
 }
 
 .lv-stat-num {
-  font-size: 40rpx;
-  font-weight: 600;
-  margin: 6rpx 0 10rpx 0;
+  font-size: 48rpx;
+  font-weight: 700;
+  margin: 8rpx 0 12rpx 0;
   color: #111827;
 }
 
@@ -258,20 +323,40 @@
 }
 
 .lv-tip {
-  margin-top: 18rpx;
+  margin-top: 20rpx;
   line-height: 1.6;
 }
 
 /* 徽章 */
 .ach-count {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #d97706;
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.ach-total {
+  font-size: 26rpx;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.ach-bar {
+  height: 14rpx;
+  border-radius: 999rpx;
+  background: #f3f4f6;
+  overflow: hidden;
+  margin-top: 18rpx;
+}
+
+.ach-bar-inner {
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
 }
 
 .section-label {
-  margin-top: 22rpx;
-  margin-bottom: 10rpx;
+  margin-top: 26rpx;
+  margin-bottom: 12rpx;
   font-size: 24rpx;
   color: #6b7280;
 }
@@ -279,13 +364,13 @@
 .near-item {
   border: 1rpx solid #fde68a;
   background: #fffbeb;
-  border-radius: 16rpx;
-  padding: 18rpx;
-  margin-bottom: 14rpx;
+  border-radius: 18rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
 }
 
 .near-name {
-  font-size: 27rpx;
+  font-size: 28rpx;
   font-weight: 600;
 }
 
@@ -295,7 +380,7 @@
 }
 
 .near-item .bar {
-  margin: 12rpx 0;
+  margin: 14rpx 0;
 }
 
 .near-foot {
@@ -308,104 +393,65 @@
   font-weight: 500;
 }
 
-.ach-total {
-  color: #9ca3af;
-  font-weight: 400;
-}
-
-.ach-list {
-  margin-top: 20rpx;
-}
-
-.ach-item {
-  display: flex;
-  align-items: center;
-  border: 1rpx solid #f3f4f6;
-  border-radius: 16rpx;
-  padding: 16rpx 18rpx;
-  margin-bottom: 12rpx;
-}
-
-.ach-earned {
-  border-color: #fde68a;
-  background: #fffbeb;
-}
-
-.ach-icon {
-  font-size: 40rpx;
-  margin-right: 18rpx;
-}
-
-.ach-icon-locked {
-  opacity: 0.3;
-}
-
-.ach-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.ach-name {
-  font-size: 27rpx;
-  font-weight: 600;
-}
-
-.ach-name-locked {
-  color: #9ca3af;
-}
-
-.ach-state {
-  font-size: 22rpx;
-  color: #d1d5db;
-  flex-shrink: 0;
-  margin-left: 12rpx;
-}
-
-.ach-state-on {
-  color: #d97706;
-}
-
-/* 当前用户 */
-.user-box {
-  display: flex;
-  align-items: center;
-  margin-top: 20rpx;
-}
-
-.user-lv {
-  padding: 10rpx 18rpx;
-  border-radius: 12rpx;
-  background: #2563eb;
-  color: #fff;
-  font-size: 24rpx;
-  font-weight: 600;
-  margin-right: 20rpx;
-  flex-shrink: 0;
-}
-
-.user-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.user-name {
-  font-size: 29rpx;
-  font-weight: 500;
-}
-
-.user-badges {
+/* 奖章格子 */
+.medal-grid {
   display: flex;
   flex-wrap: wrap;
-  margin-top: 18rpx;
 }
 
-.user-badge {
+.medal {
+  width: 31.33%;
+  margin-right: 2%;
+  margin-bottom: 18rpx;
+  box-sizing: border-box;
+  border: 1rpx solid #f3f4f6;
+  border-radius: 18rpx;
+  background: #fafafa;
+  padding: 20rpx 8rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.medal:nth-child(3n) {
+  margin-right: 0;
+}
+
+.medal-earned {
+  border-color: #fcd34d;
+  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
+  box-shadow: 0 4rpx 12rpx rgba(245, 158, 11, 0.18);
+}
+
+.medal-icon {
+  width: 88rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  border-radius: 50%;
+  font-size: 44rpx;
+}
+
+.medal-icon-on {
+  background: #fef3c7;
+  border: 3rpx solid #fcd34d;
+}
+
+.medal-icon-off {
+  background: #f3f4f6;
+  opacity: 0.4;
+}
+
+.medal-name {
+  margin-top: 14rpx;
   font-size: 22rpx;
-  color: #b45309;
-  background: #fffbeb;
-  border: 1rpx solid #fde68a;
-  border-radius: 8rpx;
-  padding: 6rpx 14rpx;
-  margin-right: 12rpx;
-  margin-bottom: 8rpx;
+  font-weight: 600;
+  color: #111827;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.medal-name-locked {
+  color: #9ca3af;
+  font-weight: 400;
 }

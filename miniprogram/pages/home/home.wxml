@@ -26,49 +26,55 @@
     </view>
   </view>
 
-  <view class="card">
-    <view class="row">
-      <view class="card-title">学习等级</view>
-      <view class="muted">经验累积，长期有效</view>
-    </view>
-    <view class="lv-row">
-      <view class="lv-medal">
-        <view class="lv-medal-cap">LV</view>
-        <view class="lv-medal-num">{{level}}</view>
+  <view class="lv-panel">
+    <view class="lv-panel-top">
+      <view class="lv-panel-head">
+        <text class="lv-panel-title">学习等级</text>
+        <text class="lv-panel-cap">共 {{levels.length}} 级</text>
       </view>
-      <view class="lv-main">
-        <view class="lv-name">{{levelName}}</view>
-        <view class="row muted lv-nums">
-          <text>累计 {{xpTotal}} 经验</text>
-          <text>{{xpInto}} / {{xpForNext}}</text>
+      <view class="lv-row">
+        <view class="lv-medal">
+          <view class="lv-medal-cap">LV</view>
+          <view class="lv-medal-num">{{level}}</view>
         </view>
-        <view class="bar"><view class="bar-inner" style="width:{{xpPct}}%"></view></view>
-        <view class="muted lv-next">距 Lv.{{level + 1}} {{nextLevelName}} 还差 {{xpToNext}} 经验</view>
+        <view class="lv-main">
+          <view class="lv-name">{{levelName}}</view>
+          <view class="lv-xp">累计 {{xpTotal}} 经验</view>
+          <view class="lv-bar"><view class="lv-bar-inner" style="width:{{xpPct}}%"></view></view>
+          <view class="lv-bar-foot">
+            <text>{{xpInto}} / {{xpForNext}}</text>
+            <text class="lv-bar-hint">还差 {{xpToNext}} 经验升级</text>
+          </view>
+        </view>
       </view>
     </view>
 
-    <view class="lv-rail">
-      <view wx:for="{{levels}}" wx:key="level" class="lv-node">
-        <view class="lv-dot {{item.current ? 'lv-dot-current' : ''}} {{item.reached ? 'lv-dot-reached' : ''}}">{{item.level}}</view>
-        <view class="lv-node-name {{item.current ? 'lv-node-cur-name' : ''}}">{{item.name}}</view>
+    <view class="lv-rail-wrap">
+      <view class="lv-rail">
+        <view wx:for="{{levels}}" wx:key="level" class="lv-node">
+          <view class="lv-dot {{item.current ? 'lv-dot-current' : ''}} {{item.reached ? 'lv-dot-reached' : ''}}">{{item.level}}</view>
+          <view class="lv-node-name {{item.current ? 'lv-node-cur-name' : ''}}">{{item.name}}</view>
+        </view>
       </view>
     </view>
 
-    <view class="lv-stats">
-      <view class="lv-stat">
-        <view class="muted">连续学习</view>
-        <view class="lv-stat-num {{studiedToday ? 'green' : 'amber'}}">{{streak}} 天</view>
-        <view class="muted">{{studiedToday ? '今天已打卡' : '今天还没学习'}}</view>
+    <view class="lv-bottom">
+      <view class="lv-stats">
+        <view class="lv-stat">
+          <view class="muted">连续学习</view>
+          <view class="lv-stat-num {{studiedToday ? 'green' : 'amber'}}">{{streak}} 天</view>
+          <view class="muted">{{studiedToday ? '今天已打卡' : '今天还没学习'}}</view>
+        </view>
+        <view class="lv-stat">
+          <view class="muted">今日目标</view>
+          <view class="lv-stat-num">{{todayXp}}<text class="lv-stat-sub"> / {{dailyGoal}}</text></view>
+          <view class="bar"><view class="bar-inner {{todayPct >= 100 ? 'bar-inner-green' : 'bar-inner-amber'}}" style="width:{{todayPct}}%"></view></view>
+        </view>
       </view>
-      <view class="lv-stat">
-        <view class="muted">今日目标</view>
-        <view class="lv-stat-num">{{todayXp}}<text class="lv-stat-sub"> / {{dailyGoal}}</text></view>
-        <view class="bar"><view class="bar-inner {{todayPct >= 100 ? 'bar-inner-green' : 'bar-inner-amber'}}" style="width:{{todayPct}}%"></view></view>
-      </view>
+      <view class="muted lv-tip">学 1 个知识点 +10，交一份考评卷 +20，每答对 1 题 +2，掌握一章 +50。</view>
+      <view class="gap"></view>
+      <button class="btn btn-primary" bindtap="goCurriculum">{{todayXp > 0 ? '继续学习，把今天的目标做完' : '开始学习，拿今天的经验'}}</button>
     </view>
-    <view class="muted lv-tip">学 1 个知识点 +10，交一份考评卷 +20，每答对 1 题 +2，掌握一章 +50。</view>
-    <view class="gap"></view>
-    <button class="btn btn-primary" bindtap="goCurriculum">{{todayXp > 0 ? '继续学习，把今天的目标做完' : '开始学习，拿今天的经验'}}</button>
   </view>
 
   <view class="card">
@@ -79,6 +85,7 @@
       </view>
       <view class="ach-count">{{earnedCount}}<text class="ach-total">/{{badgeTotal}}</text></view>
     </view>
+    <view class="ach-bar"><view class="ach-bar-inner" style="width:{{achPct}}%"></view></view>
 
     <block wx:if="{{nextBadges.length}}">
       <view class="section-label">离你最近的三枚</view>
@@ -95,15 +102,11 @@
       </view>
     </block>
 
-    <view class="section-label">全部 {{badgeTotal}} 枚徽章</view>
-    <view class="ach-list">
-      <view wx:for="{{badges}}" wx:key="id" class="ach-item {{item.earned ? 'ach-earned' : ''}}">
-        <view class="ach-icon {{item.earned ? '' : 'ach-icon-locked'}}">{{item.icon}}</view>
-        <view class="ach-body">
-          <view class="ach-name {{item.earned ? '' : 'ach-name-locked'}}">{{item.name}}</view>
-          <view class="muted">{{item.desc}}</view>
-        </view>
-        <view class="ach-state {{item.earned ? 'ach-state-on' : ''}}">{{item.earned ? '已获得' : '未达成'}}</view>
+    <view class="section-label">全部 {{badgeTotal}} 枚（已得 {{earnedCount}} 枚）</view>
+    <view class="medal-grid">
+      <view wx:for="{{badges}}" wx:key="id" class="medal {{item.earned ? 'medal-earned' : ''}}">
+        <view class="medal-icon {{item.earned ? 'medal-icon-on' : 'medal-icon-off'}}">{{item.icon}}</view>
+        <view class="medal-name {{item.earned ? '' : 'medal-name-locked'}}">{{item.name}}</view>
       </view>
     </view>
     <view class="gap"></view>

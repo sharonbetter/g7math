@@ -39,85 +39,95 @@ export default function HomePage() {
 
       <div className="grid gap-4 md:grid-cols-5">
         {/* 等级：一条累积进度，只关心当前与下一级 */}
-        <Card className="p-5 md:col-span-3">
-          <div className="flex items-center gap-2">
-            <h2 className="text-base font-semibold">学习等级</h2>
-            <span className="text-xs text-gray-400">经验累积，长期有效</span>
-          </div>
-          <div className="mt-4 flex items-center gap-4">
-            <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-2xl bg-blue-600 text-white">
-              <span className="text-[10px] leading-none opacity-80">LV</span>
-              <span className="text-2xl font-semibold leading-tight tabular-nums">{game.level}</span>
+        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/20 md:col-span-3">
+          <div className="px-6 py-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold">学习等级</h2>
+              <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs text-blue-50">
+                共 {game.levels.length} 级
+              </span>
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-base font-semibold text-gray-900">{game.levelName}</div>
-              <div className="mt-1 flex justify-between text-xs text-gray-500">
-                <span>累计 {game.xp} 经验</span>
-                <span>{game.xpIntoLevel} / {game.xpForNext}</span>
-              </div>
-              <div className="mt-1.5">
-                <ProgressBar value={game.xpIntoLevel} max={game.xpForNext} />
-              </div>
-              <div className="mt-1.5 text-xs text-gray-500">
-                距 Lv.{game.level + 1} {game.nextLevelName} 还差 {game.xpToNext} 经验
-              </div>
-            </div>
-          </div>
 
-          {/* 等级阶梯：只标节点，不做成一堆卡片 */}
-          <div className="mt-5 flex items-center">
-            {game.levels.map((lv, i) => (
-              <div key={lv.level} className="flex flex-1 items-center last:flex-none">
-                <div className="flex flex-col items-center">
-                  <span
-                    className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-medium tabular-nums ${
-                      lv.current
-                        ? 'bg-blue-600 text-white ring-2 ring-blue-200'
-                        : lv.reached
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-gray-100 text-gray-400'
-                    }`}
-                  >
-                    {lv.level}
-                  </span>
-                  <span className={`mt-1 w-14 text-center text-[10px] leading-tight ${lv.current ? 'font-medium text-blue-700' : 'text-gray-400'}`}>
-                    {lv.name}
-                  </span>
+            <div className="mt-4 flex items-center gap-5">
+              <div className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-3xl bg-white/15 ring-2 ring-white/30">
+                <span className="text-[11px] leading-none tracking-widest text-blue-100">LV</span>
+                <span className="text-5xl font-bold leading-none tabular-nums">{game.level}</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-2xl font-bold">{game.levelName}</div>
+                <div className="mt-1 text-sm text-blue-100">累计 {game.xp} 经验</div>
+                <div className="mt-2.5 h-2.5 w-full overflow-hidden rounded-full bg-white/20">
+                  <div
+                    className="h-full rounded-full bg-white transition-all"
+                    style={{ width: `${Math.min(100, Math.round((game.xpIntoLevel / Math.max(1, game.xpForNext)) * 100))}%` }}
+                  />
                 </div>
-                {i < game.levels.length - 1 && (
-                  <div className={`mx-1 mb-4 h-0.5 flex-1 ${lv.reached ? 'bg-blue-200' : 'bg-gray-100'}`} />
-                )}
+                <div className="mt-1.5 flex justify-between text-xs text-blue-100">
+                  <span>{game.xpIntoLevel} / {game.xpForNext}</span>
+                  <span className="font-medium text-white">还差 {game.xpToNext} 经验升级</span>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-lg border border-gray-100 px-3 py-2">
+          {/* 等级阶梯 */}
+          <div className="bg-black/15 px-6 py-4">
+            <div className="flex items-center">
+              {game.levels.map((lv, i) => (
+                <div key={lv.level} className="flex flex-1 items-center last:flex-none">
+                  <div className="flex flex-col items-center">
+                    <span
+                      className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold tabular-nums ${
+                        lv.current
+                          ? 'bg-white text-blue-700 ring-4 ring-white/25'
+                          : lv.reached
+                            ? 'bg-white/80 text-blue-700'
+                            : 'bg-white/15 text-blue-100/70'
+                      }`}
+                    >
+                      {lv.level}
+                    </span>
+                    <span className={`mt-1.5 w-14 text-center text-[10px] leading-tight ${lv.current ? 'font-semibold text-white' : lv.reached ? 'text-blue-50' : 'text-blue-100/60'}`}>
+                      {lv.name}
+                    </span>
+                  </div>
+                  {i < game.levels.length - 1 && (
+                    <div className={`mx-1 mb-5 h-1 flex-1 rounded-full ${lv.reached ? 'bg-white/70' : 'bg-white/15'}`} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 bg-white px-6 py-4 text-gray-900">
+            <div className="rounded-xl border border-gray-100 px-3 py-2.5">
               <div className="text-xs text-gray-500">连续学习</div>
-              <div className={`mt-0.5 text-lg font-semibold tabular-nums ${game.studiedToday ? 'text-green-600' : 'text-amber-600'}`}>
-                {game.streak} 天
+              <div className={`mt-1 text-2xl font-bold tabular-nums ${game.studiedToday ? 'text-green-600' : 'text-amber-600'}`}>
+                {game.streak} <span className="text-sm font-normal text-gray-400">天</span>
               </div>
               <div className="text-xs text-gray-400">{game.studiedToday ? '今天已打卡' : '今天还没学习'}</div>
             </div>
-            <div className="rounded-lg border border-gray-100 px-3 py-2">
+            <div className="rounded-xl border border-gray-100 px-3 py-2.5">
               <div className="text-xs text-gray-500">今日目标</div>
-              <div className="mt-0.5 text-lg font-semibold tabular-nums text-gray-900">
+              <div className="mt-1 text-2xl font-bold tabular-nums">
                 {game.todayXp} <span className="text-sm font-normal text-gray-400">/ {game.dailyGoal}</span>
               </div>
-              <div className="mt-1">
+              <div className="mt-1.5">
                 <ProgressBar value={game.todayXp} max={game.dailyGoal} tone={dailyPct >= 100 ? 'green' : 'amber'} />
               </div>
             </div>
           </div>
-          <p className="mt-3 text-xs text-gray-400">
-            {dailyPct >= 100
-              ? '今天的目标完成了，明天再来连续天数会接着涨。'
-              : '学 1 个知识点 +10，交一份考评卷 +20，每答对 1 题 +2，掌握一章 +50。'}
-          </p>
-          <Link to="/curriculum" className="btn btn-primary mt-4">
-            {game.todayXp > 0 ? '继续学习，把今天的目标做完' : '开始学习，拿今天的经验'}
-          </Link>
-        </Card>
+          <div className="bg-white px-6 pb-5 text-gray-900">
+            <p className="text-xs text-gray-400">
+              {dailyPct >= 100
+                ? '今天的目标完成了，明天再来连续天数会接着涨。'
+                : '学 1 个知识点 +10，交一份考评卷 +20，每答对 1 题 +2，掌握一章 +50。'}
+            </p>
+            <Link to="/curriculum" className="btn btn-primary mt-3">
+              {game.todayXp > 0 ? '继续学习，把今天的目标做完' : '开始学习，拿今天的经验'}
+            </Link>
+          </div>
+        </div>
 
         {/* 徽章：一次性成就，与等级是两回事 */}
         <Card className="p-5 md:col-span-2">
@@ -126,9 +136,19 @@ export default function HomePage() {
               <h2 className="text-base font-semibold">成就徽章</h2>
               <span className="text-xs text-gray-400">达成一次就永久保留</span>
             </div>
-            <span className="text-sm font-semibold text-amber-600 tabular-nums">
-              {game.earnedCount}<span className="text-gray-400">/{game.badges.length}</span>
-            </span>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-amber-500 tabular-nums">
+                {game.earnedCount}
+                <span className="text-sm font-normal text-gray-400">/{game.badges.length}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-500"
+              style={{ width: `${Math.round((game.earnedCount / game.badges.length) * 100)}%` }}
+            />
           </div>
 
           {game.nextBadges.length > 0 && (
@@ -161,32 +181,35 @@ export default function HomePage() {
             </div>
           )}
 
-          <details className="mt-4">
-            <summary className="cursor-pointer text-xs font-medium text-gray-500">
-              全部 {game.badges.length} 枚徽章
-            </summary>
-            <div className="mt-2 space-y-2">
+          <div className="mt-5">
+            <div className="mb-2 text-xs font-medium text-gray-500">
+              全部 {game.badges.length} 枚（已得 {game.earnedCount} 枚）
+            </div>
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-3">
               {game.badges.map((b) => (
                 <div
                   key={b.id}
-                  className={`flex items-center gap-3 rounded-lg border px-3 py-2 ${
-                    b.earned ? 'border-amber-200 bg-amber-50' : 'border-gray-100'
+                  title={`${b.name}：${b.desc}`}
+                  className={`flex flex-col items-center rounded-xl border px-2 py-3 text-center ${
+                    b.earned
+                      ? 'border-amber-300 bg-gradient-to-b from-amber-50 to-white shadow-sm'
+                      : 'border-gray-100 bg-gray-50'
                   }`}
                 >
-                  <span className={`text-xl ${b.earned ? '' : 'opacity-30 grayscale'}`}>{b.icon}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className={`text-sm font-medium ${b.earned ? 'text-gray-900' : 'text-gray-400'}`}>{b.name}</div>
-                    <div className="text-xs text-gray-500">{b.desc}</div>
-                  </div>
-                  {b.earned ? (
-                    <span className="shrink-0 text-xs text-amber-600">已获得</span>
-                  ) : (
-                    <span className="shrink-0 text-xs text-gray-300">未达成</span>
-                  )}
+                  <span
+                    className={`flex h-12 w-12 items-center justify-center rounded-full text-2xl ${
+                      b.earned ? 'bg-amber-100 ring-2 ring-amber-300' : 'bg-gray-100 opacity-40 grayscale'
+                    }`}
+                  >
+                    {b.icon}
+                  </span>
+                  <span className={`mt-2 text-xs font-medium leading-tight ${b.earned ? 'text-gray-900' : 'text-gray-400'}`}>
+                    {b.name}
+                  </span>
                 </div>
               ))}
             </div>
-          </details>
+          </div>
 
           <Link to="/progress" className="btn mt-4">
             查看学习报告
