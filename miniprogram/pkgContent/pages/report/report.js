@@ -4,6 +4,7 @@ var grading = require('../../../lib/grading')
 var adaptive = require('../../../lib/adaptive')
 var data = require('../../../lib/data')
 var content = require('../../content')
+var incentives = require('../../../lib/incentives')
 
 function fmtMs(ms) {
   return grading.formatDuration(ms)
@@ -38,6 +39,9 @@ Page({
     weak: [],
     timings: [],
     items: [],
+    level: 1,
+    levelName: '',
+    xpToNext: 0,
     busy: false
   },
 
@@ -71,6 +75,7 @@ Page({
 
   build: function () {
     var round = this.round
+    var game = incentives.computeIncentives(store.getData())
     var answers = round.answers || []
     var points = data.allPoints()
     var analyses = adaptive.analyzeRound(round, points, {})
@@ -159,7 +164,10 @@ Page({
       analyses: analyses,
       weak: weak,
       timings: timings,
-      items: items
+      items: items,
+      level: game.level,
+      levelName: game.levelName,
+      xpToNext: game.xpToNext
     })
   },
 

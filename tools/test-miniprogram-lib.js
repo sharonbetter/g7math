@@ -117,5 +117,53 @@ ok('origin 标注来源', Object.keys(plan.origin).length > 0)
 ok('无错题无超时=已掌握', adaptive.isMastered({ wrongQuestionIds: [], slowQuestionIds: [] }))
 ok('有错题=未掌握', !adaptive.isMastered({ wrongQuestionIds: ['x'], slowQuestionIds: [] }))
 
+// 8. 游戏式激励
+const incentives = require(path.join(root, 'incentives'))
+{
+  const now = Date.now()
+  const DAY = 86400000
+  const game = incentives.computeIncentives({
+    studied: { a: now, b: now - DAY, c: now - 2 * DAY },
+    loops: { '7a-c1': { status: 'mastered' } },
+    rounds: {
+      r1: { kind: 'exam', chapterId: '7a-c1', finishedAt: now, answers: [{ correct: true }, { correct: false }], wrongQuestionIds: ['x'], slowQuestionIds: [] },
+      r2: { kind: 'practice', chapterId: '7a-c2', finishedAt: now - DAY, answers: Array.from({ length: 8 }, () => ({ correct: true })), wrongQuestionIds: [], slowQuestionIds: [] }
+    }
+  })
+  // 课件 3×10=30；7a-c1 最好一轮考评 22；7a-c2 专项 46+10=56；掌握 1 章 +50
+  ok('经验按每章最好一轮累计', game.xp === 158, '实际 ' + game.xp)
+  ok('连续学习 3 天', game.streak === 3, '实际 ' + game.streak)
+  ok('今天已学习', game.studiedToday === true)
+  ok('今日经验只算当天学的课与当天交的卷', game.todayXp === 10 + 22, '实际 ' + game.todayXp)
+  ok('等级随经验提升', game.level === 2, '实际 ' + game.level)
+  ok('等级名称正确', game.levelName === '数轴行者', game.levelName)
+  ok('等级阶梯共 10 级', game.levels.length === 10)
+  ok('阶梯只标记一个当前级', game.levels.filter((l) => l.current).length === 1)
+  ok('阶梯标记已达成级数', game.levels.filter((l) => l.reached).length === game.level)
+  ok('距下一级经验为正', game.xpToNext === game.xpForNext - game.xpIntoLevel && game.xpToNext > 0)
+  ok('下一级名称指向后一级', game.nextLevelName === '运算学徒', game.nextLevelName)
+  ok('拿到第一课徽章', game.badges.find((b) => b.id === 'first-lesson').earned)
+  ok('拿到满分卷徽章', game.badges.find((b) => b.id === 'perfect').earned)
+  ok('拿到稳准徽章', game.badges.find((b) => b.id === 'steady').earned)
+  ok('拿到攻下一章徽章', game.badges.find((b) => b.id === 'master-1').earned)
+  ok('未达成的徽章标记为未获得', !game.badges.find((b) => b.id === 'all-lessons').earned)
+  ok('徽章计数与列表一致', game.earnedCount === game.badges.filter((b) => b.earned).length)
+
+  const empty = incentives.computeIncentives({ studied: {}, loops: {}, rounds: {} })
+  ok('徽章带进度与目标', game.badges.every((b) => typeof b.current === 'number' && typeof b.target === 'number'))
+  ok('未达成徽章给出还差多少', game.badges.filter((b) => !b.earned).every((b) => b.remaining > 0))
+  ok('已达成徽章剩余为 0', game.badges.filter((b) => b.earned).every((b) => b.remaining === 0))
+  ok('徽章百分比在 0-100', game.badges.every((b) => b.pct >= 0 && b.pct <= 100))
+  ok('每个徽章都有下一步动作', game.badges.every((b) => b.action && b.actionLabel))
+  ok('引导最多三枚徽章', game.nextBadges.length <= 3 && game.nextBadges.length > 0)
+  ok('引导只含未达成徽章', game.nextBadges.every((b) => !b.earned))
+  ok('引导按完成度从高到低', game.nextBadges.every((b, i, arr) => i === 0 || arr[i - 1].pct >= b.pct))
+  ok('最近三枚按完成度排序', game.nextBadges.map((b) => b.id).join(',') === 'streak-7,ten-lessons,hundred', game.nextBadges.map((b) => b.id).join(','))
+  ok('「一周不断」还差 4 天', game.nextBadges[0].remaining === 4, String(game.nextBadges[0].remaining))
+  ok('「十课连击」还差 7 个知识点', game.nextBadges[1].remaining === 7, String(game.nextBadges[1].remaining))
+  ok('空数据为 1 级 0 经验', empty.level === 1 && empty.xp === 0 && empty.streak === 0)
+  ok('空数据没有徽章', empty.earnedCount === 0)
+}
+
 console.log('\n通过 ' + pass + ' 项，失败 ' + fail + ' 项')
 process.exit(fail === 0 ? 0 : 1)

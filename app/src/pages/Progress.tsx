@@ -4,6 +4,7 @@ import { AlertTriangle, Badge2 } from '../components/icons'
 import { Badge, Card, Stat } from '../components/ui'
 import { allChapters, allPoints, useCurriculum } from '../lib/data'
 import { formatDuration, isSlow } from '../lib/grading'
+import { computeIncentives } from '../lib/incentives'
 import { exportData, importData, resetAll, useAppData } from '../lib/store'
 
 export default function ProgressPage() {
@@ -21,6 +22,7 @@ export default function ProgressPage() {
   const studied = Object.keys(data.studied).length
   const mastered = Object.values(data.loops).filter((l) => l.status === 'mastered').length
   const totalTime = rounds.reduce((s, r) => s + (r.totalMs || 0), 0)
+  const game = computeIncentives(data)
 
   // 知识点视角：反复出错的知识点
   const pointStats = new Map<string, { wrong: number; slow: number; seen: number }>()
@@ -61,6 +63,53 @@ export default function ProgressPage() {
         <Stat label="平均每轮用时" value={rounds.length ? formatDuration(totalTime / rounds.length) : '—'} />
         <Stat label="待提升知识点" value={weakest.length} tone={weakest.length ? 'amber' : 'green'} />
       </div>
+
+      <Card className="p-5">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-800">
+              Lv.{game.level} {game.levelName}
+            </h2>
+            <p className="mt-1 text-xs text-gray-500">
+              累计 {game.xp} 经验 · 连续学习 {game.streak} 天 · 今日 {game.todayXp}/{game.dailyGoal}
+            </p>
+          </div>
+          <Badge tone="violet">
+            徽章 {game.earnedCount}/{game.badges.length}
+          </Badge>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {game.levels.map((lv) => (
+            <span
+              key={lv.level}
+              className={`rounded-md border px-2 py-1 text-xs ${
+                lv.current
+                  ? 'border-blue-500 bg-blue-600 text-white'
+                  : lv.reached
+                    ? 'border-blue-200 bg-blue-50 text-blue-800'
+                    : 'border-gray-200 text-gray-400'
+              }`}
+            >
+              Lv.{lv.level} {lv.name}
+            </span>
+          ))}
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {game.badges.map((b) => (
+            <div
+              key={b.id}
+              className={`rounded-lg border px-3 py-2 ${
+                b.earned ? 'border-amber-200 bg-amber-50' : 'border-gray-100 bg-gray-50 opacity-60'
+              }`}
+            >
+              <div className="text-sm font-medium text-gray-800">
+                {b.icon} {b.name}
+              </div>
+              <div className="mt-0.5 text-xs text-gray-500">{b.desc}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
 
       {weakest.length > 0 && (
         <Card className="p-5">

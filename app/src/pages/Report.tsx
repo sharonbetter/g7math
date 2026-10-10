@@ -7,6 +7,7 @@ import { analyzeRound, buildPracticeExam, weakPointsOf } from '../lib/adaptive'
 import { allPoints, loadAllExams, useCurriculum } from '../lib/data'
 import { DIFFICULTY_LABEL, TYPE_LABEL, formatDuration, formatGap, isSlow, scoreWithRubric, summarizeRecords } from '../lib/grading'
 import { makeId, saveRound, updateLoop, useAppData } from '../lib/store'
+import { computeIncentives } from '../lib/incentives'
 import type { Lesson, Question, Round } from '../types'
 
 function TimingRow({
@@ -82,6 +83,7 @@ export default function ReportPage() {
   const actualTotal = round.answers.reduce((s, a) => s + a.durationMs, 0)
   const accuracy = answered ? Math.round((correct / answered) * 100) : 0
   const weak = weakPointsOf(round, points)
+  const game = computeIncentives(data)
 
   const setRubric = (questionId: string, flags: boolean[]) => {
     const answers = round.answers.map((a) => {
@@ -176,6 +178,11 @@ export default function ReportPage() {
                 交卷时间{' '}
                 {round.finishedAt ? new Date(round.finishedAt).toLocaleString('zh-CN') : '未交卷'}
               </span>
+              {round.finishedAt && (
+                <Badge tone="amber">
+                  Lv.{game.level} {game.levelName} · 距下一级还差 {game.xpToNext} 经验
+                </Badge>
+              )}
             </div>
           </div>
           <div className="flex flex-wrap gap-2">

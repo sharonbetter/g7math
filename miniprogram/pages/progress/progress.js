@@ -3,6 +3,7 @@ var store = require('../../lib/store')
 var auth = require('../../lib/auth')
 var adaptive = require('../../lib/adaptive')
 var grading = require('../../lib/grading')
+var incentives = require('../../lib/incentives')
 
 var MAX_ROUNDS = 10
 
@@ -34,7 +35,20 @@ Page({
     totalSlow: 0,
     totalTimeText: '—',
     rounds: [],
-    userLabel: ''
+    userLabel: '',
+    level: 1,
+    levelName: '',
+    xpTotal: 0,
+    xpInto: 0,
+    xpForNext: 0,
+    xpToNext: 0,
+    nextLevelName: '',
+    xpPct: 0,
+    streak: 0,
+    earnedCount: 0,
+    badgeTotal: 0,
+    badges: [],
+    levels: []
   },
 
   onShow: function () {
@@ -87,6 +101,7 @@ Page({
     })
 
     var session = auth.getSession()
+    var game = incentives.computeIncentives(d)
     this.setData({
       totalPoints: totalPoints,
       studiedCount: studiedCount,
@@ -100,7 +115,20 @@ Page({
       totalSlow: totalSlow,
       totalTimeText: totalTime ? grading.formatDuration(totalTime) : '—',
       rounds: rounds.slice(0, MAX_ROUNDS),
-      userLabel: session ? (session.name + ' · ' + auth.maskId(session.id)) : ''
+      userLabel: session ? (session.name + ' · ' + auth.maskId(session.id)) : '',
+      level: game.level,
+      levelName: game.levelName,
+      xpTotal: game.xp,
+      xpInto: game.xpIntoLevel,
+      xpForNext: game.xpForNext,
+      xpToNext: game.xpToNext,
+      nextLevelName: game.nextLevelName,
+      xpPct: game.xpForNext ? Math.round((game.xpIntoLevel / game.xpForNext) * 100) : 0,
+      streak: game.streak,
+      earnedCount: game.earnedCount,
+      badgeTotal: game.badges.length,
+      badges: game.badges,
+      levels: game.levels
     })
   },
 

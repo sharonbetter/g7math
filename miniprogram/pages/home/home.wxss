@@ -120,6 +120,247 @@
   color: #374151;
 }
 
-.user-line {
-  margin-top: 12rpx;
+/* 等级 */
+.lv-row {
+  display: flex;
+  align-items: center;
+  margin-top: 20rpx;
+}
+
+.lv-medal {
+  width: 130rpx;
+  height: 130rpx;
+  border-radius: 28rpx;
+  background: #2563eb;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.lv-medal-cap {
+  font-size: 20rpx;
+  opacity: 0.8;
+}
+
+.lv-medal-num {
+  font-size: 52rpx;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.lv-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.lv-name {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.lv-nums {
+  margin: 8rpx 0;
+}
+
+.lv-nums .muted {
+  font-size: 22rpx;
+}
+
+.lv-next {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+}
+
+/* 等级节点轨 */
+.lv-rail {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 28rpx;
+}
+
+.lv-node {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lv-dot {
+  width: 40rpx;
+  height: 40rpx;
+  line-height: 40rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #9ca3af;
+  font-size: 22rpx;
+}
+
+.lv-dot-reached {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.lv-dot-current {
+  background: #2563eb;
+  color: #fff;
+}
+
+.lv-node-name {
+  margin-top: 6rpx;
+  font-size: 18rpx;
+  color: #9ca3af;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.lv-node-cur-name {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+/* 连续与今日目标 */
+.lv-stats {
+  display: flex;
+  margin-top: 28rpx;
+}
+
+.lv-stat {
+  flex: 1;
+  border: 1rpx solid #eef0f3;
+  border-radius: 16rpx;
+  padding: 18rpx;
+  margin-right: 16rpx;
+}
+
+.lv-stat:last-child {
+  margin-right: 0;
+}
+
+.lv-stat-num {
+  font-size: 40rpx;
+  font-weight: 600;
+  margin: 6rpx 0 10rpx 0;
+  color: #111827;
+}
+
+.lv-stat-num.green { color: #16a34a; }
+.lv-stat-num.amber { color: #d97706; }
+
+.lv-stat-sub {
+  font-size: 24rpx;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.lv-tip {
+  margin-top: 18rpx;
+  line-height: 1.6;
+}
+
+/* 徽章 */
+.ach-count {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #d97706;
+}
+
+.section-label {
+  margin-top: 22rpx;
+  margin-bottom: 10rpx;
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.near-item {
+  border: 1rpx solid #fde68a;
+  background: #fffbeb;
+  border-radius: 16rpx;
+  padding: 18rpx;
+  margin-bottom: 14rpx;
+}
+
+.near-name {
+  font-size: 27rpx;
+  font-weight: 600;
+}
+
+.near-count {
+  font-size: 24rpx;
+  color: #b45309;
+}
+
+.near-item .bar {
+  margin: 12rpx 0;
+}
+
+.near-foot {
+  align-items: center;
+}
+
+.near-link {
+  font-size: 24rpx;
+  color: #1d4ed8;
+  font-weight: 500;
+}
+
+.ach-total {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.ach-list {
+  margin-top: 20rpx;
+}
+
+.ach-item {
+  display: flex;
+  align-items: center;
+  border: 1rpx solid #f3f4f6;
+  border-radius: 16rpx;
+  padding: 16rpx 18rpx;
+  margin-bottom: 12rpx;
+}
+
+.ach-earned {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.ach-icon {
+  font-size: 40rpx;
+  margin-right: 18rpx;
+}
+
+.ach-icon-locked {
+  opacity: 0.3;
+}
+
+.ach-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ach-name {
+  font-size: 27rpx;
+  font-weight: 600;
+}
+
+.ach-name-locked {
+  color: #9ca3af;
+}
+
+.ach-state {
+  font-size: 22rpx;
+  color: #d1d5db;
+  flex-shrink: 0;
+  margin-left: 12rpx;
+}
+
+.ach-state-on {
+  color: #d97706;
 }

@@ -2,7 +2,7 @@ var data = require('../../lib/data')
 var store = require('../../lib/store')
 var auth = require('../../lib/auth')
 var adaptive = require('../../lib/adaptive')
-var config = require('../../config')
+var incentives = require('../../lib/incentives')
 
 Page({
   data: {
@@ -15,7 +15,25 @@ Page({
     roundCount: 0,
     rounds: [],
     volumes: [],
-    userLabel: ''
+    userLabel: '',
+    level: 1,
+    levelName: '初识数海',
+    xpTotal: 0,
+    xpInto: 0,
+    xpForNext: 0,
+    xpToNext: 0,
+    nextLevelName: '',
+    xpPct: 0,
+    studiedToday: false,
+    streak: 0,
+    todayXp: 0,
+    dailyGoal: 40,
+    todayPct: 0,
+    badges: [],
+    nextBadges: [],
+    levels: [],
+    earnedCount: 0,
+    badgeTotal: 0
   },
 
   onShow: function () {
@@ -58,6 +76,7 @@ Page({
     })
 
     var session = auth.getSession()
+    var game = incentives.computeIncentives(d)
     this.setData({
       totalPoints: totalPoints,
       chapterCount: chapters.length,
@@ -77,7 +96,25 @@ Page({
         }
       }),
       volumes: volumes,
-      userLabel: session ? (session.name + ' · ' + auth.maskId(session.id)) : ''
+      userLabel: session ? (session.name + ' · ' + auth.maskId(session.id)) : '',
+      level: game.level,
+      levelName: game.levelName,
+      xpTotal: game.xp,
+      xpInto: game.xpIntoLevel,
+      xpForNext: game.xpForNext,
+      xpToNext: game.xpToNext,
+      nextLevelName: game.nextLevelName,
+      xpPct: game.xpForNext ? Math.round((game.xpIntoLevel / game.xpForNext) * 100) : 0,
+      studiedToday: game.studiedToday,
+      streak: game.streak,
+      todayXp: game.todayXp,
+      dailyGoal: game.dailyGoal,
+      todayPct: Math.min(100, Math.round((game.todayXp / game.dailyGoal) * 100)),
+      badges: game.badges,
+      nextBadges: game.nextBadges,
+      levels: game.levels,
+      earnedCount: game.earnedCount,
+      badgeTotal: game.badges.length
     })
   },
 
@@ -91,6 +128,18 @@ Page({
 
   goRemedial: function () {
     wx.navigateTo({ url: '/pkgContent/pages/remedial/remedial' })
+  },
+
+  goProgress: function () {
+    wx.navigateTo({ url: '/pages/progress/progress' })
+  },
+
+  /** 徽章引导：按动作跳转到对应页面 */
+  goAction: function (e) {
+    var action = e.currentTarget.dataset.action
+    if (action === 'curriculum') wx.navigateTo({ url: '/pkgContent/pages/curriculum/curriculum' })
+    else if (action === 'exams') wx.navigateTo({ url: '/pkgContent/pages/exams/exams' })
+    else if (action === 'remedial') wx.navigateTo({ url: '/pkgContent/pages/remedial/remedial' })
   },
 
   openChapter: function (e) {

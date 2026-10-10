@@ -243,3 +243,7 @@
 .two-col {
   display: block;
 }
+
+.lv-badge {
+  margin-top: 12rpx;
+}

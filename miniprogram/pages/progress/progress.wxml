@@ -29,6 +29,56 @@
   </view>
 
   <view class="card">
+    <view class="row">
+      <view class="card-title">学习等级</view>
+      <view class="muted">经验累积，长期有效</view>
+    </view>
+    <view class="lv-summary">
+      <view class="lv-medal">
+        <view class="lv-medal-cap">LV</view>
+        <view class="lv-medal-num">{{level}}</view>
+      </view>
+      <view class="lv-main">
+        <view class="lv-name">{{levelName}}</view>
+        <view class="row muted lv-nums">
+          <text>累计 {{xpTotal}} 经验</text>
+          <text>{{xpInto}} / {{xpForNext}}</text>
+        </view>
+        <view class="bar"><view class="bar-inner" style="width:{{xpPct}}%"></view></view>
+        <view class="muted lv-next">距 Lv.{{level + 1}} {{nextLevelName}} 还差 {{xpToNext}} 经验 · 连续 {{streak}} 天</view>
+      </view>
+    </view>
+    <view class="lv-ladder">
+      <view wx:for="{{levels}}" wx:key="level" class="lv-row-item {{item.reached ? 'lv-row-reached' : ''}}">
+        <view class="lv-row-dot {{item.current ? 'lv-row-cur' : ''}}">{{item.level}}</view>
+        <view class="lv-row-body">
+          <view class="lv-row-name {{item.reached ? '' : 'lv-row-locked'}}">
+            {{item.name}}<text wx:if="{{item.current}}" class="lv-row-tag">当前</text>
+          </view>
+          <view class="muted">{{item.reached ? item.desc : '需累计 ' + item.startXp + ' 经验：' + item.desc}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="row">
+      <view>
+        <view class="card-title">成就徽章</view>
+        <view class="muted">达成一次就永久保留</view>
+      </view>
+      <view class="ach-count">{{earnedCount}}<text class="ach-total">/{{badgeTotal}}</text></view>
+    </view>
+    <view class="badge-wall">
+      <view wx:for="{{badges}}" wx:key="id" class="badge-item {{item.earned ? 'badge-earned' : 'badge-locked'}}">
+        <view class="badge-icon {{item.earned ? '' : 'badge-icon-locked'}}">{{item.icon}}</view>
+        <view class="badge-name">{{item.name}}</view>
+        <view class="muted">{{item.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
     <view class="card-title">学习进度</view>
     <view class="prog">
       <view class="row muted">

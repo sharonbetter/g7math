@@ -4,6 +4,7 @@
     <view class="muted">{{kindLabel}} · 第 {{round.round}} 轮</view>
     <view class="report-title">{{round.title}}</view>
     <view class="muted">交卷时间 {{finishedText}}</view>
+    <view class="badge badge-amber lv-badge">Lv.{{level}} {{levelName}} · 距下一级还差 {{xpToNext}} 经验</view>
     <view class="gap"></view>
     <view class="btns">
       <button class="btn btn-primary btn-sm" bindtap="goRemedial">生成专项讲解课件</button>
