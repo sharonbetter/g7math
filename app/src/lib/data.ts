@@ -1,5 +1,16 @@
 import { useEffect, useState } from 'react'
-import type { BookIndex, Chapter, Curriculum, Exam, LessonFile, Point, Section, Volume } from '../types'
+import type {
+  AudioManifest,
+  BookIndex,
+  CalcBook,
+  Chapter,
+  Curriculum,
+  Exam,
+  LessonFile,
+  Point,
+  Section,
+  Volume,
+} from '../types'
 
 const BASE = `${import.meta.env.BASE_URL}data`
 
@@ -117,6 +128,58 @@ export function useExam(chapterId: string | undefined) {
     }
   }, [chapterId])
   return { exam: data, missing }
+}
+
+// ---------- 计算专项 ----------
+export function useCalcBook() {
+  const [data, setData] = useState<CalcBook | null>(null)
+  useEffect(() => {
+    let alive = true
+    getJson<CalcBook>('calc/trainings.json').then((b) => {
+      if (alive && b) setData(b)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
+  return data
+}
+
+// ---------- 课件讲解音频 ----------
+const AUDIO_BASE = `${import.meta.env.BASE_URL}audio`
+let audioManifestPromise: Promise<AudioManifest | null> | null = null
+
+export function loadAudioManifest(): Promise<AudioManifest | null> {
+  if (!audioManifestPromise) {
+    audioManifestPromise = fetch(`${AUDIO_BASE}/manifest.json`)
+      .then((r) => (r.ok ? (r.json() as Promise<AudioManifest>) : null))
+      .catch(() => null)
+  }
+  return audioManifestPromise
+}
+
+/** 某个知识点每个课件页、每个讲解步的音频时长（ms）；null 表示未生成（回退浏览器语音） */
+export function useLessonAudio(chapterId: string | undefined, pointId: string | undefined) {
+  const [audio, setAudio] = useState<number[][] | null>(null)
+  useEffect(() => {
+    setAudio(null)
+    if (!chapterId || !pointId) return
+    let alive = true
+    loadAudioManifest().then((m) => {
+      if (!alive) return
+      const slides = m?.chapters[chapterId]?.[pointId]?.slides
+      if (!slides) return
+      setAudio(slides.map((s) => s.d.map((ms) => ms)))
+    })
+    return () => {
+      alive = false
+    }
+  }, [chapterId, pointId])
+  return audio
+}
+
+export function lessonAudioUrl(chapterId: string, pointId: string, slideIdx: number, stepIdx: number): string {
+  return `${AUDIO_BASE}/lessons/${chapterId}/${pointId}-${slideIdx}-${stepIdx}.m4a`
 }
 
 // ---------- 书籍索引 ----------

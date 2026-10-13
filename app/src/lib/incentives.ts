@@ -234,22 +234,32 @@ export function computeIncentives(data: AppData): IncentiveSnapshot {
   const studiedEntries = Object.entries(data.studied)
   const rounds = finishedRounds(data)
   const mastered = Object.values(data.loops).filter((l) => l.status === 'mastered').length
-  const correct = rounds.reduce((s, r) => s + r.answers.filter((a) => a.correct).length, 0)
+  const calcDone = Object.values(data.calcDone ?? {})
+  const calcCorrect = calcDone.reduce((s, c) => s + (c.best ?? 0), 0)
+  const correct =
+    rounds.reduce((s, r) => s + r.answers.filter((a) => a.correct).length, 0) + calcCorrect
   const practice = rounds.filter((r) => r.kind === 'practice').length
 
   const xp =
     studiedEntries.length * 10 +
     xpFromRounds(rounds) +
-    mastered * 50
+    mastered * 50 +
+    calcDone.length * 10 +
+    calcCorrect
 
   const today = todayKey()
   const todayXp =
     studiedEntries.filter(([, ts]) => dayKey(ts) === today).length * 10 +
-    xpFromRounds(rounds.filter((r) => r.finishedAt && dayKey(r.finishedAt) === today))
+    xpFromRounds(rounds.filter((r) => r.finishedAt && dayKey(r.finishedAt) === today)) +
+    calcDone.filter((c) => c.doneAt && dayKey(c.doneAt) === today).length * 10 +
+    calcDone
+      .filter((c) => c.doneAt && dayKey(c.doneAt) === today)
+      .reduce((s, c) => s + (c.best ?? 0), 0)
 
   const days = new Set<string>()
   for (const [, ts] of studiedEntries) days.add(dayKey(ts))
   for (const r of rounds) if (r.finishedAt) days.add(dayKey(r.finishedAt))
+  for (const c of calcDone) if (c.doneAt) days.add(dayKey(c.doneAt))
   const streak = streakOf(days)
 
   const progress = levelProgress(xp)

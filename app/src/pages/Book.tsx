@@ -20,7 +20,7 @@ function UnitViewer({ unit }: { unit: BookUnit }) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="text-xs text-gray-400">{unit.category}</div>
-            <h2 className="text-[15px] font-semibold text-gray-900">
+            <h2 className="text-sm font-semibold text-gray-900">
               {unit.no !== '探究' && unit.no !== '-' ? `${unit.no} ` : ''}
               {unit.title}
             </h2>
@@ -123,8 +123,8 @@ export default function BookPage() {
 
   return (
     <div className="space-y-4">
-      <Card className="p-5">
-        <h1 className="text-lg font-semibold">《{index.book}》知识索引</h1>
+      <Card className="p-4">
+        <h1 className="text-[15px] font-semibold">《{index.book}》知识索引</h1>
         <p className="mt-1 text-sm text-gray-500">
           原书为 {index.pdfPages} 页扫描件，已用 macOS Vision 逐页 OCR 并按目录切分为 {index.units.length}{' '}
           个讲次。此处可浏览每一讲的<b>原页图像</b>与 OCR 文本；题库中标注「源自《探究应用新思维》」的题目

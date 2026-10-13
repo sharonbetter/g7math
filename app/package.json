@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync-data": "node scripts/sync-data.mjs",
+    "gen:audio": "node scripts/gen-lesson-audio.ts"
   },
   "dependencies": {
     "katex": "^0.19.0",

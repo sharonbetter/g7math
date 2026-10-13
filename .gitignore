@@ -16,13 +16,21 @@ dist/
 .tmp/
 .tmp_crops/
 tmp_*.png
+__pycache__/
+
+# 工具运行数据（会话、沙箱、计划等）
+.loong/
 
 # 由 app/scripts/sync-data.mjs 生成的静态数据
 app/public/data/
 
-# 扫描页图与原 PDF（体积大；文字内容已提交，页面图可本地放回）
+# 课件讲解音频（由 npm run gen:audio 生成，约 200MB+，不入库；缺失时回退浏览器语音）
+app/public/audio/
+
+# 扫描页图与原 PDF（体积大；文字与 OCR 内容已提交，原图可本地放回）
 data/book/pages/
 data/book/pages_jpg/
+refs/**/*.pdf
 refs/*.pdf
 
 # 系统文件

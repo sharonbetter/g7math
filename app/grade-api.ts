@@ -38,6 +38,80 @@ export function gradeApiPlugin(): Plugin {
     name: 'g7math-grade-api',
     configureServer(server: ViteDevServer) {
       const env = loadEnv(server.config.mode, server.config.root, '')
+
+      // ---------- 错因诊断：规则未命中时的模型兜底 ----------
+      server.middlewares.use(async (req, res, next) => {
+        if (req.url !== '/api/diagnose' || req.method !== 'POST') return next()
+        const apiKey = env.GRADE_API_KEY || env.DEEPSEEK_API_KEY || env.OPENAI_API_KEY
+        const base = (env.GRADE_BASE_URL || 'https://api.deepseek.com/v1').replace(/\/$/, '')
+        const textModel = env.GRADE_MODEL || 'deepseek-chat'
+        if (!apiKey) {
+          send(res, 503, { error: '未配置模型。请在 app/.env 填写 GRADE_API_KEY 后重启开发服务。' })
+          return
+        }
+        try {
+          const body = await readJson(req) as {
+            stem?: string
+            standardAnswer?: string
+            userAnswer?: string
+            skills?: Record<string, string>
+          }
+          if (!body.stem || !body.standardAnswer || !body.userAnswer) {
+            send(res, 400, { error: '缺少参数' })
+            return
+          }
+          const skills = body.skills ?? {}
+          const skillList = Object.entries(skills)
+            .map(([k, v]) => `- ${k}：${v}`)
+            .join('\n')
+          const prompt = [
+            '你是经验丰富的初中数学老师。下面是一道计算题，学生给出了错误答案。',
+            '请推断学生**最可能**犯的错误，并归类到给定的技能标签中。',
+            '',
+            `题目：${body.stem}`,
+            `正确答案：${body.standardAnswer}`,
+            `学生答案：${body.userAnswer}`,
+            '',
+            '可选技能标签：',
+            skillList || '（无）',
+            '- other：以上都不是（如纯粹粗心、抄错数字）',
+            '',
+            '要求：',
+            '1. skill 字段从上面的标签 key 中选一个；拿不准选 other。',
+            '2. reason 用一句话（40 字以内）说明学生可能错在哪，语气友善，给初中生看。',
+            '3. 只输出 JSON：{"skill":"标签key","reason":"一句话"}',
+          ].join('\n')
+          const upstream = await fetch(`${base}/chat/completions`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: textModel,
+              temperature: 0,
+              messages: [
+                { role: 'system', content: '你只输出 JSON。' },
+                { role: 'user', content: prompt },
+              ],
+            }),
+          })
+          const raw = await upstream.text()
+          if (!upstream.ok) {
+            send(res, 502, { error: `诊断模型返回 ${upstream.status}：${raw.slice(0, 200)}` })
+            return
+          }
+          const data = JSON.parse(raw) as { choices?: { message?: { content?: string } }[] }
+          const text = data.choices?.[0]?.message?.content ?? ''
+          const jsonText = text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1)
+          const judged = JSON.parse(jsonText) as { skill?: string; reason?: string }
+          const skillKey = judged.skill && (skills[judged.skill] || judged.skill === 'other') ? judged.skill : 'other'
+          send(res, 200, {
+            skill: skillKey,
+            reason: String(judged.reason || '').slice(0, 120) || '未能确定具体错因，请对照解析检查。',
+          })
+        } catch (e) {
+          send(res, 500, { error: e instanceof Error ? e.message : '诊断失败' })
+        }
+      })
+
       server.middlewares.use(async (req, res, next) => {
         if (req.url !== '/api/grade' || req.method !== 'POST') return next()
         const apiKey = env.GRADE_API_KEY || env.DEEPSEEK_API_KEY || env.OPENAI_API_KEY

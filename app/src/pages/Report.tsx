@@ -159,7 +159,7 @@ export default function ReportPage() {
 
   return (
     <div className="space-y-4">
-      <Card className="p-5">
+      <Card className="p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="text-xs text-gray-400">
@@ -168,7 +168,7 @@ export default function ReportPage() {
               </Link>{' '}
               / 考评报告
             </div>
-            <h1 className="mt-1 text-lg font-semibold">{round.title}</h1>
+            <h1 className="mt-1 text-[15px] font-semibold">{round.title}</h1>
             <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
               <Badge tone={round.kind === 'exam' ? 'blue' : 'violet'}>
                 {round.kind === 'exam' ? '章节考评' : round.kind === 'practice' ? '专项练习' : '专项讲解'}
@@ -210,7 +210,7 @@ export default function ReportPage() {
       </div>
 
       {round.wrongQuestionIds.length === 0 && round.slowQuestionIds.length === 0 ? (
-        <Card className="border-green-200 bg-green-50/60 p-5">
+        <Card className="border-green-200 bg-green-50/60 p-4">
           <div className="flex items-start gap-3">
             <span className="text-xl">🎉</span>
             <div>
@@ -224,7 +224,7 @@ export default function ReportPage() {
           </div>
         </Card>
       ) : (
-        <Card className="border-amber-200 bg-amber-50/60 p-5">
+        <Card className="border-amber-200 bg-amber-50/60 p-4">
           <div className="text-sm font-semibold text-amber-800">待提升：{analyses.length} 道题</div>
           <p className="mt-1 text-xs text-amber-700">
             其中错题 {round.wrongQuestionIds.length} 道、耗时标记题 {round.slowQuestionIds.length} 道，
@@ -243,7 +243,7 @@ export default function ReportPage() {
         </Card>
       )}
 
-      <Card className="p-5">
+      <Card className="p-4">
         <h2 className="text-sm font-semibold text-gray-800">逐题耗时对比</h2>
         <p className="mt-1 text-xs text-gray-500">
           实际耗时 − 预计耗时 &gt; 1 分钟的题目以黄色底纹标记；选择题另给出「首次选择用时」。
@@ -284,7 +284,7 @@ export default function ReportPage() {
         </div>
       </Card>
 
-      <Card className="p-5">
+      <Card className="p-4">
         <h2 className="text-sm font-semibold text-gray-800">逐题批改与错因分析</h2>
         <div className="mt-3 space-y-2">
           {round.answers.map((rec, i) => {
@@ -458,7 +458,7 @@ export default function ReportPage() {
       </Card>
 
       {weak.length > 0 && (
-        <Card className="p-5">
+        <Card className="p-4">
           <h2 className="text-sm font-semibold text-gray-800">知识点掌握情况</h2>
           <div className="mt-3 space-y-3">
             {weak.map((p) => {

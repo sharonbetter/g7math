@@ -91,7 +91,7 @@ export default function RemedialPage() {
             </Link>{' '}
             / 专项讲解课件
           </div>
-          <h1 className="mt-1 text-lg font-semibold">{round.chapterTitle} · 专项讲解课件</h1>
+          <h1 className="mt-1 text-[15px] font-semibold">{round.chapterTitle} · 专项讲解课件</h1>
           <p className="mt-1.5 max-w-3xl text-sm text-violet-50">
             本课件根据你在「{round.title}」中的表现自动生成：针对 {analyses.length} 道问题题目
             （错题 {round.wrongQuestionIds.length} 道、耗时标记题 {round.slowQuestionIds.length} 道）
@@ -112,18 +112,18 @@ export default function RemedialPage() {
       </Card>
 
       {analyses.length === 0 && (
-        <Card className="border-green-200 bg-green-50/60 p-5 text-sm text-green-800">
+        <Card className="border-green-200 bg-green-50/60 p-4 text-sm text-green-800">
           本轮没有错题也没有耗时超标的题目，无需专项讲解。
         </Card>
       )}
 
       {weak.length > 0 && (
-        <Card className="p-5">
-          <h2 className="text-base font-semibold text-gray-800">一、薄弱知识点精讲</h2>
+        <Card className="p-4">
+          <h2 className="text-[15px] font-semibold text-gray-800">一、薄弱知识点精讲</h2>
           <p className="mt-1 text-xs text-gray-500">
             以下按知识点汇总，先回顾核心概念与方法，再对照错题重新理解。
           </p>
-          <div className="mt-4 space-y-5">
+          <div className="mt-4 space-y-4">
             {weak.map((p) => {
               const l = lessonMap.get(p.id)
               const related = analyses.filter((a) => a.question.pointIds.includes(p.id))
@@ -186,8 +186,8 @@ export default function RemedialPage() {
       )}
 
       {analyses.length > 0 && (
-        <Card className="p-5">
-          <h2 className="text-base font-semibold text-gray-800">二、逐题错因剖析与思路重建</h2>
+        <Card className="p-4">
+          <h2 className="text-[15px] font-semibold text-gray-800">二、逐题错因剖析与思路重建</h2>
           <div className="mt-4 space-y-4">
             {analyses.map((a, i) => {
               const rec = a.record
@@ -293,8 +293,8 @@ export default function RemedialPage() {
         </Card>
       )}
 
-      <Card className="p-5">
-        <h2 className="text-base font-semibold text-gray-800">三、下一步</h2>
+      <Card className="p-4">
+        <h2 className="text-[15px] font-semibold text-gray-800">三、下一步</h2>
         <p className="mt-1 text-sm text-gray-600">
           完成上面的错因剖析后，点击下方按钮进入<b>专项练习</b>。专项练习由本轮错题与耗时题的变式题、
           同知识点强化题组成，答完后同样会记录耗时、自动批改并生成新的分析，直到没有错题与耗时问题为止。

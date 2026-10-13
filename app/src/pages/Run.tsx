@@ -322,7 +322,7 @@ export default function RunPage() {
           <span className="ml-auto text-xs text-gray-400">{current.id}</span>
         </div>
 
-        <Card className="p-5">
+        <Card className="p-4">
           <div className="flex items-start gap-3">
             <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
               {idx + 1}
@@ -348,7 +348,7 @@ export default function RunPage() {
                         : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/40'
                     }`}
                   >
-                    <MathText className="text-[15px] text-gray-800" text={opt} />
+                    <MathText className="text-sm text-gray-800" text={opt} />
                   </button>
                 )
               })}

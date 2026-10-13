@@ -9,9 +9,9 @@ export default function ExamListPage() {
   const chapters = allChapters(curriculum)
 
   return (
-    <div className="space-y-5">
-      <Card className="p-5">
-        <h1 className="text-lg font-semibold">章节考评</h1>
+    <div className="space-y-4">
+      <Card className="p-4">
+        <h1 className="text-[15px] font-semibold">章节考评</h1>
         <p className="mt-1 text-sm text-gray-500">
           每章一套考评卷，含选择题、填空题、计算题、应用题，由易到难，约 1 小时完成。
           答题时逐题记录开始与提交时刻；交卷后自动批改并生成耗时对比与错因分析。
@@ -34,7 +34,7 @@ export default function ExamListPage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="text-xs text-gray-400">{volume.name}</div>
-                  <div className="mt-0.5 text-[15px] font-medium text-gray-900">
+                  <div className="mt-0.5 text-sm font-medium text-gray-900">
                     {chapter.no} {chapter.title}
                   </div>
                   <div className="mt-1 text-xs text-gray-500">

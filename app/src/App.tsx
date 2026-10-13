@@ -3,6 +3,10 @@ import { Layout } from './components/ui'
 import { useSession } from './lib/auth'
 import LoginPage from './pages/Login'
 import BookPage from './pages/Book'
+import CalcListPage from './pages/CalcList'
+import CalcRecordPage from './pages/CalcRecord'
+import CalcRunPage from './pages/CalcRun'
+import CalcWeakPage from './pages/CalcWeak'
 import ChapterPage from './pages/ChapterPage'
 import CurriculumPage from './pages/Curriculum'
 import ExamIntroPage from './pages/ExamIntro'
@@ -25,6 +29,10 @@ export default function App() {
         <Route path="/curriculum" element={<CurriculumPage />} />
         <Route path="/curriculum/:chapterId" element={<ChapterPage />} />
         <Route path="/lesson/:pointId" element={<LessonPage />} />
+        <Route path="/calc" element={<CalcListPage />} />
+        <Route path="/calc/weak/:skill" element={<CalcWeakPage />} />
+        <Route path="/calc/:trainingId" element={<CalcRunPage />} />
+        <Route path="/calc/:trainingId/record" element={<CalcRecordPage />} />
         <Route path="/exams" element={<ExamListPage />} />
         <Route path="/exam/:chapterId" element={<ExamIntroPage />} />
         <Route path="/run/:roundId" element={<RunPage />} />

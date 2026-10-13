@@ -21,9 +21,9 @@ export default function RemedialListPage() {
     .filter((x) => x.rounds.length > 0)
 
   return (
-    <div className="space-y-5">
-      <Card className="p-5">
-        <h1 className="text-lg font-semibold">专项提升</h1>
+    <div className="space-y-4">
+      <Card className="p-4">
+        <h1 className="text-[15px] font-semibold">专项提升</h1>
         <p className="mt-1 text-sm text-gray-500">
           每次考评或专项练习后，系统会把「做错的题」与「实际耗时比预计多用 1 分钟以上的题」汇总为待提升问题，
           生成专项讲解课件与专项练习。循环进行「分析 → 专项讲解 → 专项练习」，直到没有错题与耗时问题。
@@ -46,11 +46,11 @@ export default function RemedialListPage() {
         />
       ) : (
         withRounds.map(({ volume, chapter, rounds, loop }) => (
-          <Card key={chapter.id} className="p-5">
+          <Card key={chapter.id} className="p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <div className="text-xs text-gray-400">{volume.name}</div>
-                <div className="text-[15px] font-medium text-gray-900">
+                <div className="text-sm font-medium text-gray-900">
                   {chapter.no} {chapter.title}
                 </div>
               </div>

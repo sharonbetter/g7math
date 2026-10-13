@@ -50,6 +50,7 @@ copyFile(join(src, 'book', 'index.json'), join(out, 'book-index.json'))
 const nLessons = copyDir(join(src, 'lessons'), join(out, 'lessons'), (f) => f.endsWith('.json'))
 const nExams = copyDir(join(src, 'exams'), join(out, 'exams'), (f) => f.endsWith('.json'))
 const nUnits = copyDir(join(src, 'book', 'units'), join(out, 'book-units'), (f) => f.endsWith('.txt'))
+const nCalc = copyDir(join(src, 'calc'), join(out, 'calc'), (f) => f.endsWith('.json'))
 const nPages = copyDir(join(src, 'book', 'pages_jpg'), join(out, 'book-pages'), (f) => f.endsWith('.jpg'))
 
 const chaptersWithLessons = readdirSync(join(out, 'lessons'))

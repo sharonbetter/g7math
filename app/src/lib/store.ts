@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { AppData, LoopState, Round } from '../types'
+import type { AppData, CalcAttempt, LoopState, Round } from '../types'
 import { getSession, useSession } from './auth'
 
-const EMPTY: AppData = { rounds: {}, loops: {}, studied: {} }
+const EMPTY: AppData = { rounds: {}, loops: {}, studied: {}, calcDone: {}, calcAttempts: {} }
 
 function dataKey(phone: string): string {
   return `g7math.user.${phone}.v1`
@@ -17,6 +17,8 @@ function readStored(key: string): AppData | null {
       rounds: parsed.rounds ?? {},
       loops: parsed.loops ?? {},
       studied: parsed.studied ?? {},
+      calcDone: parsed.calcDone ?? {},
+      calcAttempts: parsed.calcAttempts ?? {},
     }
   } catch {
     return null
@@ -24,8 +26,8 @@ function readStored(key: string): AppData | null {
 }
 
 function loadFor(phone: string | null): AppData {
-  if (!phone) return { ...EMPTY, rounds: {}, loops: {}, studied: {} }
-  return readStored(dataKey(phone)) ?? { ...EMPTY, rounds: {}, loops: {}, studied: {} }
+  if (!phone) return { ...EMPTY, rounds: {}, loops: {}, studied: {}, calcDone: {}, calcAttempts: {} }
+  return readStored(dataKey(phone)) ?? { ...EMPTY, rounds: {}, loops: {}, studied: {}, calcDone: {}, calcAttempts: {} }
 }
 
 undoLegacyMerge()
@@ -88,6 +90,46 @@ export function updateLoop(loop: LoopState) {
   persist()
 }
 
+/** 记录一次计算专项训练的完成（best 取历史最佳；passed 通过后不回退） */
+export function recordCalcDone(
+  trainingId: string,
+  correct: number,
+  total: number,
+  passed = false,
+  passRounds = 0,
+) {
+  const prev = cache.calcDone?.[trainingId]
+  cache.calcDone = {
+    ...(cache.calcDone ?? {}),
+    [trainingId]: {
+      best: Math.max(prev?.best ?? 0, correct),
+      total,
+      doneAt: Date.now(),
+      count: (prev?.count ?? 0) + 1,
+      passed: passed || prev?.passed || false,
+      passRounds: passed ? (prev?.passRounds ?? passRounds) : prev?.passRounds,
+    },
+  }
+  persist()
+}
+
+/** 保存计算专项一轮的逐题批改明细（每训练最多保留最近 8 轮） */
+export function saveCalcAttempt(trainingId: string, attempt: CalcAttempt) {
+  const list = [...(cache.calcAttempts?.[trainingId] ?? []), attempt].slice(-8)
+  cache.calcAttempts = { ...(cache.calcAttempts ?? {}), [trainingId]: list }
+  persist()
+}
+
+/** 就地修补一条计算专项批改记录（异步模型诊断返回后更新错因） */
+export function patchCalcAttempt(trainingId: string, finishedAt: number, items: CalcAttempt['items']) {
+  const list = cache.calcAttempts?.[trainingId] ?? []
+  const idx = list.findIndex((a) => a.finishedAt === finishedAt)
+  if (idx < 0) return
+  list[idx] = { ...list[idx], items }
+  cache.calcAttempts = { ...(cache.calcAttempts ?? {}), [trainingId]: [...list] }
+  persist()
+}
+
 export function markStudied(pointId: string) {
   if (cache.studied[pointId]) return
   cache = { ...cache, studied: { ...cache.studied, [pointId]: Date.now() } }
@@ -110,6 +152,8 @@ export function importData(json: string): boolean {
       rounds: parsed.rounds ?? {},
       loops: parsed.loops ?? {},
       studied: parsed.studied ?? {},
+      calcDone: parsed.calcDone ?? {},
+      calcAttempts: parsed.calcAttempts ?? {},
     }
     persist()
     return true

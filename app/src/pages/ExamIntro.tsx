@@ -63,14 +63,14 @@ export default function ExamIntroPage() {
 
   return (
     <div className="space-y-4">
-      <Card className="p-5">
+      <Card className="p-4">
         <div className="text-xs text-gray-400">
           <Link to="/exams" className="hover:text-blue-600">
             章节考评
           </Link>{' '}
           / {chapter.no} {chapter.title}
         </div>
-        <h1 className="mt-1 text-lg font-semibold">{exam.title}</h1>
+        <h1 className="mt-1 text-[15px] font-semibold">{exam.title}</h1>
         <p className="mt-1.5 text-sm text-gray-500">
           本卷共 {exam.questions.length} 题，预计用时 {formatDuration(exam.totalEstimatedSeconds * 1000)}
           ，建议在安静环境下一次完成。
@@ -78,7 +78,7 @@ export default function ExamIntroPage() {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="p-5 md:col-span-2">
+        <Card className="p-4 md:col-span-2">
           <h2 className="text-sm font-semibold text-gray-800">试卷结构</h2>
           <table className="mt-3 w-full text-sm">
             <thead>
@@ -132,7 +132,7 @@ export default function ExamIntroPage() {
           </div>
         </Card>
 
-        <Card className="flex flex-col p-5">
+        <Card className="flex flex-col p-4">
           <h2 className="text-sm font-semibold text-gray-800">开始考评</h2>
           <ul className="mt-3 space-y-2 text-xs text-gray-600">
             <li>· 点击「开始答题」即开始计时</li>

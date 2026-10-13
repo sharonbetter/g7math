@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { MathText } from '../components/MathText'
+import { SlideDeck } from '../components/SlideDeck'
 import { Badge, Card, Empty, ProgressBar } from '../components/ui'
-import { pointMapOf, useCurriculum, useLessonFile } from '../lib/data'
+import { pointMapOf, useCurriculum, useLessonAudio, useLessonFile } from '../lib/data'
 import { markStudied, useAppData } from '../lib/store'
 import type { Lesson, Slide } from '../types'
 
@@ -24,11 +25,11 @@ function SlideView({ slide }: { slide: Slide }) {
         <span className="text-sm font-semibold text-gray-800">{slide.title}</span>
         {slide.bookRef && <span className="text-xs text-violet-500">《{slide.bookRef}》</span>}
       </div>
-      {slide.body && <MathText className="mt-3 text-[15px] text-gray-700" text={slide.body} />}
+      {slide.body && <MathText className="mt-3 text-sm text-gray-700" text={slide.body} />}
       {slide.problem && (
         <div className="mt-3 rounded-lg bg-gray-50 px-4 py-3">
           <div className="mb-1 text-xs font-medium text-gray-500">题目</div>
-          <MathText className="text-[15px] text-gray-800" text={slide.problem} />
+          <MathText className="text-sm text-gray-800" text={slide.problem} />
         </div>
       )}
       {slide.solution && (
@@ -40,7 +41,7 @@ function SlideView({ slide }: { slide: Slide }) {
           ) : (
             <div className="rounded-lg border border-green-100 bg-green-50/50 px-4 py-3">
               <div className="mb-1 text-xs font-medium text-green-700">解答</div>
-              <MathText className="text-[15px] text-gray-800" text={slide.solution} />
+              <MathText className="text-sm text-gray-800" text={slide.solution} />
             </div>
           )}
         </div>
@@ -58,7 +59,7 @@ function SlideView({ slide }: { slide: Slide }) {
 function CheckQuestions({ lesson }: { lesson: Lesson }) {
   const [open, setOpen] = useState<number | null>(null)
   return (
-    <Card className="p-5">
+    <Card className="p-4">
       <h3 className="text-sm font-semibold text-gray-800">随堂检测</h3>
       <div className="mt-3 space-y-2">
         {lesson.checkQuestions.map((cq, i) => (
@@ -108,6 +109,8 @@ export default function LessonPage() {
   }, [curriculum, pointId])
 
   const { lessonFile, missing } = useLessonFile(found?.chapter.id)
+  const lessonAudio = useLessonAudio(found?.chapter.id, pointId)
+  const [deckOpen, setDeckOpen] = useState(false)
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -155,7 +158,7 @@ export default function LessonPage() {
 
   return (
     <div className="space-y-4">
-      <Card className="p-5">
+      <Card className="p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="text-xs text-gray-400">
@@ -167,7 +170,7 @@ export default function LessonPage() {
                 {chapter.no} {chapter.title}
               </Link>
             </div>
-            <h1 className="mt-1 text-lg font-semibold">{lesson.title}</h1>
+            <h1 className="mt-1 text-[15px] font-semibold">{lesson.title}</h1>
             <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
               <Badge tone="blue">约 {lesson.durationMinutes} 分钟</Badge>
               <Badge>难度 {'★'.repeat(Math.max(1, Math.min(3, point.difficulty)))}</Badge>
@@ -180,9 +183,12 @@ export default function LessonPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Link to={`/exam/${chapter.id}`} className="btn">
+            <Link to={`/exam/${chapter.id}`} className="btn hidden sm:inline-flex">
               去做本章考评
             </Link>
+            <button className="btn" onClick={() => setDeckOpen(true)}>
+              ▶ 幻灯片放映
+            </button>
             <button
               className="btn btn-primary"
               onClick={() => {
@@ -197,7 +203,7 @@ export default function LessonPage() {
         </div>
       </Card>
 
-      <Card className="p-5">
+      <Card className="p-4">
         <h2 className="text-sm font-semibold text-gray-800">学习目标</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-700">
           {lesson.objectives.map((o, i) => (
@@ -269,6 +275,17 @@ export default function LessonPage() {
           )}
         </div>
       </Card>
+
+      {deckOpen && (
+        <SlideDeck
+          chapterId={chapter.id}
+          lesson={lesson}
+          audio={lessonAudio}
+          completed={completed}
+          onClose={() => setDeckOpen(false)}
+          onMarkStudied={() => markStudied(point.id)}
+        />
+      )}
     </div>
   )
 }

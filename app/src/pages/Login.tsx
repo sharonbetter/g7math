@@ -14,7 +14,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-5">
       <div className="card w-full max-w-md p-6">
-        <div className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+        <div className="flex items-center gap-2 text-[15px] font-semibold text-gray-900">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm text-white">七</span>
           七年级数学学习工具
         </div>

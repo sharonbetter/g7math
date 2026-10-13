@@ -45,9 +45,9 @@ export default function ProgressPage() {
     .slice(0, 12)
 
   return (
-    <div className="space-y-5">
-      <Card className="p-5">
-        <h1 className="text-lg font-semibold">学习报告</h1>
+    <div className="space-y-4">
+      <Card className="p-4">
+        <h1 className="text-[15px] font-semibold">学习报告</h1>
         <p className="mt-1 text-sm text-gray-500">
           汇总全部考评与专项练习数据，定位长期薄弱的知识点，并记录自适应循环的完成情况。
         </p>
@@ -64,7 +64,7 @@ export default function ProgressPage() {
         <Stat label="待提升知识点" value={weakest.length} tone={weakest.length ? 'amber' : 'green'} />
       </div>
 
-      <Card className="p-5">
+      <Card className="p-4">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
             <h2 className="text-sm font-semibold text-gray-800">
@@ -112,7 +112,7 @@ export default function ProgressPage() {
       </Card>
 
       {weakest.length > 0 && (
-        <Card className="p-5">
+        <Card className="p-4">
           <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-800">
             <AlertTriangle /> 长期薄弱知识点（按出错与超时综合排序）
           </h2>
@@ -139,7 +139,7 @@ export default function ProgressPage() {
         </Card>
       )}
 
-      <Card className="p-5">
+      <Card className="p-4">
         <h2 className="text-sm font-semibold text-gray-800">考评历史</h2>
         {rounds.length === 0 ? (
           <p className="mt-2 text-sm text-gray-400">暂无记录。</p>
@@ -193,7 +193,7 @@ export default function ProgressPage() {
         )}
       </Card>
 
-      <Card className="p-5">
+      <Card className="p-4">
         <h2 className="text-sm font-semibold text-gray-800">数据管理</h2>
         <p className="mt-1 text-xs text-gray-500">
           学习数据保存在本机浏览器（localStorage）中，可导出为 JSON 备份或迁移。
@@ -242,7 +242,7 @@ export default function ProgressPage() {
         {msg && <div className="mt-2 text-xs text-gray-600">{msg}</div>}
       </Card>
 
-      <Card className="p-5">
+      <Card className="p-4">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-800">
           <Badge2 /> 关于本工具
         </h2>

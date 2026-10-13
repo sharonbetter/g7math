@@ -201,6 +201,134 @@ export interface AppData {
   loops: Record<string, LoopState>
   /** 课件学习进度：pointId -> 完成时间 */
   studied: Record<string, number>
+  /** 计算专项进度：trainingId -> 完成记录 */
+  calcDone?: Record<string, CalcRecord>
+  /** 计算专项逐题明细：trainingId -> 历史批改快照（最新在后） */
+  calcAttempts?: Record<string, CalcAttempt[]>
+}
+
+// ---------- 课件讲解音频（gen-lesson-audio.ts 生成） ----------
+/** 一页课件的音频信息：hs 与 d 按讲解步骤对齐 */
+export interface AudioStepMeta {
+  /** 每步讲解词的文本哈希（内容变了才重新合成） */
+  hs: string[]
+  /** 每步音频时长（毫秒），0 表示该步无音频 */
+  d: number[]
+}
+
+export interface AudioManifest {
+  generatedAt: string
+  voice: string
+  chapters: Record<string, Record<string, { slides: AudioStepMeta[] }>>
+}
+
+// ---------- 计算专项（《一本·计算题满分训练》同构题库） ----------
+/** 典型错答：批改时反查用户错答，诊断错因 */
+export interface CalcCommonWrong {
+  answer: string
+  reason: string
+  skill?: string | null
+}
+
+/** 同类型变式题：错题/超时题的专项练习轮使用 */
+export interface CalcVariant {
+  stem: string
+  answer: string
+  acceptedAnswers: string[]
+  estimatedSeconds: number
+  skill?: string | null
+  commonWrong?: CalcCommonWrong[]
+}
+
+export interface CalcQuestion {
+  id: string
+  stem: string
+  answer: string
+  acceptedAnswers: string[]
+  estimatedSeconds: number
+  /** 考查技能 key（用于薄弱点聚合与定向专练） */
+  skill?: string | null
+  commonWrong?: CalcCommonWrong[]
+  variants?: CalcVariant[]
+}
+
+export interface CalcTraining {
+  id: string
+  no: number
+  title: string
+  moduleId: string
+  /** 关联的教材章节，如 7a-c2 */
+  chapterId: string
+  difficulty: number
+  minutes: number
+  sourcePage: number
+  questions: CalcQuestion[]
+}
+
+export interface CalcModule {
+  id: string
+  name: string
+  range: [number, number]
+  chapterId: string
+  chapterTitle: string
+}
+
+export interface CalcPoolQuestion {
+  stem: string
+  answer: string
+  acceptedAnswers: string[]
+  estimatedSeconds: number
+  skill?: string | null
+  commonWrong?: CalcCommonWrong[]
+}
+
+export interface CalcBook {
+  modules: CalcModule[]
+  trainings: CalcTraining[]
+  skillNames?: Record<string, string>
+  skillPools?: Record<string, CalcPoolQuestion[]>
+}
+
+/** 计算专项完成记录 */
+export interface CalcRecord {
+  /** 最佳正确数 */
+  best: number
+  total: number
+  doneAt: number
+  count: number
+  /** 全对且无超时（含专项练习轮）后为真 */
+  passed?: boolean
+  /** 通过所用的总轮次（1 = 首轮直接通过） */
+  passRounds?: number
+}
+
+/** 计算专项一轮作答的逐题明细快照 */
+export interface CalcAttemptItem {
+  /** 题号（训练内） */
+  no: number
+  stem: string
+  userAnswer: string
+  answer: string
+  correct: boolean
+  slow: boolean
+  /** 实际用时 ms */
+  ms: number
+  /** 预计用时 s */
+  est: number
+  /** 错因（由典型错答反查诊断） */
+  errorTag?: string
+  /** 薄弱技能 key */
+  skill?: string | null
+}
+
+export interface CalcAttempt {
+  /** 0 = 首轮，1..n = 专项练习轮 */
+  round: number
+  finishedAt: number
+  totalMs: number
+  correct: number
+  total: number
+  items: CalcAttemptItem[]
 }
 
 // ---------- 书籍索引 ----------
