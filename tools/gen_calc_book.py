@@ -24,6 +24,7 @@ MODULES = [
     {'id': 'm4', 'name': '实数', 'range': (58, 62), 'chapterId': '7b-c8', 'chapterTitle': '第八章 实数'},
     {'id': 'm5', 'name': '二元一次方程组', 'range': (63, 76), 'chapterId': '7b-c10', 'chapterTitle': '第十章 二元一次方程组'},
     {'id': 'm6', 'name': '不等式与不等式组', 'range': (77, 97), 'chapterId': '7b-c11', 'chapterTitle': '第十一章 不等式与不等式组'},
+    {'id': 'm7', 'name': '幻方与幻圆（数学活动）', 'range': (98, 99), 'chapterId': '7a-c2', 'chapterTitle': '第二章 有理数的运算'},
 ]
 
 def module_of(no):
@@ -144,10 +145,14 @@ SKILL_NAMES = {
     'ineq_dir': '不等号方向',
     'sqrt': '平方根与立方根',
     'param': '参数求解',
+    'magic': '幻方与幻圆',
 }
 
 def q(stem, answer, accepted=None, seconds=60, skill=None, common=None):
     """common: [(错误答案, 错因key或文案)] —— 批改时反查用户错答诊断错因"""
+    # accepted 允许传单个字符串（等价于一条可选答案），避免被逐字符展开
+    if isinstance(accepted, str):
+        accepted = [accepted]
     return {
         'stem': stem, 'answer': answer, 'accepted': accepted or [], 'seconds': seconds,
         'skill': skill,
@@ -360,7 +365,8 @@ def t_mul_gen(rng, diff):
     return q(f'计算：{stem}', fmt(prod), seconds=55, skill='muldiv_sign', common=[(fmt(-prod), 'muldiv_sign')])
 
 def t_div_law(rng, diff):
-    a, b = signed_int(rng, -60, 60), rng.randint(2, 15) * rng.choice([1, -1])
+    a = mixed_ints(rng, 1, lo=12, hi=60, min_neg=0, min_pos=0, small_ratio=0)[0]
+    b = rng.randint(3, 15) * rng.choice([1, -1])
     ans = F(a, b)
     stem = f'{par(a)} ÷ {par(b)}．'
     return q(f'计算：{stem}', fmt(ans), fmt(float(ans)), seconds=50, skill='muldiv_sign', common=[(fmt(-ans), 'muldiv_sign')])
@@ -380,7 +386,7 @@ def t_div_gen(rng, diff):
 
 def t_muldiv_mix(rng, diff):
     n = 4 if diff <= 2 else 5
-    nums = [signed_int(rng, -15, 15) for _ in range(n)]
+    nums = mixed_ints(rng, n, lo=3, hi=15, min_neg=1, small_ratio=0.25)
     nums = [v if v not in (1, -1) else 2 for v in nums]
     # 保证整除
     for i in range(1, n):
@@ -412,7 +418,8 @@ def t_muldiv_mix(rng, diff):
     return q(f'计算：{stem}．', fmt(int(ans)), seconds=75)
 
 def t_power(rng, diff):
-    base = rng.choice([-3, -2, 2, 3, 4, 5, -4, -5, 10, -10, 1, -1])
+    # 负底为主（乘方的核心考点是符号判断），正底限少量
+    base = rng.choice([-2, -3, -4, -5, -2, -3, -4, -5, -3, -5, -2, 10])
     n = rng.randint(2, 4 if diff >= 2 else 3)
     ans = base ** n
     if rng.random() < 0.3:
@@ -424,7 +431,7 @@ def t_power(rng, diff):
 def t_mixed(rng, diff):
     """有理数混合运算，难度递增"""
     # 结构：a^2 ± b×c ÷ d （保证整除）
-    a = rng.choice([-3, -2, 2, 3, -4, 4, 5])
+    a = rng.choice([-3, -2, -4, 2, 3, -5, 4, -6])
     b, c = signed_int(rng, -9, 9), signed_int(rng, -9, 9)
     prod = b * c
     divisors = [d for d in range(2, 10) if prod != 0 and prod % d == 0] or [1]
@@ -820,6 +827,72 @@ def t_m6_pool(rng, diff):
         return t_solve_ineq(rng, diff)
     return t_solve_ineq_sys(rng, diff)
 
+# ===== 第七模块：幻方与幻圆 =====
+
+MAGIC_COMBOS = [(3, -4), (-2, 5), (4, -7), (1, -3), (-4, 1), (2, 7), (-1, 4), (3, -2)]
+
+def magic_grid(m, a, b):
+    return [
+        [m + a, m - a - b, m + b],
+        [m - a + b, m, m + a - b],
+        [m - b, m + a + b, m - a],
+    ]
+
+def rand_magic(rng):
+    for _ in range(60):
+        a, b = rng.choice(MAGIC_COMBOS)
+        m = rng.choice([-6, 7, -8, 4, 9, -3, 5, -5, 2, -4])
+        g = magic_grid(m, a, b)
+        vals = [x for r in g for x in r]
+        if len(set(vals)) == 9 and all(abs(x) <= 25 for x in vals):
+            return g
+    return magic_grid(5, -1, -3)
+
+def t_magic(rng, diff):
+    """幻方：求中心数 / 求缺格 / 幻和，混合"""
+    style = rng.randint(1, 3)
+    g = rand_magic(rng)
+    m = g[1][1]
+    s_magic = 3 * m
+    if style == 1:
+        return q(f'三阶幻方每行、每列、每条对角线上的三数之和都相等（记为幻和 S）。某幻方的幻和 S = {s_magic}，'
+                 f'则其中心格的数是 ______。（性质：S = 3 × 中心数）',
+                 fmt(m), [fmt(m), str(m)], seconds=60, skill='magic',
+                 common=[(fmt(-m), 'sign'), (fmt(s_magic), '计算失误（未除以 3）')])
+    hide = (rng.randint(0, 2), rng.randint(0, 2))
+    r0, c0 = hide
+    ans = g[r0][c0]
+    others = [g[r0][(c0 + 1) % 3], g[r0][(c0 + 2) % 3]]
+    import json as _json
+    cells = [[('x' if (r, c) == hide else fmt(g[r][c])) for c in range(3)] for r in range(3)]
+    fig = '@@fig ' + _json.dumps({'type': 'grid', 'cells': cells, 'highlight': [list(hide)]}, ensure_ascii=False, separators=(',', ':')) + '@@'
+    stem = (f'在 3×3 幻方中，每行、每列、每条对角线上的三数之和都相等。已知第一行为 {"、".join(fmt(g[0][j]) if (0, j) != hide else "x" for j in range(3))}，'
+            f'第二行为 {"、".join(fmt(g[1][j]) if (1, j) != hide else "x" for j in range(3))}，'
+            f'第三行为 {"、".join(fmt(g[2][j]) if (2, j) != hide else "x" for j in range(3))}，则 x = ______。\n{fig}')
+    return q(stem, fmt(ans), seconds=75, skill='magic',
+             common=[(fmt(s_magic - others[0]), '计算失误（漏减一个数）'), (fmt(-ans), 'sign')])
+
+def t_magic_circle(rng, diff):
+    """幻圆：圆心 + 直径两端，每条直径三数之和相等"""
+    c = rng.choice([-4, -2, 3, 5, 6, -6])
+    pairs = [(rng.randint(-9, 9), rng.randint(-9, 9)) for _ in range(3)]
+    S = c + pairs[0][0] + pairs[0][1]
+    import json as _json
+    if rng.random() < 0.5:
+        y_ans = S - c - pairs[1][0]
+        fig = '@@fig ' + _json.dumps({'type': 'circle', 'center': c, 'pairs': [[pairs[0][0], pairs[0][1]], [pairs[1][0], 'y'], [pairs[2][0], pairs[2][1]]]}, ensure_ascii=False, separators=(',', ':')) + '@@'
+        return q(f'幻圆中，圆心处的数是 {c}，三条直径的两端各放一个数，每条直径上三个数（两端与圆心）之和都相等。'
+                 f'已知一条直径的两端为 {pairs[0][0]}、{pairs[0][1]}，另一条直径的一端为 {pairs[1][0]}，另一端为 y，'
+                 f'则 y = ______。\n{fig}',
+                 fmt(y_ans), seconds=80, skill='magic',
+                 common=[(fmt(-y_ans), 'sign'), (fmt(S + pairs[1][0]), '计算失误（圆心重复相加）')])
+    x_ans = S - c - pairs[2][1]
+    fig2 = '@@fig ' + _json.dumps({'type': 'circle', 'center': c, 'pairs': [[pairs[0][0], pairs[0][1]], ['x', pairs[2][1]], [pairs[1][0], pairs[1][1]]]}, ensure_ascii=False, separators=(',', ':')) + '@@'
+    return q(f'幻圆中圆心处的数是 {c}，每条直径上三个数之和都等于 {S}。某条直径的两端为 x 与 {pairs[2][1]}，'
+             f'则 x = ______。\n{fig2}',
+             fmt(x_ans), seconds=70, skill='magic',
+             common=[(fmt(-x_ans), 'sign')])
+
 # ---------- 每个训练的模板路由 ----------
 TRAIN_KIND = {}
 
@@ -858,6 +931,8 @@ register(77, ('ineq_shift', 1)); register((78, 79), ('ineq_shift', 1)); register
 register(82, ('ineq_shift', 2)); register(83, ('m6_mix', 2)); register(84, ('ineq_den', 2))
 register((85, 87), ('ineq_sys', 2)); register((88, 90), ('ineq_sys', 3)); register(91, ('m6_mix', 3))
 register((92, 97), ('m6_mix', 3))
+
+register(98, ('magic', 1)); register(99, ('magic_circle', 1))
 
 GEN = {
     'int_add': lambda rng, d: t_int_add(rng, d),
@@ -900,6 +975,8 @@ GEN = {
     'ineq_den': lambda rng, d: t_solve_ineq(rng, d, 'denominator'),
     'ineq_sys': t_solve_ineq_sys,
     'm6_mix': lambda rng, d: t_m6_pool(rng, d),
+    'magic': t_magic,
+    'magic_circle': t_magic_circle,
 }
 
 # 训练标题（规范化 + 补齐 OCR 缺失的编号）
@@ -915,6 +992,7 @@ TITLE_FIX = {
     88: '解一元一次不等式组（综合）', 89: '含字母系数的不等式（组）',
     90: '【重难突破】根据不等式组的整数解求参数范围', 95: '期末集训（四）',
     3: '分数的加法', 19: '有理数的除法法则', 20: '有理数的除法',
+    98: '三阶幻方', 99: '幻圆与直径',
     26: '有理数的混合运算（一）', 27: '有理数的混合运算（二）',
 }
 
@@ -922,7 +1000,7 @@ def main():
     rng = random.Random(20261012)
     trainings = []
     skel = {t['no']: t for t in SKEL}
-    for no in range(1, 98):
+    for no in range(1, 100):
         if no not in TRAIN_KIND:
             continue
         t = skel.get(no, {'no': no, 'title': TITLE_FIX.get(no, ''), 'stars': 1, 'minutes': 15, 'bookPage': 0})

@@ -93,6 +93,34 @@ interface Manifest {
 }
 
 /** 载入全部已生成的考评卷（用于跨章专项强化） */
+/** 思路引导实时索引：轮次快照可能早于引导批量生成，渲染时按 id/题干回填最新引导 */
+export interface GuidanceIndex {
+  byId: Map<string, string>
+  byStem: Map<string, string>
+}
+
+let guidanceIndexPromise: Promise<GuidanceIndex> | null = null
+
+export function loadGuidanceIndex(): Promise<GuidanceIndex> {
+  guidanceIndexPromise ??= loadAllExams().then((all) => {
+    const byId = new Map<string, string>()
+    const byStem = new Map<string, string>()
+    for (const ex of all.values()) {
+      for (const q of ex.questions) {
+        if (q.guidance) {
+          byId.set(q.id, q.guidance)
+          byStem.set(q.stem, q.guidance)
+        }
+        for (const v of q.variants ?? []) {
+          if (v.guidance) byStem.set(v.stem, v.guidance)
+        }
+      }
+    }
+    return { byId, byStem }
+  })
+  return guidanceIndexPromise
+}
+
 export async function loadAllExams(): Promise<Map<string, Exam>> {
   const map = new Map<string, Exam>()
   const manifest = await getJson<Manifest>('manifest.json')
@@ -179,7 +207,23 @@ export function useLessonAudio(chapterId: string | undefined, pointId: string | 
 }
 
 export function lessonAudioUrl(chapterId: string, pointId: string, slideIdx: number, stepIdx: number): string {
-  return `${AUDIO_BASE}/lessons/${chapterId}/${pointId}-${slideIdx}-${stepIdx}.m4a`
+  return `${AUDIO_BASE}/lessons/${chapterId}/${pointId}-${slideIdx}-${stepIdx}.mp3`
+}
+
+// ---------- 动画课件（public/demo/*.html，嵌入式播放） ----------
+let animatedLessonsPromise: Promise<string[]> | null = null
+
+/** 已生成动画课件的知识点 id 列表（demo/manifest.json，由 sync-data 维护）；null = 加载中 */
+export function useAnimatedLessons(): string[] | null {
+  const [list, setList] = useState<string[] | null>(null)
+  useEffect(() => {
+    animatedLessonsPromise ??= fetch(`${import.meta.env.BASE_URL}demo/manifest.json`)
+      .then((r) => (r.ok ? (r.json() as Promise<{ animatedLessons: string[] }>) : { animatedLessons: [] }))
+      .then((m) => m.animatedLessons ?? [])
+      .catch(() => [] as string[])
+    animatedLessonsPromise.then(setList)
+  }, [])
+  return list
 }
 
 // ---------- 书籍索引 ----------

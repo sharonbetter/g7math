@@ -39,10 +39,10 @@ export function gradeQuestion(q: Question, rawAnswer: string, hasPhoto = false):
     if (q.type === 'choice') return normalizeChoice(cw.answer) === normalizeChoice(user)
     return answersMatch(user, cw.answer)
   })
-  const errorTags = wrong ? mergeTags(q.errorTags ?? [], ['典型错误']) : (q.errorTags ?? ['计算失误'])
-  const errorReason = wrong
-    ? wrong.reason
-    : buildGenericReason(q, user)
+  const errorTags = wrong
+    ? mergeTags(q.errorTags ?? [], ['典型错误'])
+    : mergeTags(q.errorTags ?? [], ['原因未知'])
+  const errorReason = wrong ? wrong.reason : buildGenericReason(q, user)
 
   return { correct: false, score: 0, errorTags, errorReason }
 }
@@ -51,11 +51,13 @@ function mergeTags(a: string[], b: string[]): string[] {
   return Array.from(new Set([...a, ...b]))
 }
 
+/** 未命中预置错答：不猜测错因，直接说明原因未知，引导学生对照解析走正确思路 */
 function buildGenericReason(q: Question, user: string): string {
-  const tags = q.errorTags ?? []
-  const head = tags.length ? `可能的错因：${tags.join('、')}。` : ''
   const kind = q.type === 'choice' ? '选项' : '答案'
-  return `${head}你的${kind}是「${toHalfWidth(user).trim()}」，与标准答案不一致。请对照解析逐步检查：先看题意理解是否正确，再看关键步骤的符号、运算与条件是否遗漏。`
+  return (
+    `错误原因未知：从你的${kind}「${toHalfWidth(user).trim()}」还看不出具体错在哪一步，这里不乱猜。` +
+    '直接对照下方解析，从第一步开始跟着走一遍——走到和解析不一样的地方，就是你走岔的那一步。'
+  )
 }
 
 /** 步骤分：按 rubric 自评结果折算（用于计算题/应用题） */

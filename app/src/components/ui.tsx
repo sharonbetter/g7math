@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { logout, maskPhone, useSession } from '../lib/auth'
 import { computeIncentives } from '../lib/incentives'
 import { useAppData } from '../lib/store'
+import { GatePassVeil } from './GateTransition'
 
 export function Card({
   children,
@@ -226,6 +227,8 @@ export function Layout({ children }: { children: ReactNode }) {
       <main className={isRunner ? '' : 'mx-auto max-w-6xl px-4 py-4 md:px-5'}>
         {children}
       </main>
+      {/* 穿门转场的收尾光幕（路由切换期间常驻） */}
+      <GatePassVeil />
     </div>
   )
 }

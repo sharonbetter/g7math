@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { AppData, CalcAttempt, LoopState, Round } from '../types'
-import { getSession, useSession } from './auth'
+import type { AppData, CalcAttempt, LoopState, QuestionExplain, Round } from '../types'
+import { getSession, useSession, userDataKey } from './auth'
 
-const EMPTY: AppData = { rounds: {}, loops: {}, studied: {}, calcDone: {}, calcAttempts: {} }
+const EMPTY: AppData = { rounds: {}, loops: {}, studied: {}, perfected: {}, calcDone: {}, calcAttempts: {}, questionExplains: {} }
 
 function dataKey(phone: string): string {
-  return `g7math.user.${phone}.v1`
+  return userDataKey(phone)
 }
 
 function readStored(key: string): AppData | null {
@@ -17,8 +17,13 @@ function readStored(key: string): AppData | null {
       rounds: parsed.rounds ?? {},
       loops: parsed.loops ?? {},
       studied: parsed.studied ?? {},
+      perfected: parsed.perfected ?? {},
+      energy: parsed.energy ?? 0,
+      gems: Object.fromEntries(Object.entries(parsed.gems ?? {}).map(([k, v]) => [k, v > 1e8 ? 1 : v])),
+      outfits: parsed.outfits ?? {},
       calcDone: parsed.calcDone ?? {},
       calcAttempts: parsed.calcAttempts ?? {},
+      questionExplains: parsed.questionExplains ?? {},
     }
   } catch {
     return null
@@ -27,7 +32,7 @@ function readStored(key: string): AppData | null {
 
 function loadFor(phone: string | null): AppData {
   if (!phone) return { ...EMPTY, rounds: {}, loops: {}, studied: {}, calcDone: {}, calcAttempts: {} }
-  return readStored(dataKey(phone)) ?? { ...EMPTY, rounds: {}, loops: {}, studied: {}, calcDone: {}, calcAttempts: {} }
+  return readStored(dataKey(phone)) ?? { ...EMPTY, rounds: {}, loops: {}, studied: {}, calcDone: {}, calcAttempts: {}, questionExplains: {} }
 }
 
 undoLegacyMerge()
@@ -81,12 +86,57 @@ export function useAppData(): AppData {
 }
 
 export function saveRound(round: Round) {
+  // 错题回炉轮首次完成：+3 能量（打 Boss 前的补给收益）
+  const prev = cache.rounds[round.id]
+  if (round.kind === 'remedial' && round.finishedAt && !prev?.finishedAt) {
+    cache = { ...cache, energy: (cache.energy ?? 0) + 3 }
+  }
   cache = { ...cache, rounds: { ...cache.rounds, [round.id]: round } }
   persist()
 }
 
+/** 收下能量石战斗的产出：stones 块 = +stones 能量（每颗路径宝石只结算一次） */
+export function markGem(gemId: string, stones: number) {
+  if (cache.gems?.[gemId] != null) return
+  cache = { ...cache, gems: { ...(cache.gems ?? {}), [gemId]: Math.max(0, stones) }, energy: (cache.energy ?? 0) + Math.max(0, stones) }
+  persist()
+}
+
+/** 用能量石兑换装备 */
+export function buyOutfit(outfitId: string, price: number) {
+  if (cache.outfits?.owned?.includes(outfitId)) return false
+  if ((cache.energy ?? 0) < price) return false
+  cache = {
+    ...cache,
+    energy: (cache.energy ?? 0) - price,
+    outfits: { ...(cache.outfits ?? {}), owned: [...(cache.outfits?.owned ?? []), outfitId] },
+  }
+  persist()
+  return true
+}
+
+/** 穿戴/脱下装备 */
+export function equipOutfit(slot: 'hat' | 'shoes' | 'clothes', outfitId?: string) {
+  cache = { ...cache, outfits: { ...(cache.outfits ?? {}), [slot]: outfitId } }
+  persist()
+}
+
+/** 战前准备消耗能量；余额不足返回 false */
+export function spendEnergy(cost: number): boolean {
+  if ((cache.energy ?? 0) < cost) return false
+  cache = { ...cache, energy: (cache.energy ?? 0) - cost }
+  persist()
+  return true
+}
+
 export function updateLoop(loop: LoopState) {
   cache = { ...cache, loops: { ...cache.loops, [loop.chapterId]: loop } }
+  persist()
+}
+
+/** 保存单题讲解课件（同题重复生成则覆盖） */
+export function recordQuestionExplain(ex: QuestionExplain) {
+  cache = { ...cache, questionExplains: { ...(cache.questionExplains ?? {}), [ex.questionId]: ex } }
   persist()
 }
 
@@ -99,6 +149,10 @@ export function recordCalcDone(
   passRounds = 0,
 ) {
   const prev = cache.calcDone?.[trainingId]
+  // 计算副本首次通过：+2 能量（此后再刷不重复给，防刷）
+  if (passed && !prev?.passed) {
+    cache = { ...cache, energy: (cache.energy ?? 0) + 2 }
+  }
   cache.calcDone = {
     ...(cache.calcDone ?? {}),
     [trainingId]: {
@@ -136,6 +190,13 @@ export function markStudied(pointId: string) {
   persist()
 }
 
+/** 课末微战全对首过：闪耀点亮（+5 XP） */
+export function markPerfected(pointId: string) {
+  if (cache.perfected?.[pointId]) return
+  cache = { ...cache, perfected: { ...(cache.perfected ?? {}), [pointId]: Date.now() } }
+  persist()
+}
+
 export function resetAll() {
   cache = { ...EMPTY, rounds: {}, loops: {}, studied: {} }
   persist()
@@ -154,6 +215,7 @@ export function importData(json: string): boolean {
       studied: parsed.studied ?? {},
       calcDone: parsed.calcDone ?? {},
       calcAttempts: parsed.calcAttempts ?? {},
+      questionExplains: parsed.questionExplains ?? {},
     }
     persist()
     return true

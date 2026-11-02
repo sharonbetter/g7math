@@ -1,14 +1,19 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { MathText } from '../components/MathText'
 import { BookSource } from '../components/BookSource'
 import { Badge, Card, Empty, ProgressBar, Stat } from '../components/ui'
-import { analyzeRound, buildPracticeExam, weakPointsOf } from '../lib/adaptive'
+import { analyzeRound, buildPracticeRound, weakPointsOf } from '../lib/adaptive'
 import { allPoints, loadAllExams, useCurriculum } from '../lib/data'
 import { DIFFICULTY_LABEL, TYPE_LABEL, formatDuration, formatGap, isSlow, scoreWithRubric, summarizeRecords } from '../lib/grading'
-import { makeId, saveRound, updateLoop, useAppData } from '../lib/store'
+import { makeId, recordQuestionExplain, saveRound, updateLoop, useAppData } from '../lib/store'
+import { buildExplainScenes } from '../lib/explain'
+import { loadGuidanceIndex } from '../lib/data'
+import type { ExplainScene } from '../lib/explain'
+import { ExplainPlayer } from '../components/ExplainPlayer'
+import { GuidedSolution } from '../components/GuidedSolution'
 import { computeIncentives } from '../lib/incentives'
-import type { Lesson, Question, Round } from '../types'
+import type { AnswerRecord, Lesson, Question, Round } from '../types'
 
 function TimingRow({
   q,
@@ -61,6 +66,98 @@ export default function ReportPage() {
   const { curriculum } = useCurriculum()
   const round = roundId ? data.rounds[roundId] : undefined
   const [openId, setOpenId] = useState<string | null>(null)
+  /** 单题讲解：正在播放的场景（浮层） */
+  const [explainPlaying, setExplainPlaying] = useState<ExplainScene[] | null>(null)
+  /** 思路引导实时索引：旧轮次快照里的题没有 guidance，渲染时按 id/题干回填 */
+  const [guidanceIdx, setGuidanceIdx] = useState<{ byId: Map<string, string>; byStem: Map<string, string> } | null>(null)
+  useEffect(() => {
+    loadGuidanceIndex().then(setGuidanceIdx).catch(() => {})
+  }, [])
+  const resolveGuidance = (q: Question): string | undefined =>
+    q.guidance ?? guidanceIdx?.byId.get(q.id) ?? guidanceIdx?.byStem.get(q.stem)
+
+  /** 专项练习：现场出题进度（题库枯竭时调模型） */
+  const [genPractice, setGenPractice] = useState<{ done: number; total: number } | null>(null)
+  /** 单题讲解：语音预合成进度（合成完才打开播放器） */
+  const [genProgress, setGenProgress] = useState<{ questionId: string; phase: 'script' | 'tts'; done: number; total: number } | null>(null)
+
+  /** 生成（或重新生成）单题讲解课件：拼装场景 → 预合成全部语音 → 保存并播放 */
+  const makeExplain = async (rec: AnswerRecord, q: Question) => {
+    if (!round || genProgress) return
+    const reason = (rec.errorReason ?? '').trim()
+    const known = reason !== '' && !reason.includes('看不出') && !reason.includes('错误原因未知')
+    const slowOnly = rec.correct && isSlow(rec.durationMs, q.estimatedSeconds)
+    // ① 讲解词：把题库思路引导改写成口语化讲授（点题眼、抛问题、有衔接）
+    let narration: { intro: string; compare: string; reason: string; guide: string; closing: string } | null = null
+    if (!slowOnly) {
+      setGenProgress({ questionId: q.id, phase: 'script', done: 0, total: 1 })
+      try {
+        const r = await fetch('/api/gen-narration', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            stem: q.stem,
+            standardAnswer: q.answer,
+            standardSolution: q.solution,
+            guidance: resolveGuidance(q),
+            studentAnswer: rec.value,
+            standardErrorReason: known ? reason : '',
+          }),
+        })
+        if (r.ok) narration = ((await r.json()) as { narration: typeof narration }).narration ?? null
+      } catch {
+        /* 失败回退模板讲解词 */
+      }
+    }
+
+    const scenes = buildExplainScenes(
+      {
+        chapterTitle: `${round.exam.chapterTitle} · 单题讲解`,
+        wrongs: slowOnly
+          ? []
+          : [
+              {
+                q,
+                userAnswer: rec.value,
+                spentSeconds: Math.round(rec.durationMs / 1000),
+                diag: known ? { skill: rec.errorTags[0] ?? '错因分析', reason } : null,
+                narration,
+              },
+            ],
+        slows: slowOnly
+          ? [{ q, spentSeconds: Math.round(rec.durationMs / 1000), estimatedSeconds: q.estimatedSeconds }]
+          : [],
+        weakPointNames: [],
+      },
+      { compact: true },
+    )
+    recordQuestionExplain({
+      questionId: q.id,
+      roundId: round.id,
+      createdAt: Date.now(),
+      userAnswer: rec.value,
+      scenes,
+    })
+
+    // 预合成每一幕的语音（失败不中断——该幕播放时自动降级文字模式）
+    setGenProgress({ questionId: q.id, phase: 'tts', done: 0, total: scenes.length })
+    let done = 0
+    for (const sc of scenes) {
+      try {
+        await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: sc.narration }),
+        })
+      } catch {
+        /* 忽略：播放器会重试并兜底 */
+      }
+      done += 1
+      setGenProgress({ questionId: q.id, phase: 'tts', done, total: scenes.length })
+    }
+    setGenProgress(null)
+    setExplainPlaying(scenes)
+  }
   const [busy, setBusy] = useState(false)
 
   const points = useMemo(() => allPoints(curriculum), [curriculum])
@@ -132,7 +229,10 @@ export default function ReportPage() {
     try {
       const all = await loadAllExams()
       all.set(round.exam.id, round.exam)
-      const plan = buildPracticeExam(round, all)
+      const plan = await buildPracticeRound(round, all, Object.values(data.rounds), (done, total) =>
+        setGenPractice(total > 0 ? { done, total } : null),
+      )
+      setGenPractice(null)
       const practiceRound: Round = {
         id: makeId(`${plan.exam.id}-r`),
         kind: 'practice',
@@ -184,6 +284,34 @@ export default function ReportPage() {
                 </Badge>
               )}
             </div>
+            {round.finishedAt && round.kind === 'exam' && (() => {
+              const usedHint = round.answers.filter((a) => a.hintUsed).length
+              const usedRetry = round.answers.filter((a) => a.retried).length
+              const usedHg = round.buffs?.hourglassUsed?.length ?? 0
+              const perfect =
+                answered > 0 &&
+                correct === answered &&
+                round.wrongQuestionIds.length === 0 &&
+                round.slowQuestionIds.length === 0 &&
+                usedHint === 0 &&
+                usedRetry === 0
+              return (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {perfect && (
+                    <Badge tone="green">⭐ 完美卷 · 无提示、无回炉、全对不超时</Badge>
+                  )}
+                  {(usedHint > 0 || usedRetry > 0 || usedHg > 0) && (
+                    <span className="text-[11px] text-gray-400">
+                      本卷增益留痕：
+                      {usedHint > 0 && `思路点拨 ×${usedHint} `}
+                      {usedRetry > 0 && `回炉 ×${usedRetry} `}
+                      {usedHg > 0 && `时间沙漏 ×${usedHg}`}
+                      （不影响判分，但拿不到完美卷）
+                    </span>
+                  )}
+                </div>
+              )
+            })()}
           </div>
           <div className="flex flex-wrap gap-2">
             <Link to={`/remedial/${round.id}`} className="btn btn-primary">
@@ -285,7 +413,7 @@ export default function ReportPage() {
       </Card>
 
       <Card className="p-4">
-        <h2 className="text-sm font-semibold text-gray-800">逐题批改与错因分析</h2>
+        <h2 className="text-sm font-semibold text-gray-800">逐题批改与订正</h2>
         <div className="mt-3 space-y-2">
           {round.answers.map((rec, i) => {
             const q = qMap.get(rec.questionId)
@@ -395,22 +523,11 @@ export default function ReportPage() {
                       </div>
                     </div>
 
-                    <div className="mt-3 rounded-lg border border-blue-100 bg-blue-50/40 px-4 py-3">
-                      <div className="text-xs font-medium text-blue-700">完整解析</div>
-                      <MathText className="mt-1 text-sm text-gray-800" text={q.solution} />
-                    </div>
-
-                    {!rec.correct && (
-                      <div className="mt-3 rounded-lg border border-red-100 bg-red-50/50 px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-red-700">错因分析</span>
-                          {rec.errorTags.map((t) => (
-                            <Badge key={t} tone="red">
-                              {t}
-                            </Badge>
-                          ))}
-                        </div>
-                        <MathText className="mt-1.5 text-sm text-gray-700" text={rec.errorReason} />
+                    {/* 手写待确认的核对指引保留（这是操作指引，不是错因）；错因数据不再展示，仅用于专项考评题生成 */}
+                    {rec.photoReview === 'pending' && (
+                      <div className="mt-3 rounded-lg border border-blue-100 bg-blue-50/50 px-4 py-3">
+                        <div className="text-xs font-medium text-blue-700">手写答案待确认</div>
+                        <MathText className="mt-1 text-sm text-gray-700" text={rec.errorReason} />
                       </div>
                     )}
 
@@ -425,7 +542,10 @@ export default function ReportPage() {
                     {q.rubric?.length ? (
                       <div className="mt-3 rounded-lg border border-gray-100 px-4 py-3">
                         <div className="text-xs font-medium text-gray-600">
-                          步骤要点自查（用于计算过程分，勾选你确实做到的要点）
+                          ⏱ 自评：当时做到了哪些步骤？
+                        </div>
+                        <div className="mt-0.5 text-[11px] leading-relaxed text-gray-400">
+                          做错也有过程分：勾选你当时确实做到的要点，按命中比例折算部分得分。
                         </div>
                         <div className="mt-2 space-y-1.5">
                           {q.rubric.map((r, k) => (
@@ -449,6 +569,43 @@ export default function ReportPage() {
                         </div>
                       </div>
                     ) : null}
+                    <GuidedSolution
+                      q={{ ...q, guidance: resolveGuidance(q) }}
+                      pointNames={q.pointIds.map((pid) => points.get(pid)?.name ?? '').filter(Boolean)}
+                      actions={
+                        (() => {
+                          const ex = data.questionExplains?.[q.id]
+                          const gen = genProgress?.questionId === q.id ? genProgress : null
+                          if (gen)
+                            return (
+                              <span className="flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-medium text-blue-700">
+                                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
+                                {gen.phase === 'script' ? '讲解词生成中…' : `语音合成 ${gen.done}/${gen.total}`}
+                              </span>
+                            )
+                          return (
+                            <span className="flex items-center gap-2">
+                              {ex && (
+                                <button
+                                  type="button"
+                                  className="text-[11px] text-gray-400 hover:text-gray-600"
+                                  onClick={() => makeExplain(rec, q)}
+                                >
+                                  ↻ 重新生成
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                className="rounded-full bg-blue-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-blue-500"
+                                onClick={() => (ex ? setExplainPlaying(ex.scenes) : makeExplain(rec, q))}
+                              >
+                                {ex ? '▶ 查看讲解' : '🎬 生成讲解'}
+                              </button>
+                            </span>
+                          )
+                        })()
+                      }
+                    />
                   </div>
                 )}
               </div>
@@ -498,10 +655,17 @@ export default function ReportPage() {
             专项讲解课件
           </Link>
           <button className="btn btn-primary" disabled={busy || analyses.length === 0} onClick={startPractice}>
-            生成专项练习并开始
+            {genPractice
+              ? `正在为新题出题 ${genPractice.done}/${genPractice.total}…`
+              : busy
+                ? '生成中…'
+                : '生成专项练习并开始'}
           </button>
         </div>
       </div>
+      {explainPlaying && (
+        <ExplainPlayer scenes={explainPlaying} onClose={() => setExplainPlaying(null)} />
+      )}
     </div>
   )
 }

@@ -2,11 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { MathText } from '../components/MathText'
 import { Badge, Card, Empty } from '../components/ui'
+import { allPoints, useCurriculum } from '../lib/data'
 import { DIFFICULTY_LABEL, TYPE_LABEL, formatDuration, gradeQuestion, summarizeRecords } from '../lib/grading'
 import { gradeOpenQuestion } from '../lib/modelGrade'
 import { saveRound, updateLoop, useAppData } from '../lib/store'
 import { splitNumberedParts } from '../lib/answers'
-import type { AnswerRecord, Question, QType, Round } from '../types'
+import type { AnswerRecord, Question, QType, Round, RoundBuffs } from '../types'
 
 /** 把上传的图片压缩成较小尺寸的 dataURL，避免浏览器存储溢出 */
 async function fileToDataUrl(file: File, maxWidth = 900): Promise<string> {
@@ -45,6 +46,25 @@ export default function RunPage() {
   const navigate = useNavigate()
   const data = useAppData()
   const round = roundId ? data.rounds[roundId] : undefined
+  const { curriculum } = useCurriculum()
+  const pointsMap = useMemo(() => allPoints(curriculum), [curriculum])
+
+  // ---- 战中增益（思路点拨 / 时间沙漏 / 回炉券），全部留痕 ----
+  const [retry, setRetry] = useState<{ origId: string; q: Question; startedAt: number } | null>(null)
+  const [retryDraft, setRetryDraft] = useState('')
+  const [retryPick, setRetryPick] = useState('')
+  const [retryWork, setRetryWork] = useState('')
+  const buffs = round?.buffs
+  const hintUsedSet = useMemo(() => new Set(buffs?.hintUsed ?? []), [buffs?.hintUsed])
+  const hourglassSet = useMemo(() => new Set(buffs?.hourglassUsed ?? []), [buffs?.hourglassUsed])
+  const retriedSet = useMemo(() => new Set(buffs?.retried ?? []), [buffs?.retried])
+  const remHints = (buffs?.hints ?? 0) - (buffs?.hintUsed?.length ?? 0)
+  const remRetries = (buffs?.retries ?? 0) - (buffs?.retried?.length ?? 0)
+  const remHourglasses = (buffs?.hourglasses ?? 0) - (buffs?.hourglassUsed?.length ?? 0)
+  const patchBuffs = (mut: (b: RoundBuffs) => RoundBuffs) => {
+    if (!round) return
+    saveRound({ ...round, buffs: mut(round.buffs ?? { hints: 0, retries: 0, hourglasses: 0 }) })
+  }
 
   const [answers, setAnswers] = useState<AnswerRecord[]>([])
   const [initialized, setInitialized] = useState(false)
@@ -192,6 +212,79 @@ export default function RunPage() {
     setImages((prev) => [...prev, ...urls])
   }, [])
 
+  /** 思路点拨内容：题目自带的引导优先，缺省用知识点的要点生成 */
+  const hintOf = (q: Question) => {
+    if (q.guidance) return q.guidance
+    const pts = (q.pointIds ?? []).map((pid) => pointsMap.get(pid)).filter((p): p is NonNullable<typeof p> => !!p)
+    const withKey = pts.find((p) => p.keyPoints?.length)
+    return `本题考察：${pts.map((p) => p.name).join('、') || '本章知识点'}。${
+      withKey ? `先想想「${withKey.keyPoints![0]}」这一步。` : '先把已知条件列全，再对照知识点走一步。'
+    }`
+  }
+
+  const applyHint = () => {
+    if (!current || hintUsedSet.has(current.id) || remHints <= 0) return
+    patchBuffs((b) => ({ ...b, hintUsed: [...(b.hintUsed ?? []), current.id] }))
+  }
+
+  const applyHourglass = () => {
+    if (!current || hourglassSet.has(current.id) || remHourglasses <= 0) return
+    patchBuffs((b) => ({ ...b, hourglassUsed: [...(b.hourglassUsed ?? []), current.id] }))
+  }
+
+  /** 回炉：换一道同构变式题重做（原答案封存留痕） */
+  const beginRetry = () => {
+    if (!current || remRetries <= 0 || !(current.variants ?? []).length) return
+    const v = current.variants![Math.floor(Math.random() * current.variants!.length)]
+    setRetry({
+      origId: current.id,
+      startedAt: Date.now(),
+      q: {
+        ...current,
+        stem: v.stem,
+        options: v.options,
+        answer: v.answer,
+        solution: v.solution || current.solution,
+        guidance: v.guidance,
+        estimatedSeconds: v.estimatedSeconds || current.estimatedSeconds,
+      },
+    })
+    setRetryDraft('')
+    setRetryPick('')
+    setRetryWork('')
+  }
+
+  const submitRetry = () => {
+    if (!retry || !round) return
+    const value = retry.q.type === 'choice' ? retryPick : retryDraft
+    if (!value.trim()) return
+    const g = gradeQuestion(retry.q, value, false)
+    const old = answers.find((a) => a.questionId === retry.origId)
+    const now = Date.now()
+    const rec: AnswerRecord = {
+      questionId: retry.origId,
+      type: retry.q.type,
+      startedAt: retry.startedAt,
+      submittedAt: now,
+      durationMs: now - retry.startedAt,
+      value,
+      work: retryWork || undefined,
+      revisitMs: 0,
+      revisitCount: 0,
+      correct: g.correct,
+      score: g.score,
+      errorTags: [],
+      errorReason: '',
+      index: old?.index ?? 0,
+      retried: true,
+      retriedFrom: old?.value,
+    }
+    setAnswers((prev) => prev.map((a) => (a.questionId === retry.origId ? rec : a)))
+    patchBuffs((b) => ({ ...b, retried: [...(b.retried ?? []), retry.origId] }))
+    setRetry(null)
+    setFlash(true)
+  }
+
   const handleSubmit = useCallback(async () => {
     if (!round || !current || !canSubmit || grading) return
     flushTiming(current.id)
@@ -230,6 +323,7 @@ export default function RunPage() {
       score: grade.score,
       errorTags: grade.errorTags,
       errorReason: grade.errorReason,
+      hintUsed: hintUsedSet.has(current.id) || undefined,
       photoReview: grade.photoPending ? 'pending' : undefined,
       index: idx + 1,
     }
@@ -239,22 +333,36 @@ export default function RunPage() {
     setFlash(true)
     setTimeout(() => setFlash(false), 1200)
     const nextOpen = questions.findIndex((q, i) => i !== idx && !next.some((a) => a.questionId === q.id))
-    if (nextOpen >= 0) goTo(nextOpen)
+    if (nextOpen >= 0) {
+      goTo(nextOpen)
+    } else if (next.length >= questions.length) {
+      // 全部题目作答完毕 → 自动交卷进入报告（留 1.5s 让最后一批改反馈闪现）
+      setTimeout(() => finishRef.current(), 1500)
+    }
   }, [round, current, canSubmit, grading, answerValue, firstPickAt, work, images, questions, answerById, idx, flushTiming, goTo])
 
   const handleFinish = useCallback(() => {
     if (!round) return
     const qMap = new Map(round.exam.questions.map((q) => [q.id, q]))
     const summary = summarizeRecords(answers, qMap)
+    // 时间沙漏用过的题不计超时（判分不受影响，只是这题不被记为「慢」）
+    const hgUsed = new Set(round.buffs?.hourglassUsed ?? [])
+    const wrong = summary.wrongQuestionIds
+    const slow = summary.slowQuestionIds.filter((id) => !hgUsed.has(id))
+    const weak = Array.from(new Set([...wrong, ...slow].flatMap((id) => qMap.get(id)?.pointIds ?? [])))
+    // 总用时按各题实际作答时长累计（中断离开的时间不计入）
+    const answeredMs = answers.reduce((s2, a) => s2 + (a.durationMs ?? 0), 0)
     const finishedRound: Round = {
       ...round,
       answers,
       finishedAt: Date.now(),
-      totalMs: Date.now() - round.startedAt,
-      ...summary,
+      totalMs: answeredMs,
+      wrongQuestionIds: wrong,
+      slowQuestionIds: slow,
+      weakPointIds: weak,
     }
     saveRound(finishedRound)
-    const cleared = summary.wrongQuestionIds.length === 0 && summary.slowQuestionIds.length === 0
+    const cleared = wrong.length === 0 && slow.length === 0
       && answers.every((a) => a.photoReview !== 'pending')
     updateLoop({
       chapterId: round.chapterId,
@@ -262,11 +370,14 @@ export default function RunPage() {
       round: round.round,
       status: cleared ? 'mastered' : 'remedial',
       roundIds: Array.from(new Set([...(data.loops[round.chapterId]?.roundIds ?? []), round.id])),
-      weakPointIds: summary.weakPointIds,
+      weakPointIds: weak,
       updatedAt: Date.now(),
     })
     navigate(`/report/${round.id}`)
   }, [round, answers, navigate, data.loops])
+
+  const finishRef = useRef(handleFinish)
+  finishRef.current = handleFinish
 
   if (!round) return <Empty title="未找到该考评记录" hint="请从「章节考评」重新开始。" />
   if (!initialized) return <Card className="m-6 p-6 text-sm text-gray-500">正在恢复答题进度…</Card>
@@ -274,9 +385,19 @@ export default function RunPage() {
 
   const totalEstimated = round.exam.totalEstimatedSeconds
   const unanswered = questions.filter((q) => !answerById.has(q.id)).length
+  const submitted = current ? answerById.get(current.id) : undefined
   const isChoice = current.type === 'choice'
   const isFill = current.type === 'fill'
   const isLong = current.type === 'calc' || current.type === 'applied'
+  /** 是否可以回炉：答错、有变式、有券、没回炉过、照片未挂起 */
+  const canRetryNow =
+    !!submitted &&
+    !submitted.correct &&
+    submitted.photoReview !== 'pending' &&
+    remRetries > 0 &&
+    (current.variants?.length ?? 0) > 0 &&
+    !retriedSet.has(current.id) &&
+    !retry
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -290,11 +411,28 @@ export default function RunPage() {
             本卷已用 <b className="tabular-nums text-gray-800">{formatDuration(elapsed)}</b>
             <span className="text-gray-400"> / 预计 {formatDuration(totalEstimated * 1000)}</span>
           </div>
-          <div className="text-xs text-gray-500">
-            本题已用 <b className="tabular-nums text-blue-600">{formatDuration(currentElapsed)}</b>
-            <span className="text-gray-400"> / 预计 {formatDuration(current.estimatedSeconds * 1000)}</span>
-          </div>
+          {hourglassSet.has(current.id) ? (
+            <div className="text-xs font-medium text-violet-600">⏳ 时间沙漏生效中（本题不计时、不判超时）</div>
+          ) : (
+            <div className="text-xs text-gray-500">
+              本题已用 <b className="tabular-nums text-blue-600">{formatDuration(currentElapsed)}</b>
+              <span className="text-gray-400"> / 预计 {formatDuration(current.estimatedSeconds * 1000)}</span>
+            </div>
+          )}
           {flash && <Badge tone="green">已提交并上传成功 ✓</Badge>}
+          {round.buffs && (
+            <div className="flex items-center gap-1.5">
+              {round.buffs.hints > 0 && (
+                <Badge tone="blue">💡 {round.buffs.hints - (round.buffs.hintUsed?.length ?? 0)}</Badge>
+              )}
+              {round.buffs.retries > 0 && (
+                <Badge tone="amber">🔄 {round.buffs.retries - (round.buffs.retried?.length ?? 0)}</Badge>
+              )}
+              {round.buffs.hourglasses > 0 && (
+                <Badge tone="violet">⏳ {round.buffs.hourglasses - (round.buffs.hourglassUsed?.length ?? 0)}</Badge>
+              )}
+            </div>
+          )}
           <div className="ml-auto flex items-center gap-2">
             <button className="btn !py-1.5 !text-xs" onClick={handleFinish}>
               {unanswered > 0 ? `交卷（还有 ${unanswered} 题未答）` : '交卷并查看报告'}
@@ -322,6 +460,97 @@ export default function RunPage() {
           <span className="ml-auto text-xs text-gray-400">{current.id}</span>
         </div>
 
+        {/* 战中增益：思路点拨 / 时间沙漏 */}
+        {round.buffs && !retry && !submitted && (
+          <div className="mb-3 space-y-2">
+            {hintUsedSet.has(current.id) ? (
+              <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 px-3.5 py-2.5 text-xs leading-relaxed text-indigo-900">
+                💡 {hintOf(current)}
+                <span className="ml-1 text-[10px] text-indigo-300">（本题已标记「借助提示」）</span>
+              </div>
+            ) : (
+              remHints > 0 && (
+                <button className="btn !py-1.5 !text-xs" onClick={applyHint}>
+                  💡 思路点拨（剩 {remHints}）· 用了拿不到完美卷
+                </button>
+              )
+            )}
+            {!hourglassSet.has(current.id) && remHourglasses > 0 && (
+              <button className="btn !py-1.5 !text-xs" onClick={applyHourglass}>
+                ⏳ 时间沙漏（剩 {remHourglasses}）· 本题不计时
+              </button>
+            )}
+          </div>
+        )}
+
+        {retry ? (
+          <Card className="!border-amber-300 !bg-amber-50/40 p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+                🔄 回炉重做 · 换一道同构题
+              </span>
+              <button
+                className="text-xs text-gray-400 underline-offset-2 hover:text-gray-600 hover:underline"
+                onClick={() => setRetry(null)}
+              >
+                放弃（不消耗回炉券）
+              </button>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-500 text-sm font-semibold text-white">
+                {idx + 1}
+              </span>
+              <MathText className="flex-1 text-[16px] leading-8 text-gray-900" text={retry.q.stem} />
+            </div>
+            {retry.q.type === 'choice' ? (
+              <div className="mt-4 space-y-2">
+                {(retry.q.options ?? []).map((opt, i) => {
+                  const letter = String.fromCharCode(65 + i)
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setRetryPick(letter)}
+                      className={`block w-full rounded-xl border px-4 py-3 text-left text-sm transition ${
+                        retryPick === letter ? 'border-amber-400 bg-amber-100/70' : 'border-gray-200 hover:border-amber-300'
+                      }`}
+                    >
+                      <span className="mr-2 font-semibold text-gray-500">{letter}.</span>
+                      <MathText className="inline text-gray-800" text={opt} />
+                    </button>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="mt-4">
+                <input
+                  type="text"
+                  value={retryDraft}
+                  autoComplete="off"
+                  placeholder="填写最终答案"
+                  onChange={(e) => setRetryDraft(e.target.value)}
+                />
+                <textarea
+                  rows={3}
+                  className="mt-2"
+                  value={retryWork}
+                  placeholder="简要写出过程（可选）"
+                  onChange={(e) => setRetryWork(e.target.value)}
+                />
+              </div>
+            )}
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-amber-200/60 pt-3">
+              <span className="text-xs text-amber-700/80">重做对了按对计，标记「回炉」；按精确匹配批改。</span>
+              <button
+                className="btn btn-primary"
+                disabled={retry.q.type === 'choice' ? !retryPick : !retryDraft.trim()}
+                onClick={submitRetry}
+              >
+                提交重做
+              </button>
+            </div>
+          </Card>
+        ) : (
         <Card className="p-4">
           <div className="flex items-start gap-3">
             <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
@@ -330,6 +559,18 @@ export default function RunPage() {
             <MathText className="flex-1 text-[16px] leading-8 text-gray-900" text={current.stem} />
           </div>
 
+          {submitted ? (
+            <SubmittedView
+              question={current}
+              record={submitted}
+              hasNextOpen={unanswered > 0}
+              onGoNext={() => {
+                const nextOpen = questions.findIndex((q) => !answerById.has(q.id))
+                if (nextOpen >= 0) goTo(nextOpen)
+              }}
+            />
+          ) : (
+            <>
           {isChoice && (
             <div className="mt-4 space-y-2 pl-10">
               {(current.options ?? []).map((opt, i) => {
@@ -490,13 +731,24 @@ export default function RunPage() {
                   ? images.length
                     ? '已上传手写照片。批改以照片为准，文字框只作参考。'
                     : '计算题和应用题提交后，由模型对照标准答案和解析批改。'
-                  : '点击题号可查看、修改任意一题。离开题目时本题计时暂停。'}
+                  : '点击题号可回看任意一题（已提交的题不可修改）。离开题目时本题计时暂停。'}
             </div>
             <button className="btn btn-primary" disabled={!canSubmit || grading} onClick={handleSubmit}>
-              {grading ? '模型批改中…' : answerById.has(current.id) ? '保存修改' : isChoice ? '提交本题' : isFill ? '提交答案并上传' : '提交并批改'}
+              {grading ? '模型批改中…' : isChoice ? '提交本题' : isFill ? '提交答案并上传' : '提交并批改'}
             </button>
           </div>
+            </>
+          )}
         </Card>
+        )}
+
+        {canRetryNow && (
+          <div className="mt-3">
+            <button className="btn !border-amber-300 !py-1.5 !text-xs hover:!border-amber-400" onClick={beginRetry}>
+              🔄 用回炉券换一道同构题重做（剩 {remRetries} 张）· 重做对了按对计，标记「回炉」
+            </button>
+          </div>
+        )}
 
         <div className="mt-4 flex flex-wrap gap-1.5">
           {questions.map((q, i) => {
@@ -525,6 +777,90 @@ export default function RunPage() {
         <div className="mt-2 text-xs text-gray-400">
           点击题号可跳到任意一题查看或修改。交卷后可在报告页逐题回看解析。
         </div>
+      </div>
+    </div>
+  )
+}
+
+
+/** 已提交题目：只读展示答案与批改状态，不允许修改 */
+function SubmittedView({
+  question,
+  record,
+  hasNextOpen,
+  onGoNext,
+}: {
+  question: Question
+  record: AnswerRecord
+  hasNextOpen: boolean
+  onGoNext: () => void
+}) {
+  const isChoice = question.type === 'choice'
+  const choiceIdx = isChoice ? record.value.charCodeAt(0) - 65 : -1
+  const status = record.photoReview === 'pending'
+    ? { label: '手写待确认（以照片批改为准）', cls: 'bg-amber-50 text-amber-700 border-amber-200' }
+    : record.correct
+      ? { label: '回答正确 ✓', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+      : { label: '回答错误 ✗', cls: 'bg-rose-50 text-rose-700 border-rose-200' }
+  return (
+    <div className="mt-4 space-y-3 pl-10">
+      <div className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-sm font-semibold ${status.cls}`}>
+        {status.label}
+      </div>
+
+      {isChoice ? (
+        <div className="space-y-2">
+          {(question.options ?? []).map((opt, i) => {
+            const letter = String.fromCharCode(65 + i)
+            const picked = i === choiceIdx
+            return (
+              <div
+                key={i}
+                className={`rounded-xl border px-4 py-3 ${
+                  picked ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 opacity-70'
+                }`}
+              >
+                <span className={`mr-2 font-semibold ${picked ? 'text-indigo-600' : 'text-gray-400'}`}>{letter}.</span>
+                <MathText className="inline text-sm text-gray-800" text={opt} />
+                {picked && <span className="ml-2 text-xs font-medium text-indigo-500">（你的选择）</span>}
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="rounded-xl bg-gray-50 px-4 py-3">
+          <div className="text-xs text-gray-500">你的答案</div>
+          <MathText className="mt-1 text-[15px] font-semibold text-gray-900" text={record.value || '（未填写文字答案）'} />
+          {record.work && (
+            <>
+              <div className="mt-2 text-xs text-gray-500">解题过程</div>
+              <MathText className="mt-1 text-sm text-gray-700" text={record.work} />
+            </>
+          )}
+          {record.images?.length ? (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {record.images.map((img, i) => (
+                <img key={i} src={img} alt={`手写 ${i + 1}`} className="h-24 rounded-lg border border-gray-200 object-contain" />
+              ))}
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      {!record.correct && record.photoReview !== 'pending' && record.errorReason && (
+        <div className="rounded-xl bg-rose-50/60 px-4 py-3 text-xs leading-relaxed text-rose-700">
+          <b>错因：</b>
+          {record.errorReason}
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-3 text-xs text-gray-400">
+        <span>本题已提交，答案已锁定（完整解析见交卷后的报告页）</span>
+        {hasNextOpen && (
+          <button className="btn btn-primary !py-1.5 !text-xs" onClick={onGoNext}>
+            去做下一道未答题 →
+          </button>
+        )}
       </div>
     </div>
   )

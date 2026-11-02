@@ -3,7 +3,7 @@ import { lessonAudioUrl } from '../lib/data'
 import { buildNarration } from '../lib/narration'
 import { speakChinese, ttsSupported } from '../lib/tts'
 import type { Lesson, Slide } from '../types'
-import { MathText } from './MathText'
+import { ProgressiveReveal, ProgressiveExample } from './ProgressiveReveal'
 
 const KIND_META: Record<Slide['kind'], { label: string; tone: string; bar: string; dot: string }> = {
   concept: { label: '概念讲解', tone: 'bg-blue-50 text-blue-700 border-blue-200', bar: 'border-l-blue-400', dot: 'bg-blue-400' },
@@ -76,6 +76,7 @@ export function SlideDeck({
   const step = steps[sti]
   const meta = KIND_META[slide?.kind ?? 'concept'] ?? KIND_META.concept
   const stepHasAudio = !!step && (audio?.[si]?.[sti] ?? 0) > 0
+  const audioDurationMs = audio?.[si]?.[sti] ?? 8000
 
   const stopNarration = useCallback(() => {
     ttsRef.current?.cancel()
@@ -130,7 +131,7 @@ export function SlideDeck({
       const el = audioRef.current
       if (el) {
         el.playbackRate = prefs.rate
-        el.play().catch(() => setPlaying(false))
+        el.play().catch(() => { /* 状态由 onPlaying/onPause 事件驱动 */ })
       }
     } else {
       startTts()
@@ -183,7 +184,7 @@ export function SlideDeck({
       if (!el) return
       el.src = lessonAudioUrl(chapterId, lesson.pointId, si, sti)
       el.playbackRate = prefsRef.current.rate
-      el.play().catch(() => setPlaying(false))
+      el.play().catch(() => { /* 状态由 onPlaying/onPause 事件驱动 */ })
     } else {
       startTts()
     }
@@ -310,38 +311,42 @@ export function SlideDeck({
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 text-gray-800 md:px-7">
+
             {slide.kind === 'example' ? (
               <div className="space-y-4">
-                <div className={`rounded-xl bg-amber-50/70 px-4 py-3 md:px-5 ${textSize}`}>
-                  <MathText text={slide.problem ?? slide.body} />
-                </div>
-                {(sti >= 1 || steps.length <= 1) && (
-                  <div className="space-y-4 border-t border-dashed border-gray-200 pt-4">
-                    {slide.solution && (
-                      <div className={textSize}>
-                        <div className="mb-1 text-sm font-semibold text-indigo-600">解答</div>
-                        <MathText text={slide.solution} />
-                      </div>
-                    )}
-                    {slide.notes && (
-                      <div className="rounded-lg bg-green-50/70 px-4 py-3 text-base text-green-900">
-                        <div className="mb-1 text-sm font-semibold">点评</div>
-                        <MathText text={slide.notes} />
-                      </div>
-                    )}
-                  </div>
-                )}
+                <ProgressiveExample
+                  problem={slide.problem ?? slide.body ?? ''}
+                  solution={(sti >= 1 || steps.length <= 1) ? slide.solution : undefined}
+                  notes={(sti >= 1 || steps.length <= 1) ? slide.notes : undefined}
+                  playing={playing}
+                  durationMs={stepHasAudio ? audioDurationMs : 12000}
+                  className={textSize}
+                />
                 {sti === 0 && steps.length > 1 && (
                   <div className="text-sm text-gray-400">先自己想一想，按「▶｜下一步」或等语音讲完自动看解答</div>
                 )}
               </div>
             ) : slide.kind === 'book' ? (
               <div className={`${textSize} space-y-3`}>
-                {slide.bookRef && <div className="text-sm font-medium text-violet-600">《{slide.bookRef}》</div>}
-                <MathText text={slide.body} />
+                {slide.bookRef && (
+                  <div className={`text-sm font-medium text-violet-600 ${playing ? 'reveal-visible' : 'reveal-hidden'}`}>
+                    《{slide.bookRef}》
+                  </div>
+                )}
+                <ProgressiveReveal
+                  text={slide.body ?? ''}
+                  playing={playing}
+                  durationMs={stepHasAudio ? audioDurationMs : 8000}
+                  className={textSize}
+                />
               </div>
             ) : (
-              <MathText className={textSize} text={slide.body} />
+              <ProgressiveReveal
+                text={slide.body ?? ''}
+                playing={playing}
+                durationMs={stepHasAudio ? audioDurationMs : 8000}
+                className={textSize}
+              />
             )}
           </div>
 
@@ -441,6 +446,14 @@ export function SlideDeck({
       {/* 讲解音频（婷婷预生成；缺失时回退浏览器语音） */}
       <audio
         ref={audioRef}
+        onPlaying={() => setPlaying(true)}
+        onPause={() => {
+          // 音频被外部暂停（非自然结束）→ 同步状态
+          const el = audioRef.current
+          if (el && el.currentTime < el.duration - 0.1) {
+            setPlaying(false)
+          }
+        }}
         onEnded={() => {
           if (prefs.auto) advance()
           else setPlaying(false)

@@ -76,4 +76,15 @@ writeFileSync(
 )
 
 console.log(`  课件文件 ${nLessons} 个，考评卷 ${nExams} 个，书籍文本 ${nUnits} 篇，书籍页面 ${nPages} 张`)
+
+// ---------- 动画课件清单（app/public/demo/*.html → demo/manifest.json） ----------
+const demoDir = join(appRoot, 'public', 'demo')
+const animatedLessons = existsSync(demoDir)
+  ? readdirSync(demoDir)
+      .filter((f) => /^7[ab]-\d+-\d+\.html$/.test(f))
+      .map((f) => f.replace('.html', ''))
+      .sort()
+  : []
+writeFileSync(join(demoDir, 'manifest.json'), JSON.stringify({ animatedLessons }, null, 2))
+console.log(`  动画课件 ${animatedLessons.length} 个`)
 console.log('完成。')

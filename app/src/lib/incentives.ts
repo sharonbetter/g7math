@@ -102,6 +102,35 @@ function xpOfRound(r: Round): number {
   return r.kind === 'practice' ? base + 10 : base
 }
 
+/** 连击窗口：两次完成间隔 ≤30 分钟算同一连击 */
+export const COMBO_WINDOW = 30 * 60_000
+
+/**
+ * 连学连击奖励：同一连击从第 3 个完成起每个 +5 XP。
+ * 全部由 studied 时间戳推算，不另存状态。
+ */
+export function comboBonusOf(timestamps: number[]): number {
+  const ts = [...timestamps].sort((a, b) => a - b)
+  let run = 1
+  let bonus = 0
+  for (let i = 1; i < ts.length; i++) {
+    run = ts[i] - ts[i - 1] <= COMBO_WINDOW ? run + 1 : 1
+    if (run >= 3) bonus += 5
+  }
+  return bonus
+}
+
+/** 某次完成时刻所处的连击数（含自身），用于战报展示 */
+export function comboRunAt(studied: Record<string, number>, at: number): number {
+  const ts = Object.values(studied).sort((a, b) => a - b)
+  let run = 1
+  for (let i = 0; i < ts.length; i++) {
+    if (i > 0) run = ts[i] - ts[i - 1] <= COMBO_WINDOW ? run + 1 : 1
+    if (ts[i] === at) return run
+  }
+  return 1
+}
+
 /**
  * 考评经验按「每章取最好的一轮」累计，专项练习每章最多补两轮。
  * 这样反复重做同一章不会无限刷经验，经验只反映真实推进。
@@ -242,6 +271,8 @@ export function computeIncentives(data: AppData): IncentiveSnapshot {
 
   const xp =
     studiedEntries.length * 10 +
+    Object.keys(data.perfected ?? {}).length * 5 +
+    comboBonusOf(studiedEntries.map(([, ts]) => ts)) +
     xpFromRounds(rounds) +
     mastered * 50 +
     calcDone.length * 10 +

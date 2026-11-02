@@ -1,12 +1,13 @@
 import { Route, Routes } from 'react-router-dom'
 import { Layout } from './components/ui'
-import { useSession } from './lib/auth'
+import { useAuthState } from './lib/auth'
 import LoginPage from './pages/Login'
 import BookPage from './pages/Book'
 import CalcListPage from './pages/CalcList'
 import CalcRecordPage from './pages/CalcRecord'
 import CalcRunPage from './pages/CalcRun'
 import CalcWeakPage from './pages/CalcWeak'
+import SlideRenderPage from './pages/SlideRender'
 import ChapterPage from './pages/ChapterPage'
 import CurriculumPage from './pages/Curriculum'
 import ExamIntroPage from './pages/ExamIntro'
@@ -16,12 +17,21 @@ import LessonPage from './pages/LessonPage'
 import ProgressPage from './pages/Progress'
 import RemedialListPage from './pages/RemedialList'
 import RemedialPage from './pages/RemedialPage'
+import ExplainDemo from './pages/ExplainDemo'
 import ReportPage from './pages/Report'
 import RunPage from './pages/Run'
 
 export default function App() {
-  const session = useSession()
-  if (!session) return <LoginPage />
+  const { session, ready } = useAuthState()
+  // 独立全屏路由（视频截图 / 错题讲解样例）跳过登录
+  const isStandalone = window.location.hash.includes('/render/') || window.location.hash.includes('/explain-demo')
+  if (!ready && !isStandalone) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 text-sm text-gray-400">加载中…</div>
+    )
+  }
+  if (!session && !isStandalone) return <LoginPage />
+  if (isStandalone) return <StandaloneRoutes />
   return (
     <Layout>
       <Routes>
@@ -43,5 +53,15 @@ export default function App() {
         <Route path="/progress" element={<ProgressPage />} />
       </Routes>
     </Layout>
+  )
+}
+
+// 渲染路由在 Layout 外面（无导航栏/页脚，纯内容画面用于视频截图）
+function StandaloneRoutes() {
+  return (
+    <Routes>
+      <Route path="/render/:pointId/:slideIdx" element={<SlideRenderPage />} />
+      <Route path="/explain-demo" element={<ExplainDemo />} />
+    </Routes>
   )
 }

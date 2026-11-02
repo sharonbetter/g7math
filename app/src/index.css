@@ -121,6 +121,8 @@ body::before {
 
 /* ---------- 表单 ---------- */
 input[type="text"],
+input[type="password"],
+input[type="tel"],
 textarea {
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -134,6 +136,8 @@ textarea {
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="tel"]:focus,
 textarea:focus {
   border-color: #a5b4fc;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14);
@@ -155,3 +159,93 @@ textarea:focus {
   border: 2px solid transparent;
   background-clip: content-box;
 }
+
+/* ---------- 课件图形动画 ---------- */
+@keyframes fig-pop-in {
+  0% { opacity: 0; transform: scale(0.4); }
+  70% { transform: scale(1.25); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes fig-slide-in {
+  0% { opacity: 0; transform: translateX(-14px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes fig-bounce-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.fig-pop { animation: fig-pop-in 0.7s ease-out both; transform-box: fill-box; transform-origin: center; }
+.fig-slide { animation: fig-slide-in 0.8s ease-out both; }
+.fig-bounce { animation: fig-bounce-y 1.6s ease-in-out infinite; }
+
+/* ---------- 课件逐行递进揭示 ---------- */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(3px);
+  transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              filter 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+}
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+  transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              filter 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ---------- 学伴精灵（毛栗）与对话气泡 ---------- */
+@keyframes pet-breathe { 0%,100%{transform:scale(1,1)} 50%{transform:scale(1.035,0.985)} }
+@keyframes pet-blink { 0%,90%,100%{transform:scaleY(1)} 94%{transform:scaleY(0.08)} }
+@keyframes pet-ear { 0%,100%{transform:rotate(0deg)} 30%{transform:rotate(-5deg)} 65%{transform:rotate(4deg)} }
+@keyframes pet-leaf { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(9deg)} }
+@keyframes pet-wave { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(-20deg)} 50%{transform:rotate(8deg)} 75%{transform:rotate(-16deg)} }
+@keyframes bubble-in { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.pet-breathe{transform-box:fill-box;transform-origin:center bottom;animation:pet-breathe 3.4s ease-in-out infinite}
+.pet-blink{transform-box:fill-box;transform-origin:center;animation:pet-blink 4.6s linear infinite}
+.pet-ear{transform-box:fill-box;transform-origin:center bottom;animation:pet-ear 5.2s ease-in-out infinite}
+.pet-ear-r{animation-delay:.7s}
+.pet-leaf{transform-box:fill-box;transform-origin:bottom left;animation:pet-leaf 4.2s ease-in-out infinite}
+.pet-wave{transform-box:fill-box;transform-origin:top center;animation:pet-wave 2.8s ease-in-out infinite}
+.pet-bubble-in{animation:bubble-in .45s ease-out both}
+@media (prefers-reduced-motion: reduce){.pet-breathe,.pet-blink,.pet-ear,.pet-leaf,.pet-wave,.pet-bubble-in{animation:none}}
+
+/* ---------- 穿门转场 ---------- */
+@keyframes gt-gate-in { from { opacity:0; transform: scale(.78) translateY(14px) } to { opacity:1; transform:none } }
+@keyframes gt-door-bloom { 0% { opacity:0; transform: scale(.25) } 45% { opacity:.85 } 100% { opacity:1; transform: scale(2) } }
+@keyframes gt-text-in { from { opacity:0; transform: translateY(8px) } to { opacity:1; transform:none } }
+@keyframes gt-flash-in { 0%,58% { opacity:0 } 100% { opacity:1 } }
+.gt-gate { animation: gt-gate-in .4s ease-out both }
+.gt-gate .gate-open-glow { transform-box: fill-box; transform-origin: center; animation: gt-door-bloom 1.2s .25s ease-out both }
+.gt-text { animation: gt-text-in .5s .15s ease-out both }
+.gt-flash { background: radial-gradient(circle at 50% 46%, #fffef0 0%, #fde68a 42%, rgba(253,230,138,.55) 70%, #fde68a 100%); animation: gt-flash-in 1.45s ease-in both }
+@media (prefers-reduced-motion: reduce) { .gt-gate,.gt-gate .gate-open-glow,.gt-text,.gt-flash { animation-duration: .25s; animation-delay: 0s } }
+
+/* ---------- 课内微战 ---------- */
+@keyframes lb-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px) rotate(-2deg)} 75%{transform:translateX(6px) rotate(2deg)} }
+.lb-hit { animation: lb-shake .35s ease-in-out }
+@keyframes lb-burst { from{transform:scaleX(1);opacity:1} to{transform:scaleX(1.6);opacity:0} }
+.lb-burst { animation: lb-burst .4s ease-out forwards }
+@keyframes lb-rise { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+.lb-rise { animation: lb-rise .45s ease-out both }
+@keyframes lb-cell-on { from{ background: rgba(251,191,36,.25) } to{ background: #fbbf24 } }
+.lb-cell-on { background: rgba(251,191,36,.25); animation: lb-cell-on .4s ease-out both }
+@media (prefers-reduced-motion: reduce) { .lb-hit,.lb-burst,.lb-rise,.lb-cell-on { animation-duration: .01s; animation-delay: 0s !important } }
+
+/* ---------- 能量石 ---------- */
+@keyframes gem-glow { 0%,100%{ box-shadow: 0 0 6px 2px rgba(var(--gem-glow-c, 34,211,238), .45) } 50%{ box-shadow: 0 0 16px 6px rgba(var(--gem-glow-c, 34,211,238), .75) } }
+.gem-glow { animation: gem-glow 2.2s ease-in-out infinite; border-radius: 9999px }
+@media (prefers-reduced-motion: reduce) { .gem-glow { animation: none } }
+
+/* ---------- 已点亮节点（来时路的灯） ---------- */
+@keyframes node-lit {
+  0%,100% { box-shadow: 0 0 10px 3px rgba(253,224,71,.5), 0 0 26px 9px rgba(254,249,195,.55); }
+  50% { box-shadow: 0 0 18px 6px rgba(253,224,71,.8), 0 0 40px 16px rgba(255,251,235,.85); }
+}
+.node-lit { animation: node-lit 2.8s ease-in-out infinite; }
+@keyframes node-sparkle { 0%,100%{ opacity:.5; transform:scale(.9) rotate(0deg) } 50%{ opacity:1; transform:scale(1.12) rotate(12deg) } }
+.node-sparkle { animation: node-sparkle 2.2s ease-in-out infinite; transform-origin: center }
+@media (prefers-reduced-motion: reduce) { .node-lit,.node-sparkle { animation: none } }

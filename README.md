@@ -12,12 +12,18 @@
 PC / 网页端：
 
 ```bash
+# 用户系统后端（注册/登录/数据云同步）：首次先 cp server/.env.example server/.env
+cd server && npm install && npm run dev   # http://127.0.0.1:8787（不配置短信=开发模式，验证码直接返回）
+
 cd app
 node scripts/sync-data.mjs      # 把 ../data 的内容同步到 app/public/data
 npm install                     # 首次运行
 npm run gen:audio               # 生成课件讲解语音（macOS 婷婷，约 15 分钟，全量约 1048 段）
-npm run dev                     # 打开 http://127.0.0.1:5273
+npm run dev                     # 打开 http://127.0.0.1:5273（/api 自动代理到 8787）
 ```
+
+> 后端不启动也能用：应用会走离线回退，沿用本机 localStorage 的会话与学习数据（此时无法注册新账号）。
+> 账号体系与充值方案详见 [`docs/USER_SYSTEM.md`](docs/USER_SYSTEM.md)。
 
 > 讲解语音为可选：未生成时课件放映会自动回退到浏览器语音合成（Safari/Chrome 的中文声音）。
 > 课件内容改动后重跑 `npm run gen:audio` 即可，已生成的段落按内容哈希增量更新。
@@ -117,8 +123,8 @@ PC / 网页端与微信小程序端共用同一份 `data/` 内容，判分、计
 | 能力 | PC / 网页端 | 微信小程序端 |
 | --- | --- | --- |
 | 课件、考评、专项循环 | ✅ | ✅ |
-| 用户区分 | 手机号登录 | 微信 openid（未接服务器时为本机 id） |
-| 学习数据存储 | 浏览器 localStorage | 小程序本地存储，按用户分键 |
+| 用户区分 | 手机号注册账号（短信验证码 + 密码，云端会话） | 微信 openid（未接服务器时为本机 id） |
+| 学习数据存储 | 登录后自动云端同步 + localStorage 缓存（离线可用） | 小程序本地存储，按用户分键 |
 | 非客观题模型批改 | 本地 `/api/grade` 中间件 | 需 HTTPS 域名（`miniprogram/config.js`） |
 | 教辅原页图像 | 同步到静态目录 | 需 HTTPS 域名（`miniprogram/config.js`） |
 
@@ -151,4 +157,4 @@ cd app && node scripts/sync-data.mjs
 1. 原书 PDF 为**纯扫描件**，内容依赖 macOS Vision OCR，数学公式识别存在误差；书内题均以 OCR 原文 + 书末《参考答案》交叉验证，并把依赖插图的条件改写为自足的文字题干。题库中的书内题请通过 `/book` 的原页图像做最终人工核对。
 2. 答题界面为纯文本，不显示插图；统计与几何题目均以文字/表格完整给出数据。
 3. 计算题与应用题的解题**过程**不做逐行自动判分，采用「最终答案自动判分 + 步骤要点自查给部分分」。
-4. 学习数据存于浏览器 localStorage，清空浏览器数据会丢失，请用「学习报告 → 数据管理」导出备份。
+4. 未登录/离线时学习数据存于浏览器 localStorage；登录后自动云端同步，换设备登录即可恢复。「学习报告 → 数据管理」仍可导出备份。

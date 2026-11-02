@@ -77,7 +77,7 @@ function hasRealChinese(s: string): boolean {
 
 /** 单个 / 一行文本 → 适合 TTS 的中文口语 */
 export function speakable(raw: string): string {
-  let t = (raw ?? '').replace(/\r/g, '')
+  let t = (raw ?? '').replace(/\r/g, '').replace(/@@fig\s*\{[^@]*?\}\s*@@/g, ' ')
 
   // 1) 统一易混字符：Unicode 减号、全角加号、下标 / 上标
   t = t
@@ -228,6 +228,14 @@ export function speakable(raw: string): string {
     .trim()
   t = t.replace(/^[，。、；，]+/, '')
   if (t && !/[。！？；，]$/.test(t)) t += '。'
+  // 自然停顿：问句后加"。"让 TTS 停一拍（"？。"= 句末双重标点 → 0.5 秒停顿）
+  t = t
+    .replace(/？(?=[^，。！？；\s])/g, '？。')          // 问句后直接跟内容 → 加停顿
+    .replace(/！(?=[^，。！？；\s])/g, '！。')          // 感叹后同理
+    .replace(/([。！？])我们来看/g, '$1。我们来看')     // 过渡语前停顿
+    .replace(/([。！？])其实/g, '$1。其实')             // "其实"前停顿（思考感）
+    .replace(/([。！？])所以/g, '$1。所以')             // "所以"前停顿
+    .replace(/([。！？])注意/g, '$1。注意')             // "注意"前停顿
   return t
 }
 

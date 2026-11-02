@@ -5,7 +5,10 @@ import { useCalcBook } from '../lib/data'
 import { answersMatch } from '../lib/answers'
 import { formatDuration, isSlow } from '../lib/grading'
 import { diagnoseByModel } from '../lib/diagnose'
+import { useNavigate } from 'react-router-dom'
 import { patchCalcAttempt, recordCalcDone, saveCalcAttempt, useAppData } from '../lib/store'
+import { allChapters, useCurriculum } from '../lib/data'
+import { DungeonReport } from '../components/LessonBattle'
 import type { CalcTraining } from '../types'
 
 const MODULE_COLORS: Record<string, string> = {
@@ -72,23 +75,38 @@ function buildRound(training: CalcTraining, round: number, fromIdxs?: number[]):
 
 export default function CalcRunPage() {
   const { trainingId } = useParams()
+  const navigate = useNavigate()
+  const { curriculum } = useCurriculum()
   const book = useCalcBook()
   const data = useAppData()
   const training = book?.trainings.find((t) => t.id === trainingId)
   const module = book?.modules.find((m) => m.id === training?.moduleId)
+  const chapterTitle = allChapters(curriculum).find((e) => e.chapter.id === training?.chapterId)?.chapter.title
+  const [report, setReport] = useState<{ correct: number; firstPass: boolean } | null>(null)
 
   const [round, setRound] = useState(0)
   const [roundQs, setRoundQs] = useState<RoundQ[]>([])
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [spent, setSpent] = useState<Record<string, number>>({})
   const [results, setResults] = useState<
-    { wrong: boolean; slow: boolean; ms: number; errorTag?: string; skill?: string | null }[] | null
-  >(null)
+    Record<string, { wrong: boolean; slow: boolean; ms: number; errorTag?: string; skill?: string | null }>
+  >({})
+  /** 波次推进（一波 WAVE 题，清完一波再开下一波） */
+  const [waveIdx, setWaveIdx] = useState(0)
+  const [finished, setFinished] = useState(false)
   const [passed, setPassed] = useState(false)
   const [problemIdxs, setProblemIdxs] = useState<number[]>([])
-  const [startAt] = useState(() => Date.now())
+  const [startAt, setStartAt] = useState(() => Date.now())
   const [now, setNow] = useState(() => Date.now())
   const focusRef = useRef<Record<string, number>>({})
+
+  /** 波次切分：一波 5 题 */
+  const WAVE_SIZE = 5
+  const waves = useMemo(() => {
+    const out: RoundQ[][] = []
+    for (let i = 0; i < roundQs.length; i += WAVE_SIZE) out.push(roundQs.slice(i, i + WAVE_SIZE))
+    return out
+  }, [roundQs])
 
   useEffect(() => {
     if (!training) return
@@ -96,9 +114,11 @@ export default function CalcRunPage() {
     setRoundQs(buildRound(training, 0))
     setAnswers({})
     setSpent({})
-    setResults(null)
+    setResults({})
     setPassed(false)
     setProblemIdxs([])
+    setWaveIdx(0)
+    setFinished(false)
     focusRef.current = {}
   }, [training?.id])
 
@@ -126,11 +146,12 @@ export default function CalcRunPage() {
   }
 
   const summary = useMemo(() => {
-    if (!results) return null
-    const wrong = results.filter((r) => r.wrong).length
-    const slow = results.filter((r) => r.slow && !r.wrong).length
-    return { wrong, slow, correct: results.length - wrong }
-  }, [results])
+    if (!finished) return null
+    const rs = roundQs.map((q) => results[q.key]).filter(Boolean)
+    const wrong = rs.filter((r) => r.wrong).length
+    const slow = rs.filter((r) => r.slow && !r.wrong).length
+    return { wrong, slow, correct: rs.length - wrong }
+  }, [results, roundQs, finished])
 
   /** 历史批改（最新在前） */
   const attempts = useMemo(
@@ -149,23 +170,25 @@ export default function CalcRunPage() {
       </div>
     )
 
-  const answered = roundQs.filter((q) => (answers[q.key] ?? '').trim()).length
+  const WAVE = WAVE_SIZE
+  const wave = waves[waveIdx] ?? []
+  const isLastWave = waveIdx >= waves.length - 1
+  const waveAnswered = wave.filter((q) => (answers[q.key] ?? '').trim()).length
   const prev = data.calcDone?.[training.id]
 
-  const submit = () => {
-    settle(roundQs.map((q) => q.key))
+  const submitWave = () => {
+    settle(wave.map((q) => q.key))
     // 用一次同步快照结算（settle 的 setState 是异步的，这里直接算总账）
     const spentNow: Record<string, number> = { ...spent }
-    for (const q of roundQs) {
+    for (const q of wave) {
       const t = focusRef.current[q.key]
       if (t) {
         spentNow[q.key] = (spentNow[q.key] ?? 0) + (Date.now() - t)
         delete focusRef.current[q.key]
       }
     }
-    setSpent(spentNow)
-
-    const rs = roundQs.map((q) => {
+    const graded: typeof results = {}
+    for (const q of wave) {
       const user = answers[q.key] ?? ''
       const ms = spentNow[q.key] ?? 0
       const wrong = !user.trim() || !answersMatch(user, q.answer, q.accepted)
@@ -178,34 +201,54 @@ export default function CalcRunPage() {
         errorTag = hit?.reason ?? '__PENDING__' // 未命中规则 → 模型兜底
         skill = hit?.skill ?? q.skill ?? null
       }
-      return { wrong, slow, ms, errorTag, skill }
-    })
-    setResults(rs)
+      graded[q.key] = { wrong, slow, ms, errorTag, skill }
+    }
+    setSpent(spentNow)
+    const merged = { ...results, ...graded }
+    setResults(merged)
+
+    if (!isLastWave) {
+      // 波次清完 → 推进下一波（错题留到终局统一处理）
+      setWaveIdx(waveIdx + 1)
+      window.scrollTo({ top: 160, behavior: 'smooth' })
+      return
+    }
+    finishRound(merged, spentNow)
+  }
+
+  const finishRound = (
+    merged: Record<string, { wrong: boolean; slow: boolean; ms: number; errorTag?: string; skill?: string | null }>,
+    spentNow: Record<string, number>,
+  ) => {
+    setFinished(true)
+    const rs = roundQs.map((q) => merged[q.key])
     const problems = rs.map((r, i) => (r.wrong || r.slow ? roundQs[i].fromIdx : -1)).filter((i) => i >= 0)
     setProblemIdxs(problems)
 
     if (problems.length === 0) {
       // 本轮全对且无超时 → 训练通过
       const correctTotal = rs.length
+      const firstPass = !data.calcDone?.[training.id]?.passed
       setPassed(true)
+      setReport({ correct: correctTotal, firstPass })
       recordCalcDone(training.id, correctTotal, training.questions.length, true, round + 1)
     } else {
       recordCalcDone(training.id, rs.filter((r) => !r.wrong).length, training.questions.length)
     }
     // 保存本轮逐题批改明细（历史可回看）
     const finishedAt = Date.now()
-    const toItems = (final: typeof rs) =>
+    const toItems = () =>
       roundQs.map((q, i) => ({
         no: q.no,
         stem: q.stem,
         userAnswer: answers[q.key] ?? '',
         answer: q.answer,
-        correct: !final[i].wrong,
-        slow: final[i].slow,
-        ms: final[i].ms,
+        correct: !rs[i].wrong,
+        slow: rs[i].slow,
+        ms: rs[i].ms,
         est: q.est,
-        errorTag: final[i].errorTag === '__PENDING__' ? 'AI 分析中…' : final[i].errorTag,
-        skill: final[i].skill ?? null,
+        errorTag: rs[i].errorTag === '__PENDING__' ? 'AI 分析中…' : rs[i].errorTag,
+        skill: rs[i].skill ?? null,
       }))
     saveCalcAttempt(training.id, {
       round,
@@ -213,8 +256,9 @@ export default function CalcRunPage() {
       totalMs: finishedAt - startAt,
       correct: rs.filter((r) => !r.wrong).length,
       total: roundQs.length,
-      items: toItems(rs),
+      items: toItems(),
     })
+    void spentNow
 
     // 规则未命中的错题 → 模型异步诊断，返回后更新界面与记录
     const pending = rs.map((r, i) => (r.errorTag === '__PENDING__' ? i : -1)).filter((i) => i >= 0)
@@ -225,20 +269,32 @@ export default function CalcRunPage() {
           i,
           d: await diagnoseByModel(roundQs[i].stem, roundQs[i].answer, answers[roundQs[i].key] ?? '', skills),
         })),
-      ).then((updates) => {
-        const final = rs.map((r, j) => {
-          const u = updates.find((x) => x.i === j)
-          if (!u) return r
-          return {
-            ...r,
-            errorTag: u.d ? u.d.reason : '计算失误（请对照解析检查）',
-            skill: u.d && u.d.skill !== 'other' ? u.d.skill : (r.skill ?? null),
-          }
+      )
+        .then((list) => {
+          setResults((prev) => {
+            const next = { ...prev }
+            for (const { i, d } of list) next[roundQs[i].key] = { ...next[roundQs[i].key], errorTag: d?.reason ?? '诊断失败', skill: d?.skill ?? next[roundQs[i].key]?.skill ?? null }
+            return next
+          })
+          patchCalcAttempt(training.id, finishedAt, toItems())
         })
-        setResults(final)
-        patchCalcAttempt(training.id, finishedAt, toItems(final))
-      })
+        .catch(() => {})
     }
+  }
+
+  const restart = () => {
+    setReport(null)
+    setRound(0)
+    setRoundQs(buildRound(training, 0))
+    setAnswers({})
+    setSpent({})
+    setResults({})
+    setPassed(false)
+    setProblemIdxs([])
+    setWaveIdx(0)
+    setFinished(false)
+    setStartAt(Date.now())
+    focusRef.current = {}
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -248,8 +304,10 @@ export default function CalcRunPage() {
     setRoundQs(buildRound(training, next, problemIdxs))
     setAnswers({})
     setSpent({})
-    setResults(null)
+    setResults({})
     setPassed(false)
+    setWaveIdx(0)
+    setFinished(false)
     focusRef.current = {}
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -292,6 +350,21 @@ export default function CalcRunPage() {
         </div>
       </section>
 
+      {/* 副本通关战报 */}
+      {report && training && (
+        <DungeonReport
+          moduleName={module?.name ?? ''}
+          chapterTitle={chapterTitle ?? ''}
+          correct={report.correct}
+          total={training.questions.length}
+          firstPass={report.firstPass}
+          energy={data.energy ?? 0}
+          onAgain={restart}
+          onChapter={() => navigate(`/curriculum/${training.chapterId}`)}
+          onClose={() => setReport(null)}
+        />
+      )}
+
       {/* 结果 / 通过横幅 */}
       {passed && (
         <div className="card flex flex-wrap items-center justify-between gap-4 border-l-8 !border-l-emerald-400 p-5">
@@ -308,7 +381,7 @@ export default function CalcRunPage() {
           </Link>
         </div>
       )}
-      {results && !passed && summary && (
+      {finished && !passed && summary && (
         <div className="card flex flex-wrap items-center justify-between gap-4 border-l-8 !border-l-amber-400 p-5">
           <div>
             <div className="text-lg font-bold text-gray-900">
@@ -333,14 +406,42 @@ export default function CalcRunPage() {
       )}
 
       {/* 当前轮题目 */}
-      {round > 0 && !results && (
+      {round > 0 && !finished && (
         <div className="rounded-2xl border border-indigo-200 bg-indigo-50/60 px-4 py-2.5 text-xs text-indigo-700">
           专项练习第 {round} 轮：以下为错题/超时题的同类型变式，答对且耗时不超过预计即算通过。
         </div>
       )}
+      {/* 波次进度 */}
+      {!finished && waves.length > 1 && (
+        <div className="card flex flex-wrap items-center gap-3 px-4 py-3">
+          <span className="text-xs font-semibold text-gray-700">
+            🌊 第 {Math.min(waveIdx + 1, waves.length)}/{waves.length} 波 · 每波 {WAVE} 题
+          </span>
+          <div className="flex flex-1 flex-wrap gap-1.5">
+            {waves.map((w, i) => {
+              const doneQs = w.filter((q) => results[q.key]).length
+              const wrongQs = w.filter((q) => results[q.key]?.wrong).length
+              return (
+                <span
+                  key={i}
+                  className={`h-2.5 flex-1 rounded-full transition-all ${
+                    doneQs === w.length
+                      ? wrongQs > 0 ? 'bg-rose-400' : 'bg-emerald-400'
+                      : i === waveIdx
+                        ? 'bg-indigo-400'
+                        : 'bg-gray-200'
+                  }`}
+                  title={`第 ${i + 1} 波${doneQs === w.length ? (wrongQs > 0 ? `（有错题 ${wrongQs}` : '（全对') : ''}`}
+                />
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="card divide-y divide-gray-100/70 px-2 py-1">
-        {roundQs.map((q, i) => {
-          const r = results?.[i]
+        {roundQs.slice(0, Math.min(roundQs.length, (waveIdx + 1) * WAVE)).map((q) => {
+          const r = results[q.key]
           return (
             <div
               key={q.key}
@@ -356,7 +457,7 @@ export default function CalcRunPage() {
                 {r?.wrong ? '✕' : r?.slow ? '⏱' : r ? '✓' : q.no}
               </span>
               <MathText className="min-w-0 max-w-full text-[13px] leading-relaxed text-gray-900" text={q.stem} />
-              {!results ? (
+              {!r ? (
                 <input
                   type="text"
                   autoComplete="off"
@@ -398,12 +499,12 @@ export default function CalcRunPage() {
       </div>
 
       {/* 底部提交条 */}
-      {!results && (
+      {!finished && (
         <div className="fixed inset-x-0 bottom-0 z-20 border-t border-white/60 bg-white/80 backdrop-blur-xl">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3">
             <div className="text-xs text-gray-500">
               {round === 0 ? '' : `专项练习 · 第 ${round} 轮 · `}
-              已作答 <b className="tabular-nums text-gray-800">{answered}</b>/{roundQs.length} · 总用时{' '}
+              已判 <b className="tabular-nums text-gray-800">{Object.keys(results).length}</b>/{roundQs.length} · 总用时{' '}
               <span className="tabular-nums">{fmtClock(now - startAt)}</span>
               <span className="ml-2 hidden text-gray-400 sm:inline">分数可用 a/b 表示，如 3/4</span>
             </div>
@@ -411,8 +512,8 @@ export default function CalcRunPage() {
               <Link to="/calc" className="btn !py-2 !text-[13px]">
                 退出
               </Link>
-              <button className="btn btn-primary !py-2" disabled={answered === 0} onClick={submit}>
-                提交批改
+              <button className="btn btn-primary !py-2" disabled={waveAnswered === 0} onClick={submitWave}>
+                {isLastWave ? `提交批改 · 终判` : `提交本波（${waveAnswered}/${wave.length}）→`}
               </button>
             </div>
           </div>

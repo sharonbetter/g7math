@@ -1,6 +1,22 @@
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import { useMemo } from 'react'
+import { Figure } from './Figure'
+import type { FigureSpec } from './Figure'
+
+/** 拆出 @@fig {json}@@ 图形标记 */
+export function splitFigures(text: string): { text: string; figures: FigureSpec[] } {
+  const figures: FigureSpec[] = []
+  const t = text.replace(/@@fig\s*(\{[^@]*?\})\s*@@/g, (_m, json: string) => {
+    try {
+      figures.push(JSON.parse(json) as FigureSpec)
+    } catch {
+      /* 非法 JSON 忽略 */
+    }
+    return '\n'
+  })
+  return { text: t, figures }
+}
 
 function escapeHtml(s: string): string {
   return s
@@ -43,8 +59,21 @@ export function MathText({
   text: string | undefined | null
   className?: string
 }) {
-  const html = useMemo(() => renderMixed(text ?? ''), [text])
-  return <div className={`math-content ${className}`} dangerouslySetInnerHTML={{ __html: html }} />
+  const { body, figures } = useMemo(() => {
+    const { text: t, figures } = splitFigures(text ?? '')
+    return { body: renderMixed(t), figures }
+  }, [text])
+  if (!figures.length) {
+    return <div className={`math-content ${className}`} dangerouslySetInnerHTML={{ __html: body }} />
+  }
+  return (
+    <div className={className}>
+      <div className="math-content" dangerouslySetInnerHTML={{ __html: body }} />
+      {figures.map((f, i) => (
+        <Figure key={i} spec={f} />
+      ))}
+    </div>
+  )
 }
 
 export function MathInline({ text }: { text: string | undefined | null }) {

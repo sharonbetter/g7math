@@ -26,6 +26,9 @@ export default function ExamListPage() {
       <div className="grid gap-3 md:grid-cols-2">
         {chapters.map(({ volume, chapter }) => {
           const loop = data.loops[chapter.id]
+          const unfinished = Object.values(data.rounds)
+            .filter((r) => r.kind === 'exam' && r.chapterId === chapter.id && !r.finishedAt)
+            .sort((a, b) => b.startedAt - a.startedAt)[0]
           const history = Object.values(data.rounds)
             .filter((r) => r.chapterId === chapter.id)
             .sort((a, b) => b.startedAt - a.startedAt)
@@ -46,6 +49,8 @@ export default function ExamListPage() {
                     <Badge tone="green">已掌握</Badge>
                   ) : loop ? (
                     <Badge tone="amber">第 {loop.round} 轮</Badge>
+                  ) : unfinished ? (
+                    <Badge tone="amber">答题中 {unfinished.answers.length}/{unfinished.exam.questions.length}</Badge>
                   ) : (
                     <Badge>未考评</Badge>
                   )}
@@ -53,9 +58,15 @@ export default function ExamListPage() {
               </div>
 
               <div className="mt-3 flex flex-wrap gap-2">
-                <Link to={`/exam/${chapter.id}`} className="btn btn-primary !py-1.5 !text-[13px]">
-                  {history.length ? '重新考评' : '开始考评'}
-                </Link>
+                {unfinished ? (
+                  <Link to={`/run/${unfinished.id}`} className="btn btn-primary !py-1.5 !text-[13px]">
+                    继续答题（{unfinished.answers.length}/{unfinished.exam.questions.length}）→
+                  </Link>
+                ) : (
+                  <Link to={`/exam/${chapter.id}`} className="btn btn-primary !py-1.5 !text-[13px]">
+                    {history.length ? '重新考评' : '开始考评'}
+                  </Link>
+                )}
                 {loop && (
                   <Link to={`/remedial?chapter=${chapter.id}`} className="btn !py-1.5 !text-[13px]">
                     专项提升

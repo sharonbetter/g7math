@@ -1,7 +1,7 @@
 import type {
   AnswerRecord,
   Exam,
-  ExamSection,
+  
   Lesson,
   Point,
   Question,
@@ -86,6 +86,7 @@ function variantToQuestion(
     options: v.options,
     answer: v.answer,
     solution: v.solution,
+    guidance: v.guidance,
     rubric: parent.rubric,
     errorTags: parent.errorTags,
     commonWrong: [],
@@ -100,118 +101,154 @@ export interface PracticePlan {
 }
 
 /**
- * 依据一轮考评的错题与超时题生成专项练习卷。
+ * 依据一轮的错题与超时题生成专项练习卷（异步：可能现场调模型出题）。
  *
- * 规则：
- *  1. 每道问题题目取其变式（variants）作为专项练习的第一批题目；
- *  2. 若题目数量不足，从同一知识点的其他题目中再取变式补充；
- *  3. 若仍不足，则重做原题（repeat）；
- *  4. 题量上限由总预计耗时控制（默认约 25 分钟）。
+ * 口径（2026-10 与用户确认）：
+ *  - 每道错题/超时题 → 卷中对应 1 道题
+ *  - 静态优先：先取该题（的母题）尚未练过的静态变式
+ *  - 题库枯竭（静态变式全用过/没有）→ 调模型现场生成同构变式（含思路引导，双模型审查）
+ *  - 生成失败兜底：任一静态变式（已练过再巩固）→ 原题重做
  */
-export function buildPracticeExam(
+export async function buildPracticeRound(
   round: Round,
   allExams: Map<string, Exam>,
-  opts: { maxSeconds?: number } = {},
-): PracticePlan {
-  const maxSeconds = opts.maxSeconds ?? 1500
-  const target = new Set([...round.wrongQuestionIds, ...round.slowQuestionIds])
-  const questions = round.exam.questions
-  const byId = new Map(questions.map((q) => [q.id, q]))
+  historyRounds: Round[],
+  onProgress?: (done: number, total: number) => void,
+): Promise<PracticePlan> {
+  const target = [...new Set([...round.wrongQuestionIds, ...round.slowQuestionIds])]
+  const byId = new Map(round.exam.questions.map((q) => [q.id, q]))
   const origin: Record<string, string> = {}
   const picked: Question[] = []
+
+  // 已练过的题干（历史所有专项轮 + 本轮刚做过的）——静态变式消耗记录
   const usedStems = new Set<string>()
-
-  const push = (q: Question, label: string) => {
-    if (usedStems.has(q.stem)) return
-    usedStems.add(q.stem)
-    picked.push(q)
-    origin[q.id] = label
+  for (const r of historyRounds) {
+    if (r.kind !== 'practice') continue
+    for (const q of r.exam.questions) usedStems.add(q.stem)
   }
+  for (const q of round.exam.questions) usedStems.add(q.stem)
 
-  // 1) 问题题目的变式
+  interface Slot {
+    q?: Question
+    label: string
+    parent?: Question
+  }
+  const slots: Slot[] = []
+  const needGen: { parent: Question; slot: Slot }[] = []
+
   for (const qid of target) {
-    const q = byId.get(qid)
-    if (!q) continue
-    const vs = q.variants ?? []
-    vs.forEach((v, i) => push(variantToQuestion(q, v, 'variant', i + 1), `错题/超时题变式（原题 ${q.id}）`))
-  }
-
-  // 2) 同知识点的其他题目的变式
-  const weakPoints = new Set(round.weakPointIds)
-  for (const q of questions) {
-    if (target.has(q.id)) continue
-    if (!q.pointIds.some((p) => weakPoints.has(p))) continue
-    ;(q.variants ?? []).forEach((v, i) =>
-      push(variantToQuestion(q, v, 'variant', i + 1), `同知识点强化（原题 ${q.id}）`),
-    )
-  }
-
-  // 3) 其他章的同一知识点题目（跨章强化）
-  const otherExams = Array.from(allExams.values()).filter((e) => e.id !== round.exam.id)
-  for (const ex of otherExams) {
-    for (const q of ex.questions) {
-      if (!q.pointIds.some((p) => weakPoints.has(p))) continue
-      ;(q.variants ?? []).forEach((v, i) =>
-        push(variantToQuestion(q, v, 'variant', i + 1), `跨章强化：${ex.chapterTitle}（原题 ${q.id}）`),
-      )
+    const t = byId.get(qid)
+    if (!t) continue
+    const slot: Slot = { label: '' }
+    slots.push(slot)
+    const parent = resolveParent(t, allExams)
+    slot.parent = parent
+    // 静态优先：母题未练过的变式取 1 条
+    const avail = (parent.variants ?? []).filter((v) => !usedStems.has(v.stem))
+    if (avail.length > 0) {
+      const v = avail[0]
+      const q = variantToQuestion(parent, v, 'variant', 1)
+      slot.q = q
+      slot.label = `全新变式（原题 ${parent.id}）`
+    } else {
+      needGen.push({ parent, slot })
     }
   }
 
-  // 4) 仍不足则重做原题
-  if (picked.length < 6) {
-    for (const qid of target) {
-      const q = byId.get(qid)
-      if (!q) continue
-      push(
-        {
-          ...q,
-          id: `${q.id}-repeat-${++seq}`,
-          commonWrong: [],
-        },
-        `重做原题（${q.id}）`,
-      )
+  // 题库枯竭 → 现场生成（并发 2，进度回调）
+  let genDone = 0
+  onProgress?.(0, needGen.length)
+  const queue = [...needGen]
+  const workers = Array.from({ length: Math.min(2, queue.length) }, async () => {
+    for (;;) {
+      const item = queue.shift()
+      if (!item) return
+      try {
+        const r = await fetch('/api/gen-variant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            stem: item.parent.stem,
+            options: item.parent.options,
+            standardAnswer: item.parent.answer,
+            standardSolution: item.parent.solution,
+            type: item.parent.type,
+          }),
+        })
+        if (!r.ok) throw new Error(String(r.status))
+        const data = (await r.json()) as {
+          variant: { stem: string; options?: string[]; answer: string; solution: string; guidance?: string }
+        }
+        const q = variantToQuestion(
+          item.parent,
+          { ...data.variant, estimatedSeconds: item.parent.estimatedSeconds },
+          'variant',
+          1,
+        )
+        item.slot.q = q
+        item.slot.label = `现场生成变式（原题 ${item.parent.id}）`
+      } catch {
+        /* 生成失败 → 走兜底 */
+      }
+      genDone += 1
+      onProgress?.(genDone, needGen.length)
+    }
+  })
+  await Promise.all(workers)
+
+  // 兜底：生成失败的 → 已练过的静态变式 → 原题重做
+  let repSeq = 0
+  for (const slot of slots) {
+    if (slot.q || !slot.parent) continue
+    const parent = slot.parent
+    const any = (parent.variants ?? [])[0]
+    if (any) {
+      slot.q = variantToQuestion(parent, any, 'variant', 1)
+      slot.label = `变式再巩固（原题 ${parent.id}）`
+    } else {
+      slot.q = { ...parent, id: `${parent.id}-repeat-${++repSeq}`, commonWrong: [] }
+      slot.label = `原题重做（${parent.id}）`
     }
   }
 
-  // 按难度排序（由易到难），再按总耗时截断
-  picked.sort((a, b) => a.difficulty - b.difficulty || a.estimatedSeconds - b.estimatedSeconds)
-  const limited: Question[] = []
-  let total = 0
-  for (const q of picked) {
-    if (limited.length >= 4 && total + q.estimatedSeconds > maxSeconds) continue
-    limited.push(q)
-    total += q.estimatedSeconds
-    if (total >= maxSeconds && limited.length >= 6) break
+  for (const slot of slots) {
+    if (!slot.q) continue
+    picked.push(slot.q)
+    origin[slot.q.id] = slot.label
   }
-  const finalQuestions = limited.length ? limited : picked.slice(0, 8)
 
-  const order: QType[] = ['choice', 'fill', 'calc', 'applied']
-  const labels: Record<QType, string> = {
-    choice: '一、选择题（每题只有一个正确选项）',
-    fill: '二、填空题',
-    calc: '三、计算题（写出必要的计算过程）',
-    applied: '四、应用题（写出必要的解答过程）',
-  }
-  const sections: ExamSection[] = order
+  const labels: Record<string, string> = { choice: '选择题', fill: '填空题', calc: '计算题', applied: '应用题' }
+  const sections = (['choice', 'fill', 'calc', 'applied'] as const)
     .map((t) => ({
-      id: t,
+      id: `sec-${t}`,
       title: labels[t],
       type: t,
-      questionIds: finalQuestions.filter((q) => q.type === t).map((q) => q.id),
+      questionIds: picked.filter((q) => q.type === t).map((q) => q.id),
     }))
-    .filter((s) => s.questionIds.length > 0)
+    .filter((sec) => sec.questionIds.length > 0)
 
   const exam: Exam = {
     id: `${round.exam.id}-practice-r${round.round + 1}`,
     chapterId: round.chapterId,
     chapterTitle: round.chapterTitle,
     title: `${round.chapterTitle} · 第 ${round.round + 1} 轮专项练习`,
-    totalEstimatedSeconds: finalQuestions.reduce((s, q) => s + q.estimatedSeconds, 0),
+    totalEstimatedSeconds: picked.reduce((sum, q) => sum + q.estimatedSeconds, 0),
     sections,
-    questions: finalQuestions,
+    questions: picked,
   }
 
   return { exam, origin }
+}
+
+/** 从（可能是变式/重做题的）题目解析出静态题库里的母题 */
+function resolveParent(q: Question, allExams: Map<string, Exam>): Question {
+  const m = q.id.match(/^(.+)-p[r v]\d+-\d+$/)
+  if (!m) return q
+  for (const ex of allExams.values()) {
+    const p = ex.questions.find((x) => x.id === m[1])
+    if (p) return p
+  }
+  return q
 }
 
 /** 循环状态推进：专项练习全对且无超时 → 掌握 */

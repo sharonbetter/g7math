@@ -96,7 +96,8 @@ function stepTextsOf(lesson: { slides: Slide[] }): StepText[] {
 }
 
 function relFile(chapterId: string, pointId: string, slideIdx: number, stepIdx: number): string {
-  return join('lessons', chapterId, `${pointId}-${slideIdx}-${stepIdx}.m4a`)
+  const ext = useMiniMax ? 'mp3' : 'm4a'
+  return join('lessons', chapterId, `${pointId}-${slideIdx}-${stepIdx}.${ext}`)
 }
 
 // ---------- 生成 ----------
@@ -104,6 +105,50 @@ const tmp = mkdtempSync(join(tmpdir(), 'lesson-audio-'))
 let generated = 0
 let skipped = 0
 let failed = 0
+
+// ---------- MiniMax TTS ----------
+const MM_ENV: Record<string, string> = {}
+try {
+  for (const line of readFileSync(join(appRoot, '.env'), 'utf8').split('\n')) {
+    const m = line.match(/^([A-Z_]+)=(.+)$/)
+    if (m && !line.startsWith('#')) MM_ENV[m[1]] = m[2]
+  }
+} catch { /* .env 可选 */ }
+
+const useMiniMax = MM_ENV.TTS_PROVIDER === 'minimax' && !!MM_ENV.TTS_API_KEY
+
+async function minimaxTTS(text: string): Promise<Buffer> {
+  const res = await fetch(`${MM_ENV.TTS_BASE_URL || 'https://api.minimax.chat'}/v1/t2a_v2`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${MM_ENV.TTS_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: MM_ENV.TTS_MODEL || 'speech-02-hd',
+      text,
+      stream: false,
+      voice_setting: {
+        voice_id: MM_ENV.TTS_VOICE || 'male-qn-jingying',
+        speed: 1.0,
+        vol: 1.0,
+        pitch: 0,
+      },
+      audio_setting: {
+        sample_rate: 32000,
+        bitrate: 128000,
+        format: 'mp3',
+        channel: 1,
+      },
+    }),
+    signal: AbortSignal.timeout(120_000),
+  })
+  if (!res.ok) throw new Error(`MiniMax TTS ${res.status}: ${(await res.text()).slice(0, 200)}`)
+  const data = await res.json() as { data?: { audio?: string }, error?: { message?: string } }
+  if (data.error) throw new Error(`MiniMax TTS: ${data.error.message}`)
+  if (!data.data?.audio) throw new Error('MiniMax TTS: 无音频数据')
+  return Buffer.from(data.data.audio, 'hex')
+}
 
 function synthesize(absPath: string, text: string): number {
   const txt = join(tmp, `t-${process.pid}-${Math.random().toString(36).slice(2, 8)}.txt`)
@@ -193,7 +238,20 @@ async function main() {
       const rel = relFile(job.chapterId, job.pointId, job.slideIdx, job.stepIdx)
       try {
         mkdirSync(dirname(job.absPath), { recursive: true })
-        const ms = synthesize(job.absPath, job.text)
+        let ms: number
+        if (useMiniMax) {
+          const buf = await minimaxTTS(job.text)
+          writeFileSync(job.absPath.replace(/\.m4a$/, '.mp3'), buf)
+          // 用 afinfo 获取时长（mp3 可能没有时长头，先写入再探测）
+          ms = 0
+          try {
+            const info = spawnSync('afinfo', [job.absPath.replace(/\.m4a$/, '.mp3')], { encoding: 'utf8' })
+            const dm = info.stdout?.match(/estimated duration:\s*([\d.]+)/)
+            ms = dm ? Math.round(parseFloat(dm[1]) * 1000) : Math.round(buf.length / 4000)
+          } catch { ms = Math.round(buf.length / 4000) }
+        } else {
+          ms = synthesize(job.absPath, job.text)
+        }
         if (ms <= 0) throw new Error('生成了空音频')
         const slide = manifest.chapters[job.chapterId][job.pointId].slides[job.slideIdx]
         slide.hs[job.stepIdx] = createHash('sha1').update(job.text).digest('hex').slice(0, 12)

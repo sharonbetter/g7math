@@ -35,3 +35,20 @@ refs/*.pdf
 
 # 系统文件
 .DS_Store
+
+# 数据库（本地用户数据，不入库）
+data/g7math.db
+data/g7math.db-shm
+data/g7math.db-wal
+
+# 大体积生成产物（动画课件 165M，另行分发）
+app/public/demo/
+
+# 参考备份
+refs/
+
+# 视频产物
+data/videos/
+
+# e2e 运行截图
+/tmp/

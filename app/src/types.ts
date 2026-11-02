@@ -1,3 +1,4 @@
+import type { ExplainScene } from './lib/explain'
 // ---------- 课程大纲 ----------
 export interface Point {
   id: string
@@ -83,6 +84,8 @@ export interface Variant {
   answer: string
   solution: string
   estimatedSeconds: number
+  /** 思路引导（静态变式预生成 / 动态变式随题生成） */
+  guidance?: string
 }
 
 export interface QuestionSource {
@@ -102,6 +105,8 @@ export interface Question {
   answer: string
   acceptedAnswers?: string[]
   solution: string
+  /** 思路引导（启发式讲法，逐题生成；缺省时前端回退模板版） */
+  guidance?: string
   rubric?: string[]
   errorTags?: string[]
   commonWrong?: CommonWrong[]
@@ -162,9 +167,33 @@ export interface AnswerRecord {
   errorReason: string
   /** 该题在轮到它时的序号 */
   index: number
+  /** 本题使用了「思路点拨」 */
+  hintUsed?: boolean
+  /** 本题通过「回炉券」用同构变式重做过（value 为重做后的作答） */
+  retried?: boolean
+  /** 回炉前的原始作答 */
+  retriedFrom?: string
 }
 
 export type RoundKind = 'exam' | 'remedial' | 'practice'
+
+/** Boss 战的准备与战中增益（能量购买，全部留痕、不影响判分规则） */
+export interface RoundBuffs {
+  /** 侦察卷：考前已看过卷面结构情报 */
+  intel?: boolean
+  /** 思路点拨剩余次数 */
+  hints: number
+  /** 回炉券剩余张数 */
+  retries: number
+  /** 时间沙漏剩余个（对指定题隐藏计时、不标记超时） */
+  hourglasses: number
+  /** 已使用思路点拨的题 */
+  hintUsed?: string[]
+  /** 已使用回炉券的题 */
+  retried?: string[]
+  /** 已使用时间沙漏的题 */
+  hourglassUsed?: string[]
+}
 
 export interface Round {
   id: string
@@ -184,6 +213,8 @@ export interface Round {
   weakPointIds: string[]
   /** 本轮的题目快照（专项练习卷是动态生成的，需要保存） */
   exam: Exam
+  /** 战前准备与战中增益（能量购买，留痕） */
+  buffs?: RoundBuffs
 }
 
 export interface LoopState {
@@ -196,15 +227,35 @@ export interface LoopState {
   updatedAt: number
 }
 
+/** 单题讲解课件（报告页点击生成后持久保存，可反复查看） */
+export interface QuestionExplain {
+  questionId: string
+  roundId: string
+  createdAt: number
+  userAnswer: string
+  /** 生成时固化的场景模型（含讲解词与分步内容） */
+  scenes: ExplainScene[]
+}
+
 export interface AppData {
   rounds: Record<string, Round>
   loops: Record<string, LoopState>
   /** 课件学习进度：pointId -> 完成时间 */
   studied: Record<string, number>
+  /** 闪耀点亮：pointId -> 课末微战全对首过的时刻（+5 XP） */
+  perfected?: Record<string, number>
+  /** 能量余额：通过计算副本（首次通过 +2）、错题回炉（+3）与能量石（+1）获得，用于战前准备 */
+  energy?: number
+  /** 已结算的能量石矿：gemId -> 采到块数（题目内容由全书题池派生，不另存） */
+  gems?: Record<string, number>
+  /** 毛栗装备：已拥有与穿戴 */
+  outfits?: { owned?: string[]; hat?: string; shoes?: string; clothes?: string }
   /** 计算专项进度：trainingId -> 完成记录 */
   calcDone?: Record<string, CalcRecord>
   /** 计算专项逐题明细：trainingId -> 历史批改快照（最新在后） */
   calcAttempts?: Record<string, CalcAttempt[]>
+  /** 单题讲解课件：questionId -> 生成快照 */
+  questionExplains?: Record<string, QuestionExplain>
 }
 
 // ---------- 课件讲解音频（gen-lesson-audio.ts 生成） ----------

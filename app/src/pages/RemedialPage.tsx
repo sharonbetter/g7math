@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { MathText } from '../components/MathText'
+import { SolutionView } from '../components/SolutionView'
 import { BookSource } from '../components/BookSource'
 import { Badge, Card, Empty } from '../components/ui'
 import { analyzeRound } from '../lib/adaptive'
@@ -8,7 +9,7 @@ import { allPoints, loadAllExams, loadLessonFile, useCurriculum } from '../lib/d
 import { TYPE_LABEL, formatDuration, formatGap } from '../lib/grading'
 import { makeId, saveRound, useAppData } from '../lib/store'
 import type { Lesson, LessonFile, Point, Round } from '../types'
-import { buildPracticeExam } from '../lib/adaptive'
+import { buildPracticeRound } from '../lib/adaptive'
 
 const SLIDE_LABEL: Record<string, string> = {
   concept: '概念回顾',
@@ -56,7 +57,7 @@ export default function RemedialPage() {
     try {
       const all = await loadAllExams()
       all.set(round.exam.id, round.exam)
-      const plan = buildPracticeExam(round, all)
+      const plan = await buildPracticeRound(round, all, Object.values(data.rounds))
       const practiceRound: Round = {
         id: makeId(`${plan.exam.id}-r`),
         kind: 'practice',
@@ -165,7 +166,7 @@ export default function RemedialPage() {
                               {s.solution && (
                                 <details className="mt-1.5">
                                   <summary className="cursor-pointer text-xs text-violet-700">查看解答</summary>
-                                  <MathText className="mt-1 text-sm text-gray-700" text={s.solution} />
+                                  <SolutionView className="text-sm text-gray-700" text={s.solution} />
                                 </details>
                               )}
                             </div>
@@ -251,7 +252,7 @@ export default function RemedialPage() {
 
                     <div className="mt-3 rounded-lg border border-blue-100 bg-blue-50/40 px-4 py-3">
                       <div className="text-xs font-medium text-blue-700">思路重建</div>
-                      <MathText className="mt-1 text-sm text-gray-800" text={q.solution} />
+                      <SolutionView className="text-sm text-gray-800" text={q.solution} />
                     </div>
 
                     {q.rubric?.length ? (
@@ -277,7 +278,7 @@ export default function RemedialPage() {
                                 <details className="mt-1.5">
                                   <summary className="cursor-pointer text-xs text-violet-700">查看答案与解析</summary>
                                   <MathText className="mt-1 text-sm font-medium text-gray-900" text={`答案：${v.answer}`} />
-                                  <MathText className="mt-1 text-sm text-gray-700" text={v.solution} />
+                                  <SolutionView className="text-sm text-gray-700" text={v.solution} />
                                 </details>
                               </div>
                             ))}
