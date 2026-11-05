@@ -171,10 +171,14 @@ export function PetProfile({ onClose }: { onClose: () => void }) {
           </div>
         ) : tab === 'skin' ? (
           <div className="mt-3 space-y-2">
-            <p className="text-[11px] text-gray-400">用能量石给毛栗换一身新毛色，全站同步生效。</p>
+            <div className="rounded-xl bg-gradient-to-r from-violet-50 via-fuchsia-50 to-cyan-50 px-3 py-2.5">
+              <div className="text-xs font-bold text-violet-900">角色衣橱 · 9 位学习伙伴</div>
+              <p className="mt-0.5 text-[11px] leading-5 text-violet-700/75">动物精灵、魔法学园与未来解题员随你切换；穿上后会在全站同步陪伴学习。</p>
+            </div>
             {SKINS.map((sk) => {
               const isOwned = sk.price === 0 || owned.includes(sk.id)
               const isWearing = (wearing?.skin ?? 'skin-default') === sk.id
+              const isNew = ['skin-astral', 'skin-sakura', 'skin-cyber'].includes(sk.id)
               return (
                 <div
                   key={sk.id}
@@ -188,6 +192,7 @@ export function PetProfile({ onClose }: { onClose: () => void }) {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-baseline gap-x-2">
                       <span className="text-[13px] font-semibold text-gray-800">{sk.name}</span>
+                      {isNew && <span className="rounded-full bg-fuchsia-100 px-1.5 py-0.5 text-[9px] font-bold text-fuchsia-600">NEW</span>}
                       <span className="text-[10px] text-gray-400">{sk.desc}</span>
                     </div>
                     <div className="mt-0.5 text-[11px] font-medium text-amber-600 tabular-nums">{sk.price === 0 ? '初始' : `💎 ${sk.price}`}</div>

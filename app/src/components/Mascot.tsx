@@ -179,6 +179,59 @@ function BodyComicKid() {
   )
 }
 
+/** 二次元角色组：用更清晰的发型、校服和道具区分，而不仅是换色。 */
+function BodyAnimeMage() {
+  return (
+    <>
+      <path d="M72 83 Q58 38 74 20 Q88 3 110 20 Q132 3 150 20 Q166 38 148 83 Z" fill="#312e81" stroke="#4c1d95" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M70 80 Q62 112 76 146 Q88 136 90 104 M150 80 Q158 112 144 146 Q132 136 130 104" fill="#4338ca" stroke="#4c1d95" strokeWidth="3" strokeLinecap="round" />
+      <ellipse cx="110" cy="82" rx="38" ry="42" fill="#fde7db" stroke="#4c1d95" strokeWidth="3" />
+      <path d="M75 62 Q88 30 110 44 Q132 30 145 62 Q130 54 110 58 Q90 54 75 62 Z" fill="#312e81" />
+      <path d="M78 62 Q91 47 104 58 L103 70 M142 62 Q129 47 116 58 L117 70" fill="none" stroke="#312e81" strokeWidth="7" strokeLinecap="round" />
+      <ellipse cx="96" cy="82" rx="8" ry="10" fill="#fff" stroke="#4c1d95" strokeWidth="2" /><ellipse cx="124" cy="82" rx="8" ry="10" fill="#fff" stroke="#4c1d95" strokeWidth="2" />
+      <circle cx="97" cy="84" r="4" fill="#7c3aed" /><circle cx="123" cy="84" r="4" fill="#7c3aed" /><circle cx="99" cy="82" r="1.5" fill="#fff" /><circle cx="125" cy="82" r="1.5" fill="#fff" />
+      <path d="M103 102 Q110 108 117 102" fill="none" stroke="#be185d" strokeWidth="2.5" strokeLinecap="round" /><ellipse cx="84" cy="97" rx="7" ry="3.5" fill="#f9a8d4" opacity=".65" /><ellipse cx="136" cy="97" rx="7" ry="3.5" fill="#f9a8d4" opacity=".65" />
+      <path d="M82 124 Q110 112 138 124 L144 174 Q110 190 76 174 Z" fill="#8b5cf6" stroke="#4c1d95" strokeWidth="3" strokeLinejoin="round" /><path d="M83 126 L110 144 L137 126" fill="none" stroke="#ddd6fe" strokeWidth="3" /><path d="M110 144 L110 177" stroke="#ddd6fe" strokeWidth="2" />
+      <path d="M147 132 Q170 116 180 92" fill="none" stroke="#a78bfa" strokeWidth="6" strokeLinecap="round" /><circle cx="184" cy="86" r="10" fill="#fef3c7" stroke="#f59e0b" strokeWidth="3" /><path d="M184 78 L186 84 L192 86 L186 88 L184 94 L182 88 L176 86 L182 84 Z" fill="#fbbf24" />
+      <ellipse cx="93" cy="194" rx="17" ry="9" fill="#312e81" stroke="#4c1d95" strokeWidth="3" /><ellipse cx="127" cy="194" rx="17" ry="9" fill="#312e81" stroke="#4c1d95" strokeWidth="3" />
+    </>
+  )
+}
+
+function BodyAnimeSakura() {
+  return (
+    <>
+      <path d="M67 88 Q48 53 64 25 Q82 4 110 25 Q138 4 156 25 Q172 53 153 88 L145 148 L75 148 Z" fill="#ec4899" stroke="#9d174d" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M64 77 Q48 116 65 153 Q76 135 82 105 M156 77 Q172 116 155 153 Q144 135 138 105" fill="#f472b6" stroke="#9d174d" strokeWidth="3" strokeLinecap="round" />
+      <ellipse cx="110" cy="82" rx="39" ry="43" fill="#ffeadf" stroke="#9d174d" strokeWidth="3" />
+      <path d="M73 65 Q80 30 110 39 Q140 30 147 65 Q131 55 110 59 Q89 55 73 65 Z" fill="#be185d" /><path d="M87 51 Q105 58 110 76 Q115 58 133 51" fill="none" stroke="#be185d" strokeWidth="9" strokeLinecap="round" />
+      <path d="M110 33 C100 18 80 20 83 35 C87 47 104 46 110 38 C116 46 133 47 137 35 C140 20 120 18 110 33" fill="#fbcfe8" stroke="#9d174d" strokeWidth="2" />
+      <ellipse cx="95" cy="84" rx="8" ry="10" fill="#fff" stroke="#9d174d" strokeWidth="2" /><ellipse cx="125" cy="84" rx="8" ry="10" fill="#fff" stroke="#9d174d" strokeWidth="2" /><circle cx="96" cy="86" r="4" fill="#ec4899" /><circle cx="124" cy="86" r="4" fill="#ec4899" /><circle cx="98" cy="84" r="1.5" fill="#fff" /><circle cx="126" cy="84" r="1.5" fill="#fff" />
+      <path d="M103 104 Q110 110 117 104" fill="none" stroke="#be185d" strokeWidth="2.5" strokeLinecap="round" /><ellipse cx="84" cy="99" rx="8" ry="4" fill="#fb7185" opacity=".65" /><ellipse cx="136" cy="99" rx="8" ry="4" fill="#fb7185" opacity=".65" />
+      <path d="M79 126 Q110 112 141 126 L150 176 Q110 191 70 176 Z" fill="#f9a8d4" stroke="#9d174d" strokeWidth="3" /><path d="M82 127 L110 145 L138 127" fill="none" stroke="#fff" strokeWidth="3" /><path d="M110 145 L110 180" stroke="#fff" strokeWidth="2" />
+      <path d="M62 140 Q45 130 36 116" fill="none" stroke="#f472b6" strokeWidth="7" strokeLinecap="round" /><path d="M32 108 C22 98 13 110 23 119 C29 124 34 121 36 116 C39 122 46 124 50 119 C60 110 51 98 41 108" fill="#fbcfe8" stroke="#9d174d" strokeWidth="2" />
+      <ellipse cx="92" cy="194" rx="18" ry="9" fill="#be185d" stroke="#9d174d" strokeWidth="3" /><ellipse cx="128" cy="194" rx="18" ry="9" fill="#be185d" stroke="#9d174d" strokeWidth="3" />
+    </>
+  )
+}
+
+function BodyCyberStudent() {
+  return (
+    <>
+      <path d="M66 88 Q54 40 76 21 L110 11 L144 21 Q166 40 154 88 L146 150 L74 150 Z" fill="#0f172a" stroke="#155e75" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M76 58 Q93 32 110 46 Q127 32 144 58 L138 73 Q110 58 82 73 Z" fill="#22d3ee" stroke="#155e75" strokeWidth="3" />
+      <ellipse cx="110" cy="83" rx="38" ry="42" fill="#f5ded2" stroke="#155e75" strokeWidth="3" />
+      <path d="M72 65 Q78 34 110 38 Q142 34 148 65 L137 59 L133 73 L119 58 L110 76 L99 58 L85 73 L83 59 Z" fill="#0f172a" />
+      <path d="M82 65 L97 55 M138 65 L123 55" stroke="#22d3ee" strokeWidth="4" strokeLinecap="round" />
+      <ellipse cx="95" cy="84" rx="8" ry="10" fill="#ecfeff" stroke="#155e75" strokeWidth="2" /><ellipse cx="125" cy="84" rx="8" ry="10" fill="#ecfeff" stroke="#155e75" strokeWidth="2" /><circle cx="96" cy="86" r="4" fill="#0891b2" /><circle cx="124" cy="86" r="4" fill="#0891b2" /><circle cx="98" cy="84" r="1.5" fill="#fff" /><circle cx="126" cy="84" r="1.5" fill="#fff" />
+      <path d="M102 104 Q110 109 118 104" fill="none" stroke="#0e7490" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M79 124 Q110 111 141 124 L146 176 Q110 190 74 176 Z" fill="#164e63" stroke="#155e75" strokeWidth="3" /><path d="M84 128 L136 128 M110 119 L110 177" stroke="#67e8f9" strokeWidth="2" /><circle cx="110" cy="143" r="8" fill="#22d3ee" stroke="#cffafe" strokeWidth="2" />
+      <path d="M145 132 Q169 125 184 133 L184 157 Q164 161 148 151 Z" fill="#0e7490" stroke="#155e75" strokeWidth="3" /><path d="M153 140 L178 140 M153 147 L170 147" stroke="#a5f3fc" strokeWidth="2" /><circle cx="176" cy="151" r="2" fill="#fef08a" />
+      <ellipse cx="92" cy="194" rx="18" ry="9" fill="#0f172a" stroke="#155e75" strokeWidth="3" /><ellipse cx="128" cy="194" rx="18" ry="9" fill="#0f172a" stroke="#155e75" strokeWidth="3" />
+    </>
+  )
+}
+
 // ---------- 披风 / 装备层 ----------
 function CapeBack({ on }: { on?: boolean }) {
   if (!on) return null
@@ -245,6 +298,9 @@ export function MascotBody({ skinId, hat, shoes, clothes, className = '' }: { sk
         {skin.id === 'skin-bamboo' && <BodyCloudSheep />}
         {skin.id === 'skin-night' && <BodyFirefly />}
         {skin.id === 'skin-gold' && <BodyComicKid />}
+        {skin.id === 'skin-astral' && <BodyAnimeMage />}
+        {skin.id === 'skin-sakura' && <BodyAnimeSakura />}
+        {skin.id === 'skin-cyber' && <BodyCyberStudent />}
         <FrontLayers hat={hat} shoes={shoes} clothes={clothes} />
       </g>
     </svg>

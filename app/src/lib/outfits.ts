@@ -41,6 +41,9 @@ const P_DEFAULT = { body: '#99a1ac', inner: '#c2c9d1', belly: '#ece7db', feet: '
 
 export const SKINS: MascotSkin[] = [
   { id: 'skin-default', name: '毛栗（原装）', price: 0, desc: '最初的毛栗', palette: P_DEFAULT },
+  { id: 'skin-astral', name: '星璃', price: 36, desc: '执星盘的魔法学园少女', palette: { body: '#8b5cf6', inner: '#ddd6fe', belly: '#f5f3ff', feet: '#6d28d9', edge: '#4c1d95' } },
+  { id: 'skin-sakura', name: '樱晴', price: 42, desc: '元气满满的樱粉学姐', palette: { body: '#f472b6', inner: '#fce7f3', belly: '#fff1f2', feet: '#db2777', edge: '#9d174d' } },
+  { id: 'skin-cyber', name: '零', price: 50, desc: '来自未来的赛博解题员', palette: { body: '#22d3ee', inner: '#cffafe', belly: '#ecfeff', feet: '#0891b2', edge: '#155e75' } },
   { id: 'skin-snow', name: '猫又', price: 8, desc: '白绒圆脸小猫', palette: { body: '#e7f0f7', inner: '#ffffff', belly: '#ffffff', feet: '#cdd9e5', edge: '#94a3b8' } },
   { id: 'skin-flame', name: '小狐', price: 8, desc: '橙绒尖耳小狐狸', palette: { body: '#fb923c', inner: '#fed7aa', belly: '#ffedd5', feet: '#ea580c', edge: '#c2410c' } },
   { id: 'skin-bamboo', name: '云绵', price: 12, desc: '天上的云朵小绵羊', palette: { body: '#6cbf7d', inner: '#bbf7d0', belly: '#eafbef', feet: '#4d9e63', edge: '#2f6b45' } },
