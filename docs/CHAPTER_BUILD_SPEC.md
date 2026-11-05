@@ -35,6 +35,7 @@
 | guidance 字段 | 每题（主卷 + 变式）都有，非空 | 覆盖率 100% |
 | 风格 | 首句定方向 → 分步为什么 → 收尾通法（用户审定样例风格） | 人工抽查 |
 | **思想方法标注** | guidance 末尾含"核心思想是「××」"或 `thinkingMethod` 字段 | `annotate-methods.py` |
+| **随堂检测** | 每个知识点 3~5 道检测题，带 covers 数组标注覆盖课件概念 | `gen-check-questions.mjs` |
 | 思路引导展示 | 前端 GuidedSolution 正确渲染（结构化步骤 + 通法收束） | 人工确认 |
 
 ## 四、错题讲解闭环
