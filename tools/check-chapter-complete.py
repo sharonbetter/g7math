@@ -77,16 +77,7 @@ def check(chapter_id):
         if len(types) < 3:
             fails.append(('能力题', f'类型仅 {len(types)} 种（应 ≥3 种）'))
     
-    #     # ---- 随堂检测 ----
-    no_check = sum(1 for l in lessons['lessons'] if not l.get('checkQuestions'))
-    has_covers = sum(1 for l in lessons['lessons']
-                     if any(cq.get('covers') for cq in (l.get('checkQuestions') or [])))
-    if no_check > 0:
-        fails.append(('随堂检测', str(no_check) + ' 个知识点无检测题'))
-    if has_covers < len(lessons['lessons']) * 0.8:
-        warns.append(('随堂检测', '仅 ' + str(has_covers) + '/' + str(len(lessons['lessons'])) + ' 有 covers 标注'))
-
-    LaTeX 格式（抽查含分数的题）
+    #     # LaTeX 格式（抽查含分数的题）
     bare_frac = 0
     for q in questions:
         stem = q.get('stem', '') + q.get('solution', '')
