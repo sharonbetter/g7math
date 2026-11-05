@@ -116,7 +116,7 @@ export function buyOutfit(outfitId: string, price: number) {
 }
 
 /** 穿戴/脱下装备 */
-export function equipOutfit(slot: 'hat' | 'shoes' | 'clothes', outfitId?: string) {
+export function equipOutfit(slot: 'hat' | 'shoes' | 'clothes' | 'skin', outfitId?: string) {
   cache = { ...cache, outfits: { ...(cache.outfits ?? {}), [slot]: outfitId } }
   persist()
 }

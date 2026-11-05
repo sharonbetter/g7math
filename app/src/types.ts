@@ -249,7 +249,7 @@ export interface AppData {
   /** 已结算的能量石矿：gemId -> 采到块数（题目内容由全书题池派生，不另存） */
   gems?: Record<string, number>
   /** 毛栗装备：已拥有与穿戴 */
-  outfits?: { owned?: string[]; hat?: string; shoes?: string; clothes?: string }
+  outfits?: { owned?: string[]; hat?: string; shoes?: string; clothes?: string; skin?: string }
   /** 计算专项进度：trainingId -> 完成记录 */
   calcDone?: Record<string, CalcRecord>
   /** 计算专项逐题明细：trainingId -> 历史批改快照（最新在后） */

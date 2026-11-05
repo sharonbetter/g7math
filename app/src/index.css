@@ -249,3 +249,9 @@ textarea:focus {
 @keyframes node-sparkle { 0%,100%{ opacity:.5; transform:scale(.9) rotate(0deg) } 50%{ opacity:1; transform:scale(1.12) rotate(12deg) } }
 .node-sparkle { animation: node-sparkle 2.2s ease-in-out infinite; transform-origin: center }
 @media (prefers-reduced-motion: reduce) { .node-lit,.node-sparkle { animation: none } }
+
+/* ---------- 神兽环绕 ---------- */
+@keyframes orbit-rot { to { transform: rotate(360deg) } }
+.orbit-rot { animation: orbit-rot 26s linear infinite }
+.orbit-rev { animation: orbit-rot 26s linear infinite reverse }
+@media (prefers-reduced-motion: reduce) { .orbit-rot,.orbit-rev { animation-duration: 240s } }

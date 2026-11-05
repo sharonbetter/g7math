@@ -4,12 +4,14 @@
  * - 装备铺：帽子/鞋子/衣服，用能量石（⚡）兑换，穿上即生效（所有页面的毛栗同步换装）
  */
 import { useState } from 'react'
-import Mascot, { OutfitIcon } from './Mascot'
+import Mascot, { MascotBody, OutfitIcon } from './Mascot'
+import { BeastFigure } from './BeastFigure'
 import { GemStoneView, gemColorOf } from './GemBattle'
 import { useAppData } from '../lib/store'
 import { buyOutfit, equipOutfit } from '../lib/store'
 import { allChapters, useCurriculum } from '../lib/data'
-import { OUTFITS } from '../lib/outfits'
+import { OUTFITS, SKINS } from '../lib/outfits'
+import { BEASTS, beastsOwned } from '../lib/beasts'
 import type { OutfitSlot } from '../lib/outfits'
 import { gateDesign } from './gate'
 
@@ -18,7 +20,7 @@ const GEM_LEVELS = ['青晶石', '紫晶石', '翡翠石', '琥珀石', '玫红�
 export function PetProfile({ onClose }: { onClose: () => void }) {
   const data = useAppData()
   const { curriculum } = useCurriculum()
-    const [tab, setTab] = useState<OutfitSlot | 'stats'>('stats')
+    const [tab, setTab] = useState<OutfitSlot | 'stats' | 'beasts'>('stats')
 
   const chapters = allChapters(curriculum)
   const masteredLevelNos = chapters
@@ -38,6 +40,7 @@ export function PetProfile({ onClose }: { onClose: () => void }) {
     byColor[cname] = (byColor[cname] ?? 0) + count
   }
   const totalGems = Object.values(perLevel).reduce((a, b) => a + b, 0)
+  const beasts = beastsOwned(data)
   const owned = data.outfits?.owned ?? []
   const wearing = data.outfits
   const energy = data.energy ?? 0
@@ -67,6 +70,9 @@ export function PetProfile({ onClose }: { onClose: () => void }) {
               </span>
               <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-600 tabular-nums">
                 ⚡ {energy}
+              </span>
+              <span className="rounded-full bg-violet-50 px-2 py-0.5 font-medium text-violet-600 tabular-nums">
+                已收服神兽 {beasts.length}/12
               </span>
             </div>
             <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
@@ -98,11 +104,13 @@ export function PetProfile({ onClose }: { onClose: () => void }) {
         <div className="mt-4 flex gap-1.5 border-b border-gray-100 pb-2 text-xs">
           {(
             [
-              ['stats', '通过的門与宝石'],
+              ['stats', '通关与宝石'],
+              ['beasts', '🐉 神兽'],
+              ['skin', '✨ 形象'],
               ['hat', '🎩 帽子'],
               ['shoes', '👟 鞋子'],
               ['clothes', '👕 衣服'],
-            ] as [OutfitSlot | 'stats', string][]
+            ] as [OutfitSlot | 'stats' | 'beasts', string][]
           ).map(([k, label]) => (
             <button
               key={k}
@@ -137,6 +145,74 @@ export function PetProfile({ onClose }: { onClose: () => void }) {
               )
             })}
                       </div>
+        ) : tab === 'beasts' ? (
+          <div className="mt-3">
+            <p className="text-[11px] text-gray-400">每击败一关的守关 Boss（通关一扇门）即收服该关神兽，共 12 只。收服的神兽会绕着毛栗转圈伴行。</p>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {BEASTS.map((b) => {
+                const got = beasts.some((x) => x.levelNo === b.levelNo)
+                return (
+                  <div
+                    key={b.name}
+                    className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 ${got ? 'border-violet-200 bg-violet-50/50' : 'border-gray-100 bg-gray-50/40'}`}
+                    title={got ? b.desc : `通关「${b.gateName}」后收服`}
+                  >
+                    <BeastFigure beast={b} size={46} locked={!got} />
+                    <div className="min-w-0 flex-1">
+                      <div className={`text-[13px] font-semibold ${got ? 'text-gray-800' : 'text-gray-300'}`}>
+                        {b.name} {got ? '' : '🔒'}
+                      </div>
+                      <div className="truncate text-[10px] text-gray-400">{b.gateName}</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : tab === 'skin' ? (
+          <div className="mt-3 space-y-2">
+            <p className="text-[11px] text-gray-400">用能量石给毛栗换一身新毛色，全站同步生效。</p>
+            {SKINS.map((sk) => {
+              const isOwned = sk.price === 0 || owned.includes(sk.id)
+              const isWearing = (wearing?.skin ?? 'skin-default') === sk.id
+              return (
+                <div
+                  key={sk.id}
+                  className={`flex items-center gap-3 rounded-xl border px-3.5 py-2.5 ${
+                    isWearing ? 'border-indigo-300 bg-indigo-50/50' : isOwned ? 'border-emerald-200 bg-emerald-50/30' : 'border-gray-100'
+                  }`}
+                >
+                  <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-gray-50">
+                    <MascotBody skinId={sk.id} hat={wearing?.hat} shoes={wearing?.shoes} clothes={wearing?.clothes} className="h-14 w-14" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-baseline gap-x-2">
+                      <span className="text-[13px] font-semibold text-gray-800">{sk.name}</span>
+                      <span className="text-[10px] text-gray-400">{sk.desc}</span>
+                    </div>
+                    <div className="mt-0.5 text-[11px] font-medium text-amber-600 tabular-nums">{sk.price === 0 ? '初始' : `💎 ${sk.price}`}</div>
+                  </div>
+                  {isWearing ? (
+                    <button className="btn !rounded-lg !px-3 !py-1.5 !text-xs" onClick={() => equipOutfit('skin', undefined)}>
+                      换回原装
+                    </button>
+                  ) : isOwned ? (
+                    <button className="btn btn-primary !rounded-lg !px-3 !py-1.5 !text-xs" onClick={() => equipOutfit('skin', sk.id)}>
+                      穿上
+                    </button>
+                  ) : (
+                    <button
+                      className="btn !rounded-lg !px-3 !py-1.5 !text-xs"
+                      disabled={energy < sk.price}
+                      onClick={() => buyOutfit(sk.id, sk.price)}
+                    >
+                      {energy < sk.price ? `差 ${sk.price - energy}⚡` : '兑换'}
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         ) : (
           <div className="mt-3 space-y-2">
             {OUTFITS.filter((o) => o.slot === tab).map((o) => {

@@ -1,5 +1,5 @@
 /** 毛栗装备目录：能量石兑换，纯装饰（荣誉向能量回收池） */
-export type OutfitSlot = 'hat' | 'shoes' | 'clothes'
+export type OutfitSlot = 'hat' | 'shoes' | 'clothes' | 'skin'
 
 export interface Outfit {
   id: string
@@ -25,4 +25,29 @@ export const OUTFITS: Outfit[] = [
   { id: 'cloth-armor', slot: 'clothes', name: '银色小铠甲', price: 12, desc: '面对 Boss 底气十足' },
 ]
 
-export const SLOT_LABEL: Record<OutfitSlot, string> = { hat: '帽子', shoes: '鞋子', clothes: '衣服' }
+export const SLOT_LABEL: Record<OutfitSlot, string> = { hat: '帽子', shoes: '鞋子', clothes: '衣服', skin: '形象' }
+
+
+/** 精灵形象（皮肤）：能量石兑换，全身变色 */
+export interface MascotSkin {
+  id: string
+  name: string
+  price: number
+  desc: string
+  palette: { body: string; inner: string; belly: string; feet: string; edge: string }
+}
+
+const P_DEFAULT = { body: '#99a1ac', inner: '#c2c9d1', belly: '#ece7db', feet: '#8a929d', edge: '#6c7480' }
+
+export const SKINS: MascotSkin[] = [
+  { id: 'skin-default', name: '毛栗（原装）', price: 0, desc: '最初的毛栗', palette: P_DEFAULT },
+  { id: 'skin-snow', name: '猫又', price: 8, desc: '白绒圆脸小猫', palette: { body: '#e7f0f7', inner: '#ffffff', belly: '#ffffff', feet: '#cdd9e5', edge: '#94a3b8' } },
+  { id: 'skin-flame', name: '小狐', price: 8, desc: '橙绒尖耳小狐狸', palette: { body: '#fb923c', inner: '#fed7aa', belly: '#ffedd5', feet: '#ea580c', edge: '#c2410c' } },
+  { id: 'skin-bamboo', name: '云绵', price: 12, desc: '天上的云朵小绵羊', palette: { body: '#6cbf7d', inner: '#bbf7d0', belly: '#eafbef', feet: '#4d9e63', edge: '#2f6b45' } },
+  { id: 'skin-night', name: '萤仔', price: 18, desc: '随身带光的萤火精灵', palette: { body: '#56548f', inner: '#8b89c9', belly: '#c7c5ee', feet: '#413f7e', edge: '#343266' } },
+  { id: 'skin-gold', name: '阿宝', price: 30, desc: '金发Q版冒险家', palette: { body: '#f5c542', inner: '#fde68a', belly: '#fef3c7', feet: '#d4a017', edge: '#b45309' } },
+]
+
+export function skinOf(id?: string): MascotSkin {
+  return SKINS.find((s) => s.id === id) ?? SKINS[0]
+}

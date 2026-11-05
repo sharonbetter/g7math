@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """给已有的动画课件追加例题、方法、易错场景"""
-import json, os, re
+import json, os, sys
+sys.path.insert(0, os.path.dirname(__file__))
+import animated_common as C, os, re
 
 ROOT = os.path.join(os.path.dirname(__file__), '..')
 LESSONS_DIR = os.path.join(ROOT, 'data', 'lessons')
@@ -32,37 +34,65 @@ def speakable(text):
     return t.strip()
 
 def example_scene(ex_num, problem, solution, notes=None):
-    """例题场景：题目 → 解答 → 点评"""
-    # 提取题目前几行作为展示
-    prob_lines = [l.strip() for l in problem.split('\n') if l.strip()][:4]
+    """例题场景：题目 → 解答（子问题分组+步骤编号）→ 点评（与公共层统一风格）"""
+    import sys, os
+    sys.path.insert(0, os.path.dirname(__file__))
+    from animated_common import group_by_subq
+    
+    prob_lines = [l.strip() for l in problem.split('\n') if l.strip()][:6]
     prob_html = '<br>'.join(prob_lines)
     
-    # 解答分段（按换行）
-    sol_lines = [l.strip() for l in solution.split('\n') if l.strip()][:6]
-    sol_html = '<br>'.join(sol_lines)
+    # 子问题分组
+    groups = group_by_subq(solution)
     
-    html = f'''<div class="scene" id="ex{ex_num}">
+    sep_colors = [('rgba(251,191,36,.1)', 'rgba(251,191,36,.25)', '#fbbf24'),
+                  ('rgba(99,102,241,.12)', 'rgba(99,102,241,.3)', '#a5b4fc'),
+                  ('rgba(6,182,212,.1)', 'rgba(6,182,212,.25)', '#67e8f9'),
+                  ('rgba(52,211,129,.1)', 'rgba(52,211,129,.25)', '#34d399')]
+    
+    if groups:
+        parts = []
+        for gi, (label, gsteps) in enumerate(groups):
+            if label:
+                bg, border, color = sep_colors[gi % len(sep_colors)]
+                parts.append(f'<div style="margin:{"10px" if gi > 0 else "4px"} 0 4px;padding:5px 14px;border-radius:8px;background:{bg};border:1px solid {border}"><span style="font-size:.85rem;color:{color};font-weight:700">{label}</span></div>')
+            for si, st in enumerate(gsteps):
+                parts.append(f'<div style="display:flex;gap:10px;margin-top:6px"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:rgba(52,211,129,.25);color:#34d399;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800">{si+1}</span><span style="font-size:1rem;color:#e2e8f0;line-height:1.7">{st}</span></div>')
+        sol_html = ''.join(parts)
+    else:
+        # 无子问题：统一编号
+        sol_lines = [l.strip() for l in solution.split('\n') if l.strip()][:6]
+        sol_html = ''.join(
+            f'<div style="display:flex;gap:10px;margin-top:6px"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:rgba(52,211,129,.25);color:#34d399;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800">{i+1}</span><span style="font-size:1rem;color:#e2e8f0;line-height:1.7">{l}</span></div>'
+            for i, l in enumerate(sol_lines))
+    
+    html = f"""<div class="scene" id="ex{ex_num}">
     <div class="scene-title">📝 例题 {ex_num}</div>
-    <div style="background:rgba(245,158,11,.12);border:2px solid rgba(245,158,11,.3);border-radius:16px;padding:20px 25px;margin-bottom:15px;opacity:0;animation:slide-up .7s .2s both">
+    <div style="background:rgba(245,158,11,.12);border:2px solid rgba(245,158,11,.3);border-radius:16px;padding:20px 25px;margin-bottom:15px;animation:slide-up .7s .2s both">
       <div style="font-size:.85rem;color:#b45309;margin-bottom:8px;font-weight:600">题目</div>
       <div style="font-size:1.1rem;line-height:1.7">{prob_html}</div>
     </div>
-    <div style="background:rgba(16,185,129,.1);border:2px solid rgba(16,185,129,.3);border-radius:16px;padding:20px 25px;opacity:0;animation:slide-up .7s 1.5s both">
+    <div data-reveal-at="0.3" style="background:rgba(16,185,129,.1);border:2px solid rgba(16,185,129,.3);border-radius:16px;padding:20px 25px">
       <div style="font-size:.85rem;color:#15803d;margin-bottom:8px;font-weight:600">解答</div>
-      <div style="font-size:1rem;line-height:1.7">{sol_html}</div>
-    </div>'''
+      {sol_html}
+    </div>"""
     
     if notes:
-        html += f'''
-    <div style="background:rgba(99,102,241,.1);border:2px solid rgba(99,102,241,.3);border-radius:12px;padding:14px 20px;margin-top:12px;opacity:0;animation:slide-up .7s 3s both">
+        html += f"""
+    <div data-reveal-at="0.8" style="background:rgba(99,102,241,.1);border:2px solid rgba(99,102,241,.3);border-radius:12px;padding:14px 20px;margin-top:12px">
       <span style="font-size:.9rem;color:#6366f1">💡 {notes[:80]}</span>
-    </div>'''
+    </div>"""
     
-    html += '</div>'
+    html += '\n  </div>'
+    # 生成讲解词
+    from animated_common import speakable
+    narration = '看这道题。'
+    if groups:
+        for label, gsteps in groups:
+            narration += label + '，' + '。'.join(speakable(st[:60]) for st in gsteps[:3]) + '。'
+    else:
+        narration += '。'.join(speakable(l[:60]) for l in sol_lines[:4]) + '。'
     
-    narration = f'看这道题。{speakable(problem[:200])}。我们来看解答。{speakable(solution[:300])}'
-    if notes:
-        narration += f'。注意，{speakable(notes[:100])}'
     return html, narration
 
 def method_scene(title, body):

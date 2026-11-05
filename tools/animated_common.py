@@ -22,6 +22,28 @@ body { font-family:-apple-system,"PingFang SC",sans-serif; background:linear-gra
 @keyframes slide-up { from{opacity:0;transform:translateY(25px)} to{opacity:1;transform:translateY(0)} }
 @keyframes mm-left { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
 @keyframes mindmap-line { to{opacity:1} }
+/* ── 补齐：ch1 老生成器独有的动画效果 ── */
+@keyframes bob { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-8px)} }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+@keyframes draw-line { to{stroke-dashoffset:0} }
+@keyframes drop-in { 0%{transform:translateY(-30px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+
+/* ── 补齐：颜色与动画工具类 ── */
+.blue { color:#60a5fa } .gold { color:#f59e0b } .green { color:#10b981 } .red { color:#f43f5e }
+.bg-blue { background:rgba(96,165,250,.15);border-color:rgba(96,165,250,.4) }
+.bg-gold { background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4) }
+.bg-green { background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4) }
+.bg-red { background:rgba(244,63,94,.15);border-color:rgba(244,63,94,.4) }
+.anim-pop { animation:pop-in .6s cubic-bezier(.68,-0.55,.265,1.55) both }
+.anim-up { animation:slide-up .7s ease both }
+.anim-left { animation:slide-left .7s ease both }
+.anim-bounce { animation:bounce 1.5s ease-in-out infinite }
+.anim-drop { animation:drop-in .6s ease both }
+.anim-pulse { animation:pulse 1.5s ease-in-out infinite }
+.particle { position:absolute;border-radius:50%;animation:float 3s ease-in-out infinite;pointer-events:none }
+.dots { position:fixed;top:22px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:50 }
+.svg-line { opacity:0;animation:draw-line 1s ease forwards }
 @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
 .card { border-radius:14px; padding:14px 22px; line-height:1.7; }
 .hg { color:#34d399; font-weight:800; } .hr { color:#fb7185; font-weight:800; } .hgold { color:#fbbf24; font-weight:800; }
@@ -80,6 +102,59 @@ JS = '''(function(){
 })();'''
 
 # ---------- 例题/易错/脑图装配 ----------
+
+
+
+def speakable(raw):
+    """文本 → TTS 友好的中文口语（简化版）"""
+    import re
+    t = (raw or '')
+    t = re.sub(r'@@fig[\s\S]*?@@', '', t)
+    t = re.sub(r'\$\$?([^$]*)\$\$?', r'\1', t)
+    t = t.replace('\\frac{', '').replace('\\times', '×').replace('\\sqrt', '√')
+    t = t.replace('{', '').replace('}', '').replace('\\', '')
+    t = t.replace('×', ' 乘 ').replace('÷', ' 除以 ').replace('−', '负').replace('=', ' 等于 ')
+    t = t.replace('²', '的平方').replace('³', '的立方').replace('≥', '大于等于').replace('≤', '小于等于')
+    t = t.replace('≠', '不等于').replace('π', '派').replace('…', '，以此类推，')
+    t = t.replace('\n', '。').replace('  ', ' ').strip()
+    return t[:80]
+
+def group_by_subq(solution):
+    """把解答文本按 (1)(2)(3) 子问题分组。返回 [(label, [steps])] 或 None（无子问题）"""
+    import re
+    lines = [l.strip() for l in solution.split('\n') if l.strip()]
+    groups = []
+    current_label = None
+    current_steps = []
+    
+    for line in lines:
+        m = re.match(r'^\(([0-9])\)\s*(.+)', line)
+        if m:
+            # 新子问题
+            if current_steps:
+                groups.append((current_label, current_steps))
+            current_label = f'第({m.group(1)})问'
+            content = m.group(2).strip()
+            if content:
+                current_steps = [content]
+            else:
+                current_steps = []
+        else:
+            # 去掉行首编号前缀（如 "1. " "第一步："）
+            cleaned = re.sub(r'^第?[0-9一二三四五]+[.、）:：]\s*', '', line).strip()
+            cleaned = re.sub(r'^(?:先|再|最后|然后)[，,]?\s*', '', cleaned).strip()
+            if cleaned:
+                current_steps.append(cleaned)
+    
+    if current_steps:
+        groups.append((current_label, current_steps))
+    
+    # 只有一个组且无标签 → 不是多问题
+    if len(groups) <= 1 and groups and groups[0][0] is None:
+        return None
+    
+    return groups if len(groups) >= 2 else None
+
 def split_steps(sol):
     return [l.strip() for l in sol.split('\n') if l.strip()]
 
@@ -88,9 +163,28 @@ def strip_num(l):
 
 def example_scene(idx, prob, sol, tag):
     steps = [strip_num(l) for l in split_steps(sol)]
-    steps_html = ''.join(
-        f'<div style="display:flex;gap:10px;margin-top:6px"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:rgba(52,211,153,.25);color:#34d399;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800">{i+1}</span><span style="font-size:1rem;color:#e2e8f0;line-height:1.7">{s}</span></div>'
-        for i, s in enumerate(steps))
+    # 检测子问题分组
+    groups = group_by_subq(sol)
+    
+    if groups:
+        # 多子问题：按组分段，每组独立编号
+        sep_colors = [('rgba(251,191,36,.1)', 'rgba(251,191,36,.25)', '#fbbf24'),
+                      ('rgba(99,102,241,.12)', 'rgba(99,102,241,.3)', '#a5b4fc'),
+                      ('rgba(6,182,212,.1)', 'rgba(6,182,212,.25)', '#67e8f9'),
+                      ('rgba(52,211,129,.1)', 'rgba(52,211,129,.25)', '#34d399')]
+        parts = []
+        for gi, (label, gsteps) in enumerate(groups):
+            if label:
+                bg, border, color = sep_colors[gi % len(sep_colors)]
+                parts.append(f'<div style="margin:{"10px" if gi > 0 else "4px"} 0 4px;padding:5px 14px;border-radius:8px;background:{bg};border:1px solid {border}"><span style="font-size:.85rem;color:{color};font-weight:700">{label}</span></div>')
+            for si, st in enumerate(gsteps):
+                parts.append(f'<div style="display:flex;gap:10px;margin-top:6px"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:rgba(52,211,153,.25);color:#34d399;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800">{si+1}</span><span style="font-size:1rem;color:#e2e8f0;line-height:1.7">{st}</span></div>')
+        steps_html = ''.join(parts)
+    else:
+        # 无子问题：统一编号
+        steps_html = ''.join(
+            f'<div style="display:flex;gap:10px;margin-top:6px"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:rgba(52,211,153,.25);color:#34d399;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800">{i+1}</span><span style="font-size:1rem;color:#e2e8f0;line-height:1.7">{s}</span></div>'
+            for i, s in enumerate(steps))
     return {'title': f'📝 例{idx} · {tag}', 'html': f'''
 <div class="card" style="background:rgba(251,191,36,.08);border:2px solid rgba(251,191,36,.35);animation:slide-up .6s .3s both">
   <b style="color:#fbbf24">题目</b>&nbsp;&nbsp;<span style="font-size:1.05rem;color:#e2e8f0">{prob[:180]}</span>
